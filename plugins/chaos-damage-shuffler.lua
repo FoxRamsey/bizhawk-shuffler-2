@@ -620,8 +620,11 @@ local function singleplayer_withlives_swap(gamemeta)
 		end
 
 		-- sometimes you want to swap for things that don't take standard health or lives, like non-standard game overs
-		if gamemeta.other_swaps and gamemeta.other_swaps() then
-			data.p1hpcountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			if swap then
+				data.p1hpcountdown = delay or gamemeta.delay or 3
+			end
 		end
 		
 		return false
@@ -813,9 +816,12 @@ local function twoplayers_withlives_swap(gamemeta)
 		end
 
 		-- sometimes you want to swap for things that don't take standard health or lives, like non-standard game overs
-		if gamemeta.other_swaps and gamemeta.other_swaps() then
-			data.p1hpcountdown = gamemeta.delay or 3
-			data.p2hpcountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			if swap then
+				data.p1hpcountdown = delay or gamemeta.delay or 3
+				data.p2hpcountdown = delay or gamemeta.delay or 3
+			end
 		end
 
 		return false
@@ -1446,16 +1452,6 @@ local function iframe_health_swap(gamemeta)
 	return function(data)
 		local iframes_changed, iframes_curr, iframes_prev = update_prev('iframes', gamemeta.get_iframes())
 		local health_changed, health_curr, health_prev = false, 0, 0
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		if gamemeta.get_health then
 			health_changed, health_curr, health_prev = update_prev('health', gamemeta.get_health())
 		end
@@ -1476,14 +1472,15 @@ local function iframe_health_swap(gamemeta)
 		if gamemeta.get_health then
 			-- check 0 health for games that don't set iframes on death
 			if (iframes_valid or health_curr == 0) and health_changed and health_curr < health_prev then
-				data.delayCountdown = gamemeta.delay or 3
+				return true, gamemeta.delay
 			end
 		elseif iframes_valid then
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 		-- sometimes you want to swap for things that don't give iframes and change health, like non-standard game overs
-		if gamemeta.other_swaps() then
-			data.delayCountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 	end
 end
@@ -1496,26 +1493,17 @@ local function health_swap(gamemeta)
 		end
 		-- for games where iframes are unhelpful
 		local health_changed, health_curr, health_prev = update_prev('health', gamemeta.get_health())
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		-- check if we're in a valid gamestate
 		if not gamemeta.is_valid_gamestate() then
 			return false
 		end
 		if health_changed and health_curr < health_prev then
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 		-- sometimes you want to swap for things that don't reduce health
-		if gamemeta.other_swaps() then
-			data.delayCountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 	end
 end
@@ -1562,16 +1550,6 @@ local function jonathan_charlotte_swap(gamemeta)
 		local j_iframes_changed, j_iframes_curr, j_iframes_prev = update_prev('jonathan iframes', gamemeta.get_jonathan_iframes())
 		local c_iframes_changed, c_iframes_curr, c_iframes_prev = update_prev('charlotte iframes', gamemeta.get_charlotte_iframes())
 		local health_changed, health_curr, health_prev = update_prev('health', gamemeta.get_health())
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		if not gamemeta.is_valid_gamestate() then
 			return false
 		end
@@ -1580,12 +1558,12 @@ local function jonathan_charlotte_swap(gamemeta)
 			and health_changed and health_curr < health_prev
 		then
 			-- jonathan!
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		elseif not gamemeta.is_jonathan() and c_iframes_changed and c_iframes_prev <= 1
 			and health_changed and health_curr < health_prev
 		then
 			-- charlotte!
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 	end
 end
@@ -1595,27 +1573,18 @@ local function damage_buffer_swap(gamemeta)
 		-- games that instead of decreasing health directly, set a "damage buffer" value that then decreases health per frame
 		local iframes_changed, iframes_curr, iframes_prev = update_prev('iframes', gamemeta.get_iframes())
 		local buffer_changed, buffer_curr, buffer_prev = update_prev('damage buffer', gamemeta.get_damage_buffer())
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		if not gamemeta.is_valid_gamestate() then
 			return false
 		end
 		if iframes_changed and iframes_prev == 0 and buffer_changed and buffer_curr > buffer_prev then
 			-- if the buffer is very large, it may not hit 0 before iframes run out
 			-- will this ever actually happen in practice? maybe not, but may as well future-proof this
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 		-- sometimes you want to swap for things that don't reduce health
-		if gamemeta.other_swaps() then
-			data.delayCountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 	end
 end
@@ -1732,16 +1701,6 @@ end
 
 local function Pebble_Beach_Golf_Links_swap(gamemeta)
 	return function(data)
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 
 --		local currentPlayerChanged, currentPlayer, previousPlayer = update_prev('player', gamemeta.getCurrentPlayer());
 --		local player1Changed, player1, prevPlayer1 = update_prev('player1', gamemeta.getPlayer1());
@@ -1751,7 +1710,7 @@ local function Pebble_Beach_Golf_Links_swap(gamemeta)
 --			console.log(string.format("Current player changed from \"%s\" to \"%s\"", previousPlayer, currentPlayer));
 --			if (previousPlayer == prevPlayer1) then
 --				console.log(string.format("Previous player \"%s\" was Player 1 (\"%s\"); will be swapping", previousPlayer, prevPlayer1));
---				data.delayCountdown = gamemeta.delay;
+--				return true, gamemeta.delay;
 --			else
 --				console.log(string.format("Previous player \"%s\" was NOT Player 1 (\"%s\"); no swap needed", previousPlayer, prevPlayer1));
 --			end;
@@ -1780,7 +1739,7 @@ local function Pebble_Beach_Golf_Links_swap(gamemeta)
 			--console.log("P1 Strokes on hole "..hole.." has changed from "..prevPlayer1Strokes.." to "..player1Strokes);
 		end
 		if (player1StrokesChanged and player1Strokes == (prevPlayer1Strokes + 1)) then
-			data.delayCountdown = gamemeta.delay;
+			return true, gamemeta.delay;
 		end
 	end
 end
@@ -1799,16 +1758,6 @@ local function NBA_Jam_swap(gamemeta)
 			--console.log(string.format("Quarter went from %d to %d; swapping", prevQuarter, quarter));
 			return true;
 		end
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		-- Don't do any further processing if the game mode is wrong.
 		if (gamemeta.gmode and not gamemeta.gmode()) then
 			return false;
@@ -1816,13 +1765,13 @@ local function NBA_Jam_swap(gamemeta)
 		-- If opposing team score went up, swap after a delay
 		if (opposingTeamScoreChanged and opposingTeamScore > prevOpposingTeamScore) then
 			--console.log(string.format("Opposing team score went from %d to %d; swapping in %d frames", prevOpposingTeamScore, opposingTeamScore, gamemeta.delay));
-			data.delayCountdown = gamemeta.delay;
+			return true, gamemeta.delay;
 		end
 		-- If "SHOT CLOCK VIOLATION" is flashing on-screen and the player's team had the ball, swap after a delay
 		if (shotClockViolationMessageTimerChanged and shotClockViolationMessageTimer > prevShotClockViolationMessageTimer) then
 			if (teamWithBall == 0 or (teamWithBall == -1 and teamWithBallChanged and prevTeamWithBall == 0)) then
 				--console.log(string.format("Player held the ball too long without shooting; swapping in %d frames", gamemeta.delay));
-				data.delayCountdown = gamemeta.delay;
+				return true, gamemeta.delay;
 			end
 		end
 	end
