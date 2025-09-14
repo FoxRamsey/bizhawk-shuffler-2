@@ -2257,16 +2257,8 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 			data.p1_injured_music_cued = false
 		end
 		
-		-- we need to implement a delay for certain swaps, so we will add a countdown here
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
+		-- we need to implement a delay for certain swaps
+		local swap_delay = nil
 		
 		-- SWAPS
 		-- first, swap on p2 scoring a TD or FG, after a 60-frame delay
@@ -2278,13 +2270,13 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 		if data.p2_scored == true and 
 			((p2_kickoff_curr == true and p2_kickoff_prev == false) or (p1_kickoff_curr == true and p1_kickoff_prev == false)) -- latter will handle kickoffs back to p2 after halftime if p2 to end 2Q and gets possession to start Q3
 		then
-			data.delayCountdown = 3
+			swap_delay = 3
 			data.p2_scored = false
 		end
 		-- We need to shuffle if p2 wins the game.
 		if gamemeta.get_end_of_game() == true and p2_points_curr > p1_points_curr
 		then
-			data.delayCountdown = 169 -- wait for scoreboard
+			swap_delay = 169 -- wait for scoreboard
 		end
 		-- We need to shuffle if a p1 player gets injured. We'll know because the music (0x2B) played.
 		-- conveniently, music and sound cues only last for one frame
@@ -2292,13 +2284,13 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 		-- When the cue goes through to silence the music (0x01), swap
 		if music_cue_curr == 0x01 and data.p1_injured_music_cued == true
 		then
-			data.delayCountdown = 3
+			swap_delay = 3
 		end
 		-- next, swap on possession losses by checking if possession changed to p2 ("p1 now has ball" is irrelevant here)
 		if p1_possession_curr == false and p1_possession_prev == true then
 			-- compare p1's score before and after the possession change (the only time we would not swap right away is if p1 scored and is kicking off)
 			if p1_points_curr == data.p1_score_on_load then -- p1 gave up the ball and didn't score? swap now
-				data.delayCountdown = 3
+				swap_delay = 3
 			else -- p1 is kicking off after a score? update that stored score, and reset "play picker seen" to 0 because it's about to be a new drive for p2
 				data.p1_score_on_load = p1_points_curr
 				data.play_picker_seen = 0
@@ -2307,17 +2299,18 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 		-- now that we've handled possession changes, we need to check mid-drive failures (p1 doesn't get a first down, or p2 gets one)
 		if picking_play_curr == true and picking_play_prev == false then -- down just changed if the playbook screen just came up
 			if p1_possession_curr and whatdown_curr > data.down_at_start_of_play then -- did down just go up? oh, then you didn't get a first down, huh? swap now
-				data.delayCountdown = 3
+				swap_delay = 3
 			-- next, we need to swap if the opponent has earned a first down - this would happen after the play picker has been seen at least once
 			elseif p1_possession_curr == false and whatdown_curr == 0 and -- it's p2's ball and first down?
 				picking_play_curr == true and picking_play_prev == false and data.play_picker_seen > 0 then -- and the play picker just showed up, and we've seen them pick a play already? swap now
-				data.delayCountdown = 3
+				swap_delay = 3
 			-- and, if none of that is true, update the down we saw the last time the play picker came up
 			else
 				data.down_at_start_of_play = whatdown_curr
 			end
 		end
 		
+		return swap_delay ~= nil, swap_delay
     end
 end
 
