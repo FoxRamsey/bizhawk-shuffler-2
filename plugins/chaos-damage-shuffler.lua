@@ -352,6 +352,7 @@ local prevdata
 local debug_timer
 local swap_scheduled
 local shouldSwap
+local game_settings
 local gamesleft
 local prev_framecount
 
@@ -394,6 +395,14 @@ local function update_prev(key, value)
 	prevdata[key] = value
 	local changed = prev_value ~= nil and value ~= prev_value
 	return changed, value, prev_value
+end
+
+---
+-- get the value of the named setting
+-- if default is provided, it will be returned instead of a nil value
+local function get_setting(name, default)
+	local value = game_settings[name]
+	if value ~= nil then return value else return default end
 end
 
 local function sml1_swap(gamemeta)
@@ -7436,6 +7445,7 @@ function plugin.on_game_load(data, settings)
 	debug_timer = 0
 	swap_scheduled = false
 	shouldSwap = function() return false end
+	game_settings = {}
 
 	prev_framecount = emu.framecount()
 	
@@ -7567,6 +7577,12 @@ function plugin.on_game_load(data, settings)
 		gamemeta = gamedata[tag]
 		local func = gamemeta.func
 		shouldSwap = func(gamemeta)
+		
+		if gamemeta.settings then
+			for _, name in ipairs(gamemeta.settings) do
+				game_settings[name] = settings[name]
+			end
+		end
 		
 		-- Infinite* Lives - set lives to max on game load
 		local CanHaveInfiniteLives = gamemeta.CanHaveInfiniteLives
@@ -7733,7 +7749,7 @@ if type(tonumber(which_level)) == "number" then
 		end
 		
 		-- AND NOW WE SWAP
-		local schedule_swap, delay = shouldSwap(prevdata)
+		local schedule_swap, delay = shouldSwap(prevdata, game_settings)
 		if schedule_swap and frames_since_restart > grace then
 			delay = delay or 3
 			debug_timer = -delay
