@@ -385,6 +385,14 @@ local bt_snes_level_names = { "Khaos Mountains",
 local bt_snes_level_recoder = { 0, 1, 2, 3, 4, 6, 8, 7 } -- THIS GAME DOESN'T STORE LEVELS IN THE ORDER YOU PLAY THEM, COOL
 ---------------
 
+---
+-- get the value of the named setting
+-- if default is provided, it will be returned instead of a nil value
+local function get_setting(name, default)
+	local value = game_settings[name]
+	if value ~= nil then return value else return default end
+end
+
 -- update value in prevdata and return whether the value has changed, new value, and old value
 -- value is only considered changed if it wasn't nil before
 local function update_prev(key, value)
@@ -395,14 +403,6 @@ local function update_prev(key, value)
 	prevdata[key] = value
 	local changed = prev_value ~= nil and value ~= prev_value
 	return changed, value, prev_value
-end
-
----
--- get the value of the named setting
--- if default is provided, it will be returned instead of a nil value
-local function get_setting(name, default)
-	local value = game_settings[name]
-	if value ~= nil then return value else return default end
 end
 
 local function sml1_swap(gamemeta)
