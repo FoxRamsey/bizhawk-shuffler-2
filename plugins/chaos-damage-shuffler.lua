@@ -53,6 +53,7 @@ plugin.description =
 	-Super Mario Land (GB or GBC DX patch), 1p
 	-Super Mario Land 2: 6 Golden Coins (GB or GBC DX patch), 1p
 	-Super Mario 64 (N64), 1p - including Better Non-Stop hack
+	-Super Mario Advance 4 (GBA Virtual Console), 1p
 	-New Super Mario Bros. (DS), 1p
 
 	CASTLEVANIA BLOCK
@@ -3346,6 +3347,60 @@ local gamedata = {
 		LivesWhichRAM=function() return "RDRAM" end,
 		maxlives=function() return 69 end,
 		ActiveP1=function() return memory.read_u8(0x33B193, "RDRAM") > 0 end,
+	},
+	['SMA4_VC'] = { -- Super Mario Advance 4 (Virtual Console)
+		func = singleplayer_withlives_swap,
+		p1gethp = function()
+			if memory.read_u8(0x3BB0, "IWRAM") == 1 then
+				return 0 -- maybe a death, wait for lives
+			elseif memory.read_u8(0x2D77, "IWRAM") == 0 then
+				return math.min(memory.read_u8(0x2CE2, "IWRAM"), 2) + 1 -- mario
+			else
+				return math.min(memory.read_u8(0x2CE3, "IWRAM"), 2) + 1 -- luigi
+			end
+		end,
+		p1getlc = function()
+			if memory.read_u8(0x385E, "IWRAM") == 3 then
+				-- e-reader mode lives (shared 1p/2p)
+				return memory.read_s16_le(0x3A48, "IWRAM")
+			else
+				-- 1p + 2p lives, allows for life trading
+				return memory.read_s16_le(0x2A6A, "IWRAM") + memory.read_s16_le(0x2A6C, "IWRAM")
+			end
+		end,
+		maxhp = function() return 3 end,
+		-- only swap for changes during a level
+		swap_exceptions = function() return memory.read_u8(0x376C, "IWRAM") ~= 2 end,
+		-- Infinite* Lives section
+		CanHaveInfiniteLives = true,
+		p1livesaddr = function()
+			if memory.read_u8(0x385E, "IWRAM") == 3 then
+				return 0x3A48
+			elseif memory.read_u8(0x2D77, "IWRAM") == 0 then
+				return 0x2A6A else return 0x2A6C
+			end
+		end,
+		LivesWhichRAM = function() return "IWRAM" end,
+		maxlives = function() return 68 end, -- 1 byte here, so no 420
+		ActiveP1 = function()
+			local state = memory.read_u8(0x376C, "IWRAM")
+			-- lives can be set on map screens as well
+			return state == 1 or state == 2 or state == 10
+		end,
+		-- OTHER NOTES:
+		-- you can have 999 lives in this one for some reason
+		-- 0x376C IWRAM is the overall game state: (for SMB3: 0 title, 1 map, 2 level, 3 bonus)
+		-- 0x385E IWRAM is the SMB3 mode: 0 on title, 1 1p, 2 2p, 3 e-reader
+		--   e-reader mode has its own lives counter
+		-- 0x3BB0 IWRAM is 1 during deaths/end-of-level/mushroom houses
+		--   used to avoid double-swapping on death w/ status > 0
+		-- 0x2C[2E-51] IWRAM is the 1p inventory (36 items), values 1-15 (2p @ 2C[59-7C])
+		-- 0x2CE2/0x2CE3 IWRAM is mario/luigi status: goes (2+) -> 1 -> 0 on hit
+		-- 0x2D77 IWRAM is which character: 0 for mario, 1 for luigi
+		-- 0x2A40 IWRAM is 1 during loading, 0 otherwise
+		-- some game data is stored in a non-fixed location in memory via pointers
+		--   0x7818 and 0x7820 IWRAM appear to hold the start/end pointers for this
+		--   if needed, the actual death status is at +0x62 here: 1 enemy, 2 fall
 	},
 	['NSMB_DS'] = { -- New Super Mario Bros (DS)
 		func = mario_swap,
