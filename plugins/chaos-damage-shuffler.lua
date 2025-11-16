@@ -13,6 +13,7 @@ plugin.settings =
 	{ name='SMW2YI_MiniBonusSwaps', type='boolean', label="Yoshi's Island: Shuffle on Mini Battle damage/loss", default=true},
 	{ name='IceClimberBonusSwaps', type='boolean', label="Ice Climber (NES): Shuffle on failing the bonus game"},
 	{ name='grace', type='number', label="Minimum grace period before swapping (won't go < 10 frames)", default=10 },
+	{ name='GraceOnHit', type='boolean', label="Apply grace period from last hit instead of last swap" },
 }
 
 plugin.description =
@@ -348,6 +349,7 @@ plugin.description =
 	Suppress Logs: if you do not want the lua console log to tell you about file naming errors, or unrecognized ROMs. This can help keep the log cleaner if you are also using the Mega Man Damage Shuffler or other plugins!
 
 	Grace period: 10 frames is the default minimum frames between swaps. Adjust up as needed. This idea originated in the TownEater fork of the damage shuffler!
+	- This can be adjusted to be 'minimum frames since damage before swapping again' if needed to help with 'combo hits' causing large numbers of swaps.
 
 	Enjoy? Send bug reports?
 
@@ -363,6 +365,7 @@ local tag
 local gamemeta
 local prevdata
 local debug_timer
+local last_hit
 local swap_scheduled
 local shouldSwap
 local gamesleft
@@ -8097,6 +8100,7 @@ end
 function plugin.on_game_load(data, settings)
 	prevdata = {}
 	debug_timer = 0
+	last_hit = 0
 	swap_scheduled = false
 	shouldSwap = function() return false end
 
@@ -8382,14 +8386,13 @@ if type(tonumber(which_level)) == "number" then
 	-- TODO: CAN WE MAKE THIS A FUNCTION AND CALL IT WHEN WE NEED IT
 	
 	-- avoiding super short swaps (<10) as a precaution
-	local grace = math.max(gamemeta and gamemeta.grace or 0, settings.grace, 10)
+	local grace = math.max(gamemeta and gamemeta.grace or 0, settings.grace or 0, 10)
 	
 	if settings.DebugSingleGame and swap_scheduled then
-		debug_timer = debug_timer + 1
-		-- rearm the shuffler even though no on_load happened to reset things
-		if debug_timer > grace then
+		-- rearm the shuffler even though no on_game_load happened to reset things
+		if frames_since_restart - 1 >= debug_timer then
 			prevdata = {}
-			debug_timer = 0
+			last_hit = frames_since_restart - 1
 			swap_scheduled = false
 		end
 	end
@@ -8423,15 +8426,22 @@ if type(tonumber(which_level)) == "number" then
 		
 		-- AND NOW WE SWAP
 		local schedule_swap, delay = shouldSwap(prevdata)
-		if schedule_swap and frames_since_restart > grace then
-			delay = delay or 3
-			debug_timer = -delay
-			swap_game_delay(delay)
-			swap_scheduled = true
-			if not settings.SuppressLog or settings.DebugSingleGame then
-				log_console('Chaos Shuffler: swap scheduled for %s (frame: %d, delay: %d)', tag, frames_since_restart, delay)
+		if schedule_swap then
+			if frames_since_restart > last_hit + grace then
+				delay = delay or 3
+				debug_timer = frames_since_restart + delay
+				swap_game_delay(delay)
+				swap_scheduled = true
+				if not settings.SuppressLog or settings.DebugSingleGame then
+					log_console('Chaos Shuffler: swap scheduled for %s (frame: %d, delay: %d)', tag, frames_since_restart, delay)
+				end
+				if PAUSE_ON_SWAP then client.pause() end
+			else
+				log_debug('Chaos Shuffler: swap blocked (grace) for %s (frame: %d, grace: %d)', tag, frames_since_restart, grace)
+				if settings.GraceOnHit or gamemeta.grace_on_hit then
+					last_hit = frames_since_restart
+				end
 			end
-			if PAUSE_ON_SWAP then client.pause() end
 		end
 	end
 	
