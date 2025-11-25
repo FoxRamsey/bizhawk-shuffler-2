@@ -5904,8 +5904,6 @@ local gamedata = {
 		-- OTHER NOTES:
 		-- 0x0BE4F0 is gamestate: 15 in level, 17 gameover, 33 boss rush
 		-- you only have one life for the boss rush, regardless of life count
-		-- iframes are at 0x12E896: s16, increases from -1 instead of 0
-		--   set a frame after health drops, 60 'game frames' @ 30 fps
 	},
 	['AdvMagicKingdom_NES']={ -- Adventures in the Magic Kingdom, NES
 		func=singleplayer_withlives_swap,
