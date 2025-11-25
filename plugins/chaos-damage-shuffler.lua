@@ -113,6 +113,7 @@ plugin.description =
 	-Kirby: Super Star (SNES), 1p
 	-Kirby: Nightmare in Dream Land (GBA), 1p
 	-Kirby and the Amazing Mirror (GBA), 1p
+	-Kirby 64: The Crystal Shards (N64), 1p
 	
 	SONIC BLOCK
 	-Sonic the Hedgehog (Genesis/Mega Drive), 1p
@@ -5869,6 +5870,42 @@ local gamedata = {
 			if title_card_changed then return true end
 			return false
 		end,
+	},
+	['KirbyCrystalShards_N64'] = { -- Kirby 64: The Crystal Shards, N64
+		func = singleplayer_withlives_swap,
+		gmode = function()
+			local state = memory.read_u32_be(0x0BE4F0, "RDRAM")
+			return state == 15 or state == 17 or state == 33
+		end,
+		p1gethp = function() return memory.readfloat(0x0D6E50, true, "RDRAM") end,
+		p1getlc = function() return memory.read_s32_be(0x0D6E4C, "RDRAM") end,
+		maxhp = function() return 6 end,
+		other_swaps = function()
+			-- additionally swap for a death in the boss rush
+			if memory.read_u32_be(0x0BE4F0, "RDRAM") == 33 then
+				local substate = memory.read_u32_be(0x0BE4F8, "RDRAM")
+				if update_prev('substate', substate) and substate == 6 then
+					return true, 330 -- wait for the death animation
+				end
+			end
+			return false
+		end,
+		-- Infinite* Lives section
+		CanHaveInfiniteLives = true,
+		p1livesaddr = function() return 0x0D6E4F end, -- big-endian, lowest byte
+		LivesWhichRAM = function() return "RDRAM" end,
+		maxlives = function() return 70 end,
+		ActiveP1 = function()
+			local state = memory.read_u32_be(0x0BE4F0, "RDRAM")
+			-- anything after the title screen, except the boss rush
+			-- state *must* also be valid in general, so no unbounded range
+			return state >= 10 and state < 33
+		end,
+		-- OTHER NOTES:
+		-- 0x0BE4F0 is gamestate: 15 in level, 17 gameover, 33 boss rush
+		-- you only have one life for the boss rush, regardless of life count
+		-- iframes are at 0x12E896: s16, increases from -1 instead of 0
+		--   set a frame after health drops, 60 'game frames' @ 30 fps
 	},
 	['AdvMagicKingdom_NES']={ -- Adventures in the Magic Kingdom, NES
 		func=singleplayer_withlives_swap,
