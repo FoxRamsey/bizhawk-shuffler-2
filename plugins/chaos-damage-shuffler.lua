@@ -260,6 +260,7 @@ plugin.description =
 	-Super Mario Kart (SNES), 1-2p - shuffles on collisions with other karts (lost coins or have 0 coins), falls
 	-Sonic Mario Bros., Squirrel King mechanics (bootleg) (Genesis/Mega Drive), 1p
 	-Super Monkey Ball Jr. (GBA), 1p
+	-Super Monkey Ball: Touch & Roll (DS), 1p
 	-Super Smash TV (SNES), 1p
 	-TaleSpin (NES), 1p
 	-Tarzan: Lord of the Jungle (unreleased) (SNES), 1p
@@ -5425,6 +5426,34 @@ local gamedata = {
 		-- you get 1ups for 50 bananas that doesn't account for that, so 99 is a
 		-- safe compromise. 3 lives max drawn on HUD, but higher values do count
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['MonkeyBallTouchRoll_DS'] = { -- Super Monkey Ball: Touch & Roll, DS
+		func = singleplayer_withlives_swap,
+		gmode = function() return memory.read_u32_le(0x0E870C, "Main RAM") == 3 end,
+		p1gethp = function() return 1 end,
+		p1getlc = function() return memory.read_u8(0x1FBF34, "Main RAM") end,
+		maxhp = function() return 1 end,
+		other_swaps = function()
+			if memory.read_u8(0x1FBF34, "Main RAM") == 0 then
+				-- swap for a gameover at zero lives, delay for text to show
+				local gameover = memory.read_u8(0x0C88CB, "Main RAM") == 0
+				return update_prev('gameover', gameover) and gameover, 45
+			end
+		end,
+		-- Infinite* Lives section
+		CanHaveInfiniteLives = true,
+		p1livesaddr = function() return 0x1FBF34 end,
+		LivesWhichRAM = function() return "Main RAM" end,
+		maxlives = function() return 69 end,
+		ActiveP1 = function() return memory.read_u32_le(0x0E870C, "Main RAM") == 3 end,
+		-- OTHER NOTES:
+		-- lives are uncapped, display is mod 100
+		--   practice mode holds lives constant (normally at 99)
+		-- you gameover on failing a level with zero lives
+		--   0x0C88CB goes 1 -> 0 when this happens
+		--   flag also cycles when starting gameplay post-credits,
+		--   however at that point lives should be set > 0
+		-- the banana counter for unlocking world 12 is at 0x1FBF70
 	},
 	['BATMAN_NES']={ -- Batman, NES
 		func=singleplayer_withlives_swap,
