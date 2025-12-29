@@ -6127,7 +6127,7 @@ local gamedata = {
 		maxlives=function() return 5 end,
 		ActiveP1=function() return memory.read_u8(0x006a, "WRAM") > 0 end,
 		ActiveP2=function() return memory.read_u8(0x006b, "WRAM") > 0 end,
-		grace=60,
+		grace=120, -- you can be comboed extremely hard in this game
 	},
  	['PockyRocky2_SNES']={ -- Pocky & Rocky 2, SNES
 		func=PockyRocky2_SNES_swap,
