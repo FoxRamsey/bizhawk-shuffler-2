@@ -284,6 +284,7 @@ plugin.description =
 	-Vice: Project Doom (NES), 1p
 	-Vs. Ice Climber, set IC4-4 B-1 (Arcade), 1p
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
+	-WarioWare: Twisted! (GBA), 1p
 	-Wild Guns (SNES), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
 	-Wit's (NES), 1p
@@ -5398,6 +5399,31 @@ local gamedata = {
 		CanHaveInfiniteLives=false,
 		-- may add a option for this in the future, but you don't lose *progress* in the story if you game over (similar to Mega Man)
 		-- would also need to consider modes that don't use lives
+	},
+	['WarioWareTwisted_GBA'] = { -- WarioWare: Twisted!, GBA
+		func = singleplayer_withlives_swap,
+		p1gethp = function() return 1 end,
+		p1getlc = function() return memory.read_u8(0x3D86, "IWRAM") end,
+		maxhp = function() return 1 end,
+		-- state check, only swap in gameplay
+		swap_exceptions = function() return memory.read_u16_le(0x3AF4, "IWRAM") ~= 2 end,
+		other_swaps = function()
+			local stage = memory.read_u8(0x3AF8, "IWRAM")
+			if stage == 10 or stage == 15 then -- timed stages
+				local time_up = memory.read_u8(0x4DB4, "IWRAM") == 1
+				return update_prev('time_up', time_up) and time_up, 150
+			end
+			return false
+		end,
+		-- OTHER NOTES:
+		-- 0x3AF4 IWRAM is game state: 1 title, 2 gameplay, 4 main menu, etc
+		-- 0x3AF8 IWRAM is which 'stage': 0-15 for story mode stages, 99+ for bonus/spindex games
+		-- for timed stages: (99 lives, gameover on time up)
+		--   0x4DB0 IWRAM timer: counts 'ticks' with lower byte fractional value (deducted per frame)
+		--     starts at 200 << 8 for 20 'seconds', actual time affected by speedups
+		--     value is soft capped at 300 ticks (won't get bonus time past that)
+		--     snaps to zero on value falling below 256 (1 tick)
+		--   0x4DB4 IWRAM: goes 0 -> 1 on time up, resets after gameover
 	},
 	['MagicalDoropie_NES']={ -- Magical Doropie / Krion Conquest, NES
 		func=iframe_health_swap,
