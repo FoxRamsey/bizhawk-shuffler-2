@@ -5405,8 +5405,10 @@ local gamedata = {
 		p1gethp = function() return 1 end,
 		p1getlc = function() return memory.read_u8(0x3D86, "IWRAM") end,
 		maxhp = function() return 1 end,
-		-- state check, only swap in gameplay
-		swap_exceptions = function() return memory.read_u16_le(0x3AF4, "IWRAM") ~= 2 end,
+		swap_exceptions = function()
+			return memory.read_u16_le(0x3AF4, "IWRAM") ~= 2 -- state check, only swap in gameplay
+				or memory.read_u8(0x3D86, "IWRAM") == memory.read_u8(0x3D87, "IWRAM") -- at max lives
+		end,
 		other_swaps = function()
 			local stage = memory.read_u8(0x3AF8, "IWRAM")
 			if stage == 10 or stage == 15 then -- timed stages
