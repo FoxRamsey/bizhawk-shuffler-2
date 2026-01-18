@@ -5411,7 +5411,7 @@ local gamedata = {
 		end,
 		other_swaps = function()
 			local stage = memory.read_u8(0x3AF8, "IWRAM")
-			if stage == 10 or stage == 15 then -- timed stages
+			if stage == 10 or stage == 15 or stage == 99 then -- timed stages
 				local time_up = memory.read_u8(0x4DB4, "IWRAM") == 1
 				return update_prev('time_up', time_up) and time_up, 150
 			end
