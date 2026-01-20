@@ -5439,6 +5439,7 @@ local gamedata = {
 				local gameover = memory.read_u8(0x0C88CB, "Main RAM") == 0
 				return update_prev('gameover', gameover) and gameover, 45
 			end
+			return false
 		end,
 		-- Infinite* Lives section
 		CanHaveInfiniteLives = true,
@@ -5447,6 +5448,7 @@ local gamedata = {
 		maxlives = function() return 69 end,
 		ActiveP1 = function() return memory.read_u32_le(0x0E870C, "Main RAM") == 3 end,
 		-- OTHER NOTES:
+		-- gamestate is at 0x0E870C: 1 title, 2 menus, 3 gameplay, etc
 		-- lives are uncapped, display is mod 100
 		--   practice mode holds lives constant (normally at 99)
 		-- you gameover on failing a level with zero lives
