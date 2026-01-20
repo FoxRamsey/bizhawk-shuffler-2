@@ -3319,7 +3319,7 @@ local gamedata = {
 		maxhp = function() return 16320 end, -- 255*64
 		minhp = -1, -- swap on 0 health as well
 		delay = 30,
-		grace = 90,
+		grace = 120,
 		-- Infinite* Lives section
 		CanHaveInfiniteLives = true,
 		LivesWhichRAM = function() return "IWRAM" end,
@@ -3374,7 +3374,7 @@ local gamedata = {
 			return memory.read_u8(0x121B, "IWRAM") == 9, 90
 		end,
 		delay = 30,
-		grace = 90,
+		grace = 120,
 		-- Infinite* Lives section
 		CanHaveInfiniteLives = true,
 		LivesWhichRAM = function() return "IWRAM" end,
@@ -3430,7 +3430,7 @@ local gamedata = {
 			return memory.read_u8(0x1797, "IWRAM") == 8, 90
 		end,
 		delay = 30,
-		grace = 90,
+		grace = 120,
 		-- Infinite* Lives section
 		CanHaveInfiniteLives = true,
 		LivesWhichRAM = function() return "IWRAM" end,
@@ -3476,7 +3476,7 @@ local gamedata = {
 			return flags & 6 == 0 or flags & 4 == 0 and memory.read_u8(0x2C4A86, "RDRAM") == 1
 		end,
 		delay = 30,
-		grace = 90,
+		grace = 120,
 		-- Infinite* Lives section
 		CanHaveInfiniteLives = true,
 		LivesWhichRAM = function() return "RDRAM" end,
