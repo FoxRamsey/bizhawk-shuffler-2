@@ -101,6 +101,7 @@ plugin.description =
 	-Contra: Hard Corps (Genesis/Mega Drive), 1-2p
 
 	KONG BLOCK
+	-Donkey Kong (World) (Gameboy)
 	-Donkey Kong Country (SNES), 1p, 2p Contest, or 2p Team
 	-Donkey Kong Country 2: Diddy's Kong Quest (SNES), 1p, 2p Contest, or 2p Team
 	-Donkey Kong Country 3: Dixie Kong's Double Trouble (SNES), 1p, 2p Contest, or 2p Team
@@ -4913,6 +4914,21 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x0433, "RAM") > 0 end,
 		delay=7,
 		-- let players see the knockdown happen
+	},
+	['DonkeyKong94_GB']={ -- Donkey Kong (World) (Gameboy)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end, -- no health system
+		p1getlc=function() return memory.read_u8(0x1A43, "WRAM") end,
+		maxhp=function() return 1 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x1A43 end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		other_swaps=function()  
+			-- when player is carrying an item, getting hit stuns them instead of killing them. add an additional shuffle for this circumstance
+			local stunstate_changed, stunstate_curr, stunstate_prev = update_prev('stunstate', memory.read_u8(0x1DD7, "WRAM"))
+			return stunstate_changed and stunstate_curr == 160 end, -- stunstate should be 160 only when hit while carrying item
 	},
 	['DKC1_SNES']={ -- Donkey Kong Country (SNES)
 		func=iframe_health_swap,
