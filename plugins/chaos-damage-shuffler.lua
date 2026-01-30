@@ -188,6 +188,7 @@ plugin.description =
 	-Jaws (NES), 1p
 	-Jim Power - The Lost Dimension in 3D (SNES), 1p
 	-Journey to Silius (NES), 1p
+	-Joy Mech Fight (NES), 1p
 	-Jungle Book, The (NES, SNES, Genesis/Mega Drive), 1p
 	-Jurassic Park (SNES), 1p
 	-Kabuki Quantum Fighter (NES), 1p
@@ -260,6 +261,7 @@ plugin.description =
 	-Super Mario Kart (SNES), 1-2p - shuffles on collisions with other karts (lost coins or have 0 coins), falls
 	-Sonic Mario Bros., Squirrel King mechanics (bootleg) (Genesis/Mega Drive), 1p
 	-Super Monkey Ball Jr. (GBA), 1p
+	-Super Smash Bros., N64 (USA), 1p
 	-Super Smash TV (SNES), 1p
 	-TaleSpin (NES), 1p
 	-Tarzan: Lord of the Jungle (unreleased) (SNES), 1p
@@ -7125,6 +7127,15 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['JoyMechFight_NES']={ -- Joy Mech Fight
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0529, "RAM") end,
+		p1getlc=function() return memory.read_u8(0x0540, "RAM") end,
+		maxhp=function() return 88 end,
+		gmode=function() return memory.read_u8(0x01FE, "RAM")==122 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		grace=13,
+	},
 	['SunsetRiders_SNES']={ -- Sunset Riders, SNES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end,
@@ -7249,6 +7260,39 @@ local gamedata = {
 		maxlives=function() return 5 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['SmashBros_N64']={ -- Super Smash Bros., N64 (USA)
+		func=singleplayer_withlives_swap,
+		p1gethp=function()
+			local currdamage
+		
+			local current_arcade_stage = memory.read_u8(0x0A4AE7, "RDRAM")
+			
+			-- damage is stored in a different location depending on differnt stages. 
+			if current_arcade_stage == 0 then currdamage = memory.read_u16_be(0x26805E, "RDRAM") -- 1p mode, link stage
+				elseif current_arcade_stage == 1 then currdamage = memory.read_u16_be(0x26839E, "RDRAM") -- 1p mode, yoshi stage
+				elseif current_arcade_stage == 2 then currdamage = memory.read_u16_be(0x2705F6, "RDRAM") -- 1p mode, fox stage
+				elseif current_arcade_stage == 4 then currdamage = memory.read_u16_be(0x26329E, "RDRAM") -- 1p mode, mario brothers stage
+				elseif current_arcade_stage == 5 then currdamage = memory.read_u16_be(0x272F96, "RDRAM") -- 1p mode, pikachu stage
+				elseif current_arcade_stage == 6 then currdamage = memory.read_u16_be(0x26FFCE, "RDRAM") -- 1p mode, giant donkey kong stage
+				elseif current_arcade_stage == 8 then currdamage = memory.read_u16_be(0x26D03E, "RDRAM") -- 1p mode, kirby stage
+				elseif current_arcade_stage == 9 then currdamage = memory.read_u16_be(0x26F4A6, "RDRAM") -- 1p mode, samus stage
+				elseif current_arcade_stage == 10 then currdamage = memory.read_u16_be(0x262AE6, "RDRAM") -- 1p mode, metal mario stage
+				elseif current_arcade_stage == 11 then currdamage = memory.read_u16_be(0x240156, "RDRAM") -- 1p mode, race to the finish stage
+				elseif current_arcade_stage == 12 then currdamage = memory.read_u16_be(0x261C6E, "RDRAM") -- 1p mode, fighting polygon team stage
+				elseif current_arcade_stage == 13 then currdamage = memory.read_u16_be(0x27119E, "RDRAM") -- 1p mode, master hand stage
+				else return 1 end
+			
+			return 999 - currdamage end,
+		p1getlc=function() return memory.read_s8(0x0A4B43, "RDRAM") end,
+		maxhp=function() return 999 end,
+		minhp=-1,
+		gmode=function() return memory.read_u8(0x0465BD, "RDRAM")==26 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0A4B43 end,
+		LivesWhichRAM=function() return "RDRAM" end,
+		maxlives=function() return 68 end,
+		ActiveP1=function() return memory.read_u8(0x0465BD, "RDRAM")==26 end, -- restricted to gameplay to prevent issues during boot
+	},	
 	['SuperSmashTV_SNES']={ -- Super Smash T.V., SNES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end,
