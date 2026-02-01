@@ -248,6 +248,8 @@ plugin.description =
 	-Snake Rattle 'n Roll (NES), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
 	-Sparkster (SNES), 1p
+	-Spider-Man & Venom - Maximum Carnage, (SNES) (USA), 1p
+	-Spider-Man X-Men - Arcade's Revenge, (SNES) (USA), 1p
 	-StarTropics (NES), 1p
 	-Street Fighter 2010: The Final Fight (NES), 1p
 	-Streets of Rage II (Genesis/Mega Drive), 1-2p (includes duel mode)
@@ -287,6 +289,7 @@ plugin.description =
 	-Wild Guns (SNES), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
 	-Wit's (NES), 1p
+	-Wolverine - Adamantium Rage, (SNES) (USA), 1p
 
 	NICHE ZONE
 	- NES 240p Suite: shuffles on every second that passes in Stopwatch Mode. Can be useful for testing a single game.
@@ -6231,6 +6234,74 @@ local gamedata = {
 		ActiveP1=function() return true end, -- p1 is always active!
 		delay=10, -- helps with health-draining situations, like the wringers in stage 2
 	},
+	['MaximumCarnage_SNES']={ -- Spider-Man-Venom - Maximum Carnage, SNES (USA)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x000B7C, "WRAM") end,
+		p1getlc=function() return memory.read_u8(0x000990, "WRAM") end,
+		maxhp=function() return 48 end,
+		gmode=function() return memory.read_u8(0x000BE3, "WRAM") == 8 end,
+		swap_exceptions=function() return memory.read_u8(0x0002F4, "WRAM") == 32 end, -- check for letterboxed cutscenes, which may otherwise cause shuffles
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x000990 end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['ArcadesRevenge_SNES']={ -- Spider-Man-X-Men - Arcade's Revenge, SNES (USA)
+		func=function() return function()
+				local playercharacter = memory.read_u8(0x000143, "WRAM")
+				local is_cyclops = 1
+				local is_wolverine = 2
+				local is_spiderman = 3
+				local is_gambit = 4
+				local is_storm = 5
+				
+				local lives_changed, lives_curr, lives_prev = update_prev('lives', memory.read_u8(0x000100, "WRAM"))
+				
+				local spiderman_health_changed, spiderman_health_curr, spiderman_health_prev = update_prev('spiderman_health', memory.read_u8(0x0010F8, "WRAM"))
+				local spiderman_health_max = 128
+				
+				local gambit_health_changed, gambit_health_curr, gambit_health_prev = update_prev('gambit_health', memory.read_u8(0x00119E, "WRAM"))
+				local gambit_health_max = 104
+				
+				-- cyclops, wolverine, and storm (air meter) use a common health address and maximum
+				local cycwolsto_health_changed, cycwolsto_health_curr, cycwolsto_health_prev = update_prev('cycwolsto_health', memory.read_u8(0x000B29, "WRAM"))
+				local cycwolsto_health_max = 127
+				
+				local oxygen_timer_changed, oxygen_timer_curr, oxygen_timer_prev = update_prev('oxygen_timer', memory.read_u8(0x000B28, "WRAM"))
+				
+				local gmode = memory.read_u8(0x0001FC, "WRAM")==129
+				
+				if (gmode) then
+					if (playercharacter == is_cyclops or playercharacter == is_wolverine) and cycwolsto_health_curr <= cycwolsto_health_max and cycwolsto_health_curr > 0 then
+						if cycwolsto_health_changed and cycwolsto_health_curr < cycwolsto_health_prev then
+							return true end
+					elseif playercharacter == is_spiderman and spiderman_health_curr <= spiderman_health_max and spiderman_health_curr > 0 then
+						if spiderman_health_changed and spiderman_health_curr < spiderman_health_prev then
+							return true end
+					elseif playercharacter == is_gambit and gambit_health_curr <= gambit_health_max and gambit_health_curr > 0 then
+						if gambit_health_changed and gambit_health_curr < gambit_health_prev then
+							return true end
+					elseif playercharacter == is_storm and cycwolsto_health_curr <= cycwolsto_health_max and cycwolsto_health_curr > 0 then
+						if cycwolsto_health_changed and cycwolsto_health_curr < cycwolsto_health_prev then
+							-- storm's air meter constantly drains when she isn't on the surface so we need to avoid swapping on regular life loss
+							if oxygen_timer_curr < oxygen_timer_prev or cycwolsto_health_curr < (cycwolsto_health_prev - 1) then return true end
+						end
+					end
+					
+					-- lives are common to all characters and can be handled identically
+					if lives_changed and lives_curr == lives_prev - 1 then return true end
+				end
+				
+				return false end
+			end,
+		grace=10,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x000100 end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['StarTropics_NES']={ -- StarTropics, NES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x0112, "RAM") end,
@@ -7305,6 +7376,16 @@ local gamedata = {
 			end
 			return false
 		end,
+	},
+	['WolverineAdamantium_SNES']={ -- Wolverine - Adamantium Rage, SNES (USA)
+		func=health_swap,
+		is_valid_gamestate=function() return true end,
+		get_health=function() return memory.read_u8(0x001027, "WRAM") end,
+		other_swaps=function() 
+			-- there are no lives, so attempt to catch instant game overs like elsie-dee by detecting when the game over screen has appeared while the player still has health
+			local health_curr = memory.read_u8(0x001027, "WRAM")
+			local gameover_state_changed, gameover_state_cur, _ = update_prev('gameover_state', memory.read_u8(0x0000AF, "WRAM"))
+			return gameover_state_changed and health_curr > 0 and gameover_state_cur==255 end,
 	},
 	['MagicalQuestMickey1_SNES']={ -- The Magical Quest Starring Mickey Mouse (SNES)
 		func=health_swap,
@@ -8777,6 +8858,13 @@ if type(tonumber(which_level)) == "number" then
 			-- give the player some Gnat Attack instructions!
 			gui.drawText(0,0,"GNAT ATTACK! Dpad moves, face buttons click, hold one/both of L/R to go fast", "green")
 		end
+		if tag == "WolverineAdamantium_SNES" then
+			-- increate health regeneration speed
+			-- regeneration counter counts up to 255 then rolls over to 0. When the counter hits 255, health recovers by 1
+			if settings.InfiniteLives
+			and memory.read_u8(0x000045, "WRAM") == 85 then -- pick lower maximum value for regeneration counter
+				memory.write_u8(0x000045, 255, "WRAM") end -- sets the regeneration count to maximum, forcing a heal
+		end		
 	end
 end
 
