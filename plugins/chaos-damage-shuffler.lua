@@ -454,6 +454,38 @@ local function value_in_range(value, min, max, fallback)
 	end
 end
 
+-- converts an unsigned value from BCD format, e.g. 0x1234 -> 1234
+local function from_bcd(value)
+
+	local acc, mul = 0, 1
+	
+	while value > 0 do
+		local digit = value & 0xF
+		acc = acc + digit * mul
+		
+		value = value >> 4
+		mul = mul * 10
+	end
+	
+	return acc
+end
+
+-- converts an unsigned value to BCD format, e.g. 1234 -> 0x1234
+local function to_bcd(value)
+
+	local acc, mul = 0, 1
+	
+	while value > 0 do
+		local digit = value % 10
+		acc = acc + digit * mul
+		
+		value = value // 10
+		mul = mul << 4
+	end
+	
+	return acc
+end
+
 -- Follow a 32-bit pointer chain, given a start address and a series of offsets.
 -- Returns the final address in the chain, or nil if any addresses in the chain are invalid.
 -- If restricted is true, only the typical address space 0x8000_0000-0x801F_FFFF is considered valid.
