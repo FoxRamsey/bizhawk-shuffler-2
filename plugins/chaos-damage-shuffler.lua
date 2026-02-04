@@ -128,6 +128,7 @@ plugin.description =
 
 	ADDITIONAL SUPPORTED GAMES
 	-ActRaiser (SNES), 1p
+	-Adventure Island II (NES), 1p
 	-Adventures in the Magic Kingdom (NES), 1p
 	-Adventures of the Gummi Bears (bootleg) (Genesis/Mega Drive), 1p
 	-Aero the Acro-Bat (SNES), 1p
@@ -152,6 +153,7 @@ plugin.description =
 	-Captain Novolin (SNES), 1p
 	-Chip and Dale Rescue Rangers 1 (NES), 1-2p
 	-Chip and Dale Rescue Rangers 2 (NES), 1-2p
+	-Clash At Demonhead (NES), 1p
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
 	-Crash Bandicoot 4 (Bootleg) (NES), 1p
 	-Darkwing Duck (NES), 1p
@@ -220,6 +222,7 @@ plugin.description =
 	-Ninja Gaiden II - The Dark Sword of Chaos (NES), 1p
 	-Ninja Gaiden III - The Ancient Ship of Doom (NES), 1p
 	-Ninjawarriors (SNES), 1p
+	-Panic Restaurant (NES), 1p
 	-PaRappa the Rapper (PSX), 1p - shuffles on dropping a rank
 	-Pebble Beach Golf Links (Sega Saturn), 1p - Tournament Mode, shuffles after stroke
 	-Pepsiman (PSX), 1p
@@ -284,6 +287,7 @@ plugin.description =
 	-Vice: Project Doom (NES), 1p
 	-Vs. Ice Climber, set IC4-4 B-1 (Arcade), 1p
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
+	-Werewolf: The Last Warrior (NES), 1p
 	-Wild Guns (SNES), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
 	-Wit's (NES), 1p
@@ -5533,6 +5537,43 @@ local gamedata = {
 		end,
 		grace=60, -- Professional/Action Mode (Nintendo Super System only???? Must verify) can combo you too rapidly to recover
 	},
+	['AdventureIsland2_NES']={ -- Adventure Island II
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end, -- the energy meter drains regularly, so it is not particularly useful to treat as a standard health bar
+		p1getlc=function() return memory.read_u8(0x07D2, "RAM") end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x0204, "RAM")==14 end,
+		other_swaps=function()
+				local form_changed, form_curr, _ = update_prev('form', memory.read_u8(0x007C, "RAM"))				
+				local energy_changed, energy_curr, energy_prev = update_prev('energy', memory.read_u8(0x07D3, "RAM"))
+				
+				if energy_changed and energy_curr < energy_prev - 1  -- shuffle only when energy is lowered unusually, not by the usually regular drop by 1
+					and energy_curr > 0 then return true end -- shuffling when energy is lowered to zero can be handled by life loss
+
+				--[[ shuffle when the player takes a hit and returns to base form. forms are stored in hex. 0x0 = base, 0x10 = skateboard, 0x20 = blue camptosaurus,
+				0x30 = red captosaurus, 0x40 = pteranodon, 0x50 = elasmosaurus ]]
+				if form_changed and form_curr == 0 then return true end 
+				
+				return false
+			end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x07D2 end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['PanicRestaurant_NES']={ -- Panic Restaurant
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00D7, "RAM") end,
+		p1getlc=function() return memory.read_u8(0x00D6, "RAM") end,
+		maxhp=function() return 4 end,
+		gmode=function() return memory.read_u8(0x016F, "RAM")==48 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00D6 end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['PaRappa1_PS1']={ -- PaRappa the Rapper, PSX
 		func=singleplayer_withlives_swap,
 		gmode=function() return memory.read_u8(0x1C3670, "MainRAM") > 0 end, -- if no points yet, no shuffle, should help avoid shuffles between rounds and give leeway at the top of a round
@@ -7221,6 +7262,17 @@ local gamedata = {
 		grace=80,
 		delay=7,
 	},
+	['WerewolfLastWarrior_NES']={ -- Werewolf: The Last Warrior
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00BC, "RAM") end,
+		p1getlc=function() return memory.read_u8(0x0406, "RAM") end,
+		maxhp=function() return 20 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0406 end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['WildGuns_SNES']={ -- Wild Guns, SNES
 		func=singleplayer_withlives_swap,
 		-- only swap during gameplay, not for demo/options
@@ -7890,7 +7942,13 @@ local gamedata = {
 		ActiveP1=function() return true end, -- p1 is always active!
 		delay=5, -- good to give a slightly higher delay to make the damage more readable to the player
 	},
-
+	['ClashAtDemonhead_NES']={ -- Clash At Demonhead
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x002C, "RAM")==24 end,
+		get_health=function() return memory.read_s8(0x009F, "RAM") end,	
+		other_swaps=function() return false end,
+		grace=10,
+	},
 	['CrashBandicoot1_PS1_USA']={
 		-- TODO: swap on death in bonus stages
 		func=function(gamemeta)
