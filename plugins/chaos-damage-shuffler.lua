@@ -174,6 +174,7 @@ plugin.description =
 	-Gimmick! (NES/Famicom), 1p
 	-Goof Troop (SNES), 1-2p
 	-Gremlins 2: The New Batch (NES), 1p
+	-Gun.Smoke (NES), 1p
 	-Gunstar Heroes (Genesis/Mega Drive), 1p
 	-Hammerin' Harry (NES), 1p
 	-Hercules II (Bootleg) (Genesis/Mega Drive), 1p
@@ -206,6 +207,7 @@ plugin.description =
 	-Math Blaster - Episode 1 (SNES), 1p
 	-Mega Q*Bert (Genesis/Mega Drive), 1p
 	-Mendel Palace (NES), 1p
+	-Mercs (W) [!] (Genesis), 1p
 	-Metal Slug - Super Vehicle-001 (Arcade), 1p
 	-Metal Storm (NES), 1p
 	-Mighty Morphin Power Rangers - The Movie (SNES), 1p
@@ -244,6 +246,7 @@ plugin.description =
 	-Shaq-Fu (Genesis/Mega Drive), 1p
 	-Shatterhand (NES), 1p
 	-Shinobi III (Genesis/Mega Drive), 1p
+	-Shock Troopers - 2nd Squad (Arcade), 1p
 	-Simpsons: Bart vs. the World (NES), 1p
 	-Snake Rattle 'n Roll (NES), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
@@ -6199,6 +6202,17 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['ShockTroopers2_ARC']={ -- Shock Troopers - 2nd Squad
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0001B5, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getlc=function() return memory.read_u8(0x00905B, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 64 end,
+		CanHaveInfiniteLives=false, -- left as false to allow character switching
+		p1livesaddr=function() return 0x00905B end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 3 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['SimpsonsBartvsWorld_NES']={ -- The Simpsons: Bart vs. the World, NES
 		func=singleplayer_withlives_swap,
 		gmode=function() return
@@ -7780,6 +7794,18 @@ local gamedata = {
 			local balloon_changed, balloon_curr, balloon_prev = update_prev('balloon', memory.read_u8(0x050C, "RAM"))
 			return balloon_changed and balloon_curr < balloon_prev end,
     },
+	['GunSmoke_NES']={ -- Gun.Smoke (NES)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0077, "RAM") end, -- horse health
+		p1getlc=function() return memory.read_u8(0x007A, "RAM") end,
+		maxhp=function() return 3 end,
+		minhp=-1, -- horse dying does not result in player death
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x007A end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 10 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['GargoylesQuest2_NES']={ -- Gargoyle's Quest II, NES, (US)
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x0038, "RAM") end,
@@ -8109,6 +8135,17 @@ local gamedata = {
 		p1livesaddr=function() return 0x000653 end,
 		LivesWhichRAM=function() return "m68000 : ram : 0x108000-0x11FFFF" end,
 		maxlives=function() return 2 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['Mercs_GEN']={ -- Mercs (W) [!] (Genesis)
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x00C5BE, "68K RAM") ~= 255 end, -- confirms that character is not being switched
+		get_health=function() return memory.read_u8(0x00C349, "68K RAM") end,
+		other_swaps=function() return false end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00C343 end,
+		LivesWhichRAM=function() return "68K RAM" end,
+		maxlives=function() return 36 end, -- values are stored as multiples of 4; max of 9 continues is 9*4=36
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['MetalSlug1_ARC']={ -- Metal Slug - Super Vehicle-001, arcade (US)
