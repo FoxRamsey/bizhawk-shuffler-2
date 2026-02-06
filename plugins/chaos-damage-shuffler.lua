@@ -212,6 +212,7 @@ plugin.description =
 	-Minnesota Fats - Pool Legend (Saturn), 1p story mode
 	-Ms. Pac-Man (Tengen) (NES), 1p
 	-Monopoly (NES), 1-8p (on one controller), shuffles on any human player going bankrupt, going or failing to roll out of jail, and losing money (not when buying, trading, or setting up game)
+	-Monster Rancher Explorer (USA) (GBC), 1p
 	-Mortal Kombat (Genesis/Mega Drive), 1p (for now)
 	-Mortal Kombat II (SNES), 1p (for now)
 	-Mystic Warriors (Arcade), 1p
@@ -246,6 +247,7 @@ plugin.description =
 	-Shinobi III (Genesis/Mega Drive), 1p
 	-Simpsons: Bart vs. the World (NES), 1p
 	-Snake Rattle 'n Roll (NES), 1p
+	-Solomon no Kagi (Japan) (Arcade), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
 	-Sparkster (SNES), 1p
 	-StarTropics (NES), 1p
@@ -4238,6 +4240,25 @@ local gamedata = {
 		
 		CanHaveInfiniteLives=false
 	},
+	['MonsterRancherExplorer_GBC']={ -- Monster Rancher Explorer (USA)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x02C5, "WRAM") end,
+		p1getlc=function()
+			local livesHex = memory.read_u8(0x02C3, "WRAM")
+			-- Get upper nybble, bit-shift right 4 bits
+			local tens = (livesHex & 0xF0)>>4
+			-- Just the lower nybble
+			local ones = livesHex & 0x0F
+			-- Merge 'em
+			local lives = (tens * 10) + ones
+			return lives end,
+		maxhp=function() return 3 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x02C3 end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 0x69 end, -- stored as hex
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['BUBSY1_SNES']={ -- Bubsy in Claws Encounters of the Furred Kind, SNES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 0 end ,
@@ -4425,6 +4446,17 @@ local gamedata = {
 		LivesWhichRAM = function() return "RAM" end,
 		maxlives = function() return 9 end,
 		ActiveP1 = function() return true end,
+	},
+	['SolomonsKey_ARC']={ -- Solomon no Kagi (Japan)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x0237, "z80 : ram : 0xC000-0xCFFF") end, -- Coins don't seem to put you any further back than lives. Coins at 0x004C
+		maxhp=function() return 1 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0237 end,
+		LivesWhichRAM=function() return "z80 : ram : 0xC000-0xCFFF" end,
+		maxlives=function() return 6 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['ROCK_N_ROLL_RACING_SNES']={ -- Rock n' Roll Racing, SNES
 		func=singleplayer_withlives_swap,
