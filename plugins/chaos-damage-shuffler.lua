@@ -130,6 +130,7 @@ plugin.description =
 	-ActRaiser (SNES), 1p
 	-Adventures in the Magic Kingdom (NES), 1p
 	-Adventures of the Gummi Bears (bootleg) (Genesis/Mega Drive), 1p
+	-Aero Fighters 2 / Sonic Wings 2 (Arcade), 1p
 	-Aero the Acro-Bat (SNES), 1p
 	-Aladdin (Genesis/Mega Drive), 1p
 	-Aladdin (SNES), 1p
@@ -158,6 +159,7 @@ plugin.description =
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
 	-Do-Re-Mi Fantasy - Milon no Dokidoki Daibouken (SNES), 1p
+	-DoDonPachi (World, 1997 2/ 5 Master Ver.) (Arcade), 1p
 	-Double Dragon 1 (NES), 1-2p, Mode A or B, shuffles on knockdown and death
 	-Double Dragon 2 (NES), 1-2p, shuffles on knockdown and death
 	-DuckTales (NES), 1p
@@ -165,6 +167,7 @@ plugin.description =
 	-Dynamite Headdy (Genesis/Mega Drive), 1p
 	-Earnest Evans, Mega CD
 	-Einhänder (PSX), 1p
+	-ESP Ra.De. (World, 1998 4/22 International Ver.) (Arcade), 1p
 	-F-Zero (SNES), 1p
 	-Family Feud (SNES), 1-2p
 	-Garfield: A Week of Garfield (NES), 1p
@@ -188,9 +191,11 @@ plugin.description =
 	-Jaws (NES), 1p
 	-Jim Power - The Lost Dimension in 3D (SNES), 1p
 	-Journey to Silius (NES), 1p
+	-Judgement Silversword - Rebirth Edition (Japan) (Rev 4321) (WonderSwan), 1p
 	-Jungle Book, The (NES, SNES, Genesis/Mega Drive), 1p
 	-Jurassic Park (SNES), 1p
 	-Kabuki Quantum Fighter (NES), 1p
+	-Kingdom Grandprix (Arcade), 1p
 	-Kuru Kuru Kururin (GBA), 1p
 	-Last Alert (TG-16 CD), 1p
 	-Little Samson (NES), 1p
@@ -229,6 +234,7 @@ plugin.description =
 	-Power Blade (NES), 1p
 	-Power Blade 2 (NES), 1p
 	-Powerslave/Exhumed, Saturn
+	-Radiant Silvergun (Japan) (Saturn), 1p
 	-Rainbow Islands - The Story of Bubble Bobble 2 (NES), 1p
 	-Resident Evil (PSX), 1p - includes OG, Director's Cut, Dualshock and True Director's Cut Hack
 	-Resident Evil 2 (PSX), 1p - includes Regular & DualShock Ver (recommend using multi-disk bundler to work between disks)
@@ -4299,6 +4305,18 @@ local gamedata = {
 		ActiveP1 = function() return true end,
 		delay = 45,
 	},
+	['EspRaDe_ARC']={ -- ESP Ra.De. (World, 1998 4/22 International Ver.)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00254F, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getlc=function() return memory.read_u8(0x001227, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 3 end,
+		gmode=function() return memory.read_u8(0x002539, "m68000 : ram : 0x100000-0x10FFFF")==3 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x001227 end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['ROCKET_KNIGHT_ADVENTURES_GEN']={ -- Rocket Knight Adventures, Genesis
 		func=Rocket_Knight_Adventures_swap,
 		p1gethp=function() return memory.read_s16_be(0xC040, "68K RAM") end,
@@ -4425,6 +4443,18 @@ local gamedata = {
 		LivesWhichRAM = function() return "RAM" end,
 		maxlives = function() return 9 end,
 		ActiveP1 = function() return true end,
+	},
+	['RadiantSilvergun_SAT']={ -- Radiant Silvergun (Japan) (Saturn)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x076AB6, "Work Ram High") end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x0165E0, "Work Ram High")==37 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x076AB6 end,
+		LivesWhichRAM=function() return "Work Ram High" end,
+		maxlives=function() return 0x69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['ROCK_N_ROLL_RACING_SNES']={ -- Rock n' Roll Racing, SNES
 		func=singleplayer_withlives_swap,
@@ -5656,6 +5686,19 @@ local gamedata = {
 			return false
 		end,
 	},
+	['KingdomGrandprix_ARC']={ -- Kingdom Grandprix (Arcade)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x000555, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x001361, "m68000 : ram : 0x100000-0x10FFFF")==36 end,
+		swap_exceptions=function() return memory.read_u8(0x00001B, "m68000 : ram : 0x100000-0x10FFFF")==5 end, -- attempts to catch transition between character select and ship boarding sequence; the player loses a life after selecting a character
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00041D end, -- credits provided instead of lives to allow for character switching
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['GhostsnGoblins_NES']={ -- Ghosts n' Goblins, NES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x68c, "RAM") end,
@@ -6652,6 +6695,17 @@ local gamedata = {
 		ActiveP1=function() return true end, -- p1 is always active!
 		gmode=function() return (memory.read_u8(0x0031, "RAM") < 8) end, --game state is between 0 and 7 for the levels of the game.
 	},
+	['AeroFighters2_ARC']={ -- Aero Fighters 2 / Sonic Wings 2 (Arcade)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x00E43F, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 1 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00E43F end, -- unlimited lives provided; continues also revive on the spot, no character switching option available
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 5 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['AerotheAcrobat_SNES']={ -- Aero the Acro-Bat, SNES
 		func=iframe_health_swap,
 		is_valid_gamestate=function()
@@ -7123,6 +7177,17 @@ local gamedata = {
 		p1livesaddr=function() return 0x0053 end,
 		LivesWhichRAM=function() return "RAM" end,
 		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['JudgementSilversword_WS']={ -- Judgement Silversword - Rebirth Edition (Japan) (Rev 4321)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x02CAA1, "SRAM") end,
+		maxhp=function() return 56 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x02CAA1 end,
+		LivesWhichRAM=function() return "SRAM" end,
+		maxlives=function() return 70 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['SunsetRiders_SNES']={ -- Sunset Riders, SNES
@@ -8180,6 +8245,18 @@ local gamedata = {
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x0000F1 end,
 		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['DoDonPachi_ARC']={ -- DoDonPachi (World, 1997 2/ 5 Master Ver.) (Arcade)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x001965, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x0019C9, "m68000 : ram : 0x100000-0x10FFFF") == 224 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0013AB end, -- credits provided instead of lives to allow for ship swapping
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
