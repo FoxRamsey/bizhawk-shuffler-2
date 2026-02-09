@@ -175,6 +175,7 @@ plugin.description =
 	-Goof Troop (SNES), 1-2p
 	-Gremlins 2: The New Batch (NES), 1p
 	-Gunstar Heroes (Genesis/Mega Drive), 1p
+	-Gyruss (NES), 1p
 	-Hammerin' Harry (NES), 1p
 	-Hercules II (Bootleg) (Genesis/Mega Drive), 1p
 	-High Seas Havoc (Genesis/Mega Drive), 1p
@@ -220,6 +221,7 @@ plugin.description =
 	-Ninja Gaiden II - The Dark Sword of Chaos (NES), 1p
 	-Ninja Gaiden III - The Ancient Ship of Doom (NES), 1p
 	-Ninjawarriors (SNES), 1p
+	-Panorama Cotton (English v1.0.1) (Mega Drive/Genesis), 1p
 	-PaRappa the Rapper (PSX), 1p - shuffles on dropping a rank
 	-Pebble Beach Golf Links (Sega Saturn), 1p - Tournament Mode, shuffles after stroke
 	-Pepsiman (PSX), 1p
@@ -5803,6 +5805,20 @@ local gamedata = {
 		get_health=function() return memory.read_u16_be(0xA424, "68K RAM") end, -- note; health will not go above 999
 		grace=60,
 	},
+	['Gyruss_NES']={ -- Gyruss (NES)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end, 
+		p1getlc=function() return memory.read_u8(0x002E, "RAM") end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x0018, "RAM") == 4 end,
+		swap_exceptions=function() return memory.read_u8(0x0051, "RAM") == 0 end, -- prevent shuffle between stages; player gets an extra life and dies to show revive animation
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x002E end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 7 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		other_swaps=function() return false end,
+	},
 	['ContraHardCorps_GEN']={ -- Contra - Hard Corps, Genesis
 		func=twoplayers_withlives_swap,
 		p1gethp=function() return memory.read_u8(0xFA0D, "68K RAM") end,
@@ -7764,6 +7780,17 @@ local gamedata = {
 		is_valid_gamestate=function() return true end,
 		get_health=function() return memory.read_u8(0x0018B2, "WRAM") end,
 		other_swaps=function() return false end,
+	},
+	['PanoramaCotton_GEN']={ -- Panorama Cotton (English v1.0.1	)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u16_be(0x00F36C, "68K RAM") end,
+		p1getlc=function() return memory.read_u8(0x00F31F, "68K RAM") end,
+		maxhp=function() return 1200 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00F31F end,
+		LivesWhichRAM=function() return "68K RAM" end,
+		maxlives=function() return 5 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['Gremlins2_NES']={ -- Gremlins 2: The New Batch, NES (US)
 		func=singleplayer_withlives_swap,
