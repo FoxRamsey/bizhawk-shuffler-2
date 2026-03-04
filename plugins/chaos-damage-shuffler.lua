@@ -5833,6 +5833,7 @@ local gamedata = {
 		is_valid_gamestate=function() return memory.read_u8(0x0291B0, "EWRAM")==6 end,
 		get_health=function() return memory.read_u8(0x029220, "EWRAM") end,
 		other_swaps=function() return false end,
+		grace=25,
 	},
 	['ContraHardCorps_GEN']={ -- Contra - Hard Corps, Genesis
 		func=twoplayers_withlives_swap,
