@@ -7947,7 +7947,7 @@ local gamedata = {
 		is_valid_gamestate=function() return memory.read_u8(0x002C, "RAM")==24 end,
 		get_health=function() return memory.read_s8(0x009F, "RAM") end,	
 		other_swaps=function() return false end,
-		grace=10,
+		grace=20,
 	},
 	['CrashBandicoot1_PS1_USA']={
 		-- TODO: swap on death in bonus stages
