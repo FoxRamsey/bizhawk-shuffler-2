@@ -7898,8 +7898,7 @@ local gamedata = {
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x00101C, "WRAM") end,
 		p1getlc=function() return memory.read_u8(0x00101E, "WRAM") end,
-		maxhp=function() return 15 end, -- starting value, need to find max
-		--gmode=function() return memory.read_u8(0x1A18, "Main Memory") == 1 end,
+		maxhp=function() return 30 end,
 		swap_exceptions=function()
 			-- bonk is returned to normal form for bonus stages, need to suppress swap when entering
 			local isOnBonusStage = memory.read_u8(0x00100D, "WRAM")
