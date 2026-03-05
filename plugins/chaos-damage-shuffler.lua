@@ -6246,6 +6246,7 @@ local gamedata = {
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+		grace=25,
 	},
 	['ArcadesRevenge_SNES']={ -- Spider-Man-X-Men - Arcade's Revenge, SNES (USA)
 		func=function() return function()
