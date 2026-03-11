@@ -6273,18 +6273,19 @@ local gamedata = {
 				
 				local gmode = memory.read_u8(0x0001FC, "WRAM")==129
 				
+				-- healing items can raise health above max, after which it snaps down to max. conditions need to avoid shuffling when dealing with health higher than max
 				if (gmode) then
 					if (playercharacter == is_cyclops or playercharacter == is_wolverine) and cycwolsto_health_curr <= cycwolsto_health_max and cycwolsto_health_curr > 0 then
-						if cycwolsto_health_changed and cycwolsto_health_curr < cycwolsto_health_prev then
+						if cycwolsto_health_changed and cycwolsto_health_prev <= cycwolsto_health_max and cycwolsto_health_curr < cycwolsto_health_prev then
 							return true end
 					elseif playercharacter == is_spiderman and spiderman_health_curr <= spiderman_health_max and spiderman_health_curr > 0 then
-						if spiderman_health_changed and spiderman_health_curr < spiderman_health_prev then
+						if spiderman_health_changed and spiderman_health_prev <= spiderman_health_max and spiderman_health_curr < spiderman_health_prev then
 							return true end
 					elseif playercharacter == is_gambit and gambit_health_curr <= gambit_health_max and gambit_health_curr > 0 then
-						if gambit_health_changed and gambit_health_curr < gambit_health_prev then
+						if gambit_health_changed and gambit_health_prev <= gambit_health_max and gambit_health_curr < gambit_health_prev then
 							return true end
 					elseif playercharacter == is_storm and cycwolsto_health_curr <= cycwolsto_health_max and cycwolsto_health_curr > 0 then
-						if cycwolsto_health_changed and cycwolsto_health_curr < cycwolsto_health_prev then
+						if cycwolsto_health_changed and cycwolsto_health_prev <= cycwolsto_health_max and cycwolsto_health_curr < cycwolsto_health_prev then
 							-- storm's air meter constantly drains when she isn't on the surface so we need to avoid swapping on regular life loss
 							if oxygen_timer_curr < oxygen_timer_prev or cycwolsto_health_curr < (cycwolsto_health_prev - 1) then return true end
 						end
