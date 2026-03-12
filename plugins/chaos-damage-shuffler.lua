@@ -210,6 +210,7 @@ plugin.description =
 	-Metal Slug - Super Vehicle-001 (Arcade), 1p
 	-Metal Slug X - Super Vehicle-001 (NGM-2500 ~ NGH-2500), 1p
 	-Metal Slug 3 (NGM-2560), 1p
+	-Metal Slug 5 (NGM-2680), 1p
 	-Metal Storm (NES), 1p
 	-Mighty Morphin Power Rangers - The Movie (SNES), 1p
 	-Minnesota Fats - Pool Legend (Saturn), 1p story mode
@@ -8183,6 +8184,33 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!		
 	},	
+	['MetalSlug5_ARC']={ -- Metal Slug 5 (NGM-2680)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
+		p1getlc=function() return memory.read_u8(0x000A41, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 1 end,
+		other_swaps=function()
+			-- lives value remains at 0 when player loses their last life, need to catch player death 
+			
+			-- Need to convert binary-coded decimal hexadecimal value to just plain decimal
+			local creditsHex = memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF")
+			-- Get upper nybble, bit-shift right 4 bits
+			local tens = (creditsHex & 0xF0)>>4
+			-- Just the lower nybble
+			local ones = creditsHex & 0x0F
+			
+			-- used the merged value
+			local credits_changed, credits_curr, credits_prev = update_prev('credits', (tens * 10) + ones)
+			
+			local lives_curr = memory.read_u8(0x000A41, "m68000 : ram : 0x100000-0x10FFFF")
+			return credits_changed and lives_curr == 0 and credits_curr < credits_prev end,
+		gmode=function() return memory.read_u8(0x0008E6, "m68000 : ram : 0x100000-0x10FFFF")==201 end,
+		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters. coins cannot be pushed
+		p1livesaddr=function() return 0x000A41 end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!		
+	},
 	['TripWorld_GB']={ -- Trip World, GB, and Trip World DX, GBC
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x20, "HRAM") end,
