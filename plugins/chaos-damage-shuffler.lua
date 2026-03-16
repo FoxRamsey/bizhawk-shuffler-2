@@ -246,6 +246,7 @@ plugin.description =
 	-Shinobi (set 6, System 16A) (unprotected) (Arcade), 1p
 	-Revenge of Shinobi, The (W) (REV01) [!] (Genesis/Mega Drive), 1p
 	-Shinobi III (Genesis/Mega Drive), 1p
+	-Shinobi Legions (U) (Saturn), 1p
 	-Simpsons: Bart vs. the World (NES), 1p
 	-Snake Rattle 'n Roll (NES), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
@@ -6220,6 +6221,17 @@ local gamedata = {
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "68K RAM" end,
 		p1livesaddr=function() return 0x37e0 end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['ShinobiLegions_SAT']={ -- Shinobi Legions (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0EA2CB, "Work Ram High") end,
+		p1getlc=function() return memory.read_u8(0x0252B9, "Work Ram High") end,
+		maxhp=function() return 6 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0252B9 end,
+		LivesWhichRAM=function() return "Work Ram High" end,
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
