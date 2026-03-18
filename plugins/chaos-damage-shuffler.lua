@@ -247,6 +247,7 @@ plugin.description =
 	-Revenge of Shinobi, The (W) (REV01) [!] (Genesis/Mega Drive), 1p
 	-Shinobi III (Genesis/Mega Drive), 1p
 	-Shinobi Legions (U) (Saturn), 1p
+	-Shinobi-X - Shin Shinobi Den (Europe) (Saturn), 1p
 	-Simpsons: Bart vs. the World (NES), 1p
 	-Snake Rattle 'n Roll (NES), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
@@ -6231,6 +6232,17 @@ local gamedata = {
 		maxhp=function() return 6 end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x0252B9 end,
+		LivesWhichRAM=function() return "Work Ram High" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['ShinobiX_SAT']={ -- Shinobi Legions (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0EA41B, "Work Ram High") end,
+		p1getlc=function() return memory.read_u8(0x0252DD, "Work Ram High") end,
+		maxhp=function() return 6 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0252DD end,
 		LivesWhichRAM=function() return "Work Ram High" end,
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
