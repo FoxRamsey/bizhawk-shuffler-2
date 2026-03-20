@@ -146,7 +146,8 @@ plugin.description =
 	-Bonk III - Bonk's Big Adventure (U) (TG-16), 1p
 	-B.C. Kid / Bonk's Adventure / Kyukyoku!! PC Genjin (Arcade), 1p
 	-Super Bonk (USA) (SNES), 1p
-	-Super Genjin 2 (Japan) (Super Bonk 2)
+	-Super Genjin 2 (Japan) (Super Bonk 2) (SNES), 1p
+	-Super Air Zonk (U) (TG-CD), 1p
 	-Bubble Bobble (NES), 1p
 	-Bubsy in Claws Encounters of the Furred Kind (aka Bubsy 1) (SNES), 1p
 	-Bubsy in Fractured Furry Tales (Jaguar), 1p
@@ -7933,6 +7934,18 @@ local gamedata = {
 		p1livesaddr=function() return 0x00110D end,
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['SuperAirZonk_TG16']={ -- Super Air Zonk (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x065B, "Main Memory") end, -- powerup form (when uncombined)
+		p1getlc=function() return memory.read_u8(0x065A, "Main Memory") end,
+		maxhp=function() return 4 end, -- max increases as game progresses
+		minhp=-1,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x065A end,
+		LivesWhichRAM=function() return "Main Memory" end,
+		maxlives=function() return 10 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['Pepsiman_PSX']={ -- Pepsiman (Japan)
