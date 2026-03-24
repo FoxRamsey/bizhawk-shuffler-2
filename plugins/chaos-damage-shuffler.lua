@@ -4253,6 +4253,15 @@ local gamedata = {
 			local lives = (tens * 10) + ones
 			return lives end,
 		maxhp=function() return 3 end,
+		swap_exceptions=function()
+			--[[ After defeating a boss, the player's lives are reset to 1 on the same frame as the room number is updated.
+			To prevent shuffling due to this unavoidable life reduction, suppress shuffling on the frame that room number is updated.
+			Multiple numbers are used to represent the room number. 0x0FF2 is the number provided by the doorman and does not account
+			for cleared boss rooms. We will be using 0x0FF0, which marks the actual room the doorman loads you into and does change
+			when in a boss room, although the boss room number is just the number of that boss and so does technically overlap with
+			early room numbers, even if they're not similar to the number of the surrounding rooms. ]]
+			local currentroom_changed, currentroom_curr, currentroom_prev = update_prev('currentroom', memory.read_u8(0x0FF0, "WRAM"))
+			return currentroom_changed end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x02C3 end,
 		LivesWhichRAM=function() return "WRAM" end,
