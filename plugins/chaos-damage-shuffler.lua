@@ -7801,6 +7801,10 @@ local gamedata = {
 		p1getlc=function() return memory.read_u8(0x007A, "RAM") end,
 		maxhp=function() return 3 end,
 		minhp=-1, -- horse dying does not result in player death
+		swap_exceptions=function()
+			-- horse health is reduced to zero at the start of the new horse animation, potentially leading to shuffling if the player already has a horse.
+			-- attempt to suppress shuffling during the new horse animation by identifying appropriate flag
+			return memory.read_u8(0x0420, "RAM")==12 end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x007A end,
 		LivesWhichRAM=function() return "RAM" end,
