@@ -7802,9 +7802,16 @@ local gamedata = {
 		maxhp=function() return 3 end,
 		minhp=-1, -- horse dying does not result in player death
 		swap_exceptions=function()
+			-- the player loses their horse between levels, so horse health drops to zero, causing a swap whenever the player clears a level with a horse.
+			-- suppress shuffling on frame when stage changes
+			local stage_changed, stage_curr, stage_prev = update_prev('stage', memory.read_u8(0x0041, "RAM"))
+			if stage_changed then return true end
+			
 			-- horse health is reduced to zero at the start of the new horse animation, potentially leading to shuffling if the player already has a horse.
 			-- attempt to suppress shuffling during the new horse animation by identifying appropriate flag
-			return memory.read_u8(0x0420, "RAM")==12 end,
+			if memory.read_u8(0x0420, "RAM")==12 then return true end
+			
+			return false end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x007A end,
 		LivesWhichRAM=function() return "RAM" end,
