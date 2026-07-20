@@ -1762,71 +1762,6 @@ local function NBA_Jam_swap(gamemeta)
 	end
 end
 
--- An entire clone of singleplayer_withlives_swap because RKA has to be SPECIAL
--- with everything it does vis-à-vis health and lives 😒
-local function Rocket_Knight_Adventures_swap(gamemeta)
-	return function(data)
-		-- if a method is provided and we are not in normal gameplay, don't ever swap
-		if gamemeta.gmode and not gamemeta.gmode() then
-			--console.log("Not gamemode; skipping");
-			return false
-		end
-
-		local p1currhp = gamemeta.p1gethp()
-		local p1currlc = gamemeta.p1getlc()
-		local currtogglecheck = 0
-		if gamemeta.gettogglecheck ~= nil then currtogglecheck = gamemeta.gettogglecheck() end
-
-		local maxhp = gamemeta.maxhp()
-
-		-- health must be within an acceptable range to count
-		-- ON ACCOUNT OF ALL THE GARBAGE VALUES BEING STORED IN THESE ADDRESSES
-		-- but don't check minhp BECAUSE ANY NEGATIVE VALUE IS VALID IN THIS GAME
-		if p1currhp > maxhp then
-			--console.log("p1currhp ("..p1currhp..") > "..maxhp.."; skipping");
-			return false
-		end
-
-		-- retrieve previous health and lives before backup
-		local p1prevhp = data.p1prevhp
-		local p1prevlc = data.p1prevlc
-		local prevtogglecheck = data.prevtogglecheck
-
-		data.p1prevhp = p1currhp
-		data.p1prevlc = p1currlc
-		data.prevtogglecheck = currtogglecheck
-
-		--if we have found a toggle flag, that changes at the same time as a junk hp/lives change, then don't swap.
-		if prevtogglecheck ~= nil and prevtogglecheck ~= currtogglecheck then return false end
-
-		-- this delay ensures that when the game ticks away health for the end of a level,
-		-- we can catch its purpose and hopefully not swap, since this isnt damage related
-		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
-			data.p1hpcountdown = data.p1hpcountdown - 1
-			--console.log("p1hpcountdown: "..data.p1hpcountdown);
-			if data.p1hpcountdown == 0 and p1currhp >= 0 then
-				--console.log("p1hpcountdown is 0; HP "..p1currhp.." >= 0, so swapping");
-				return true
-			end
-		end
-
-		-- if health goes below 0, we will rely on life count to tell us whether to swap
-		if p1prevhp ~= nil and p1currhp < p1prevhp then
-			data.p1hpcountdown = gamemeta.delay or 3
-			--console.log("HP went from "..p1prevhp.." to "..p1currhp.."; setting p1hpcountdown to "..data.p1hpcountdown);
-		end
-
-		-- check to see if life count went down
-		if p1prevlc ~= nil and p1currlc == p1prevlc - 1 then -- MUST CHECK THAT LIVES ALWAYS GO DOWN BY 1. BUT THIS SHOULD HELP REMOVE NONSENSE SWAPS
-			--console.log("Lives went from "..p1prevlc.." to "..p1currlc..", so swapping");
-			return true
-		end
-
-		--console.log("All good; health: "..p1currhp..", lives: "..p1currlc);
-		return false
-	end
-end
-
 -- 240p Suite on NES has a stopwatch, so you can force a swap within a second
 -- Useful if you only have one real game to test swaps on
 local function StopWatch_swap(gamemeta)
@@ -4300,8 +4235,9 @@ local gamedata = {
 		delay = 45,
 	},
 	['ROCKET_KNIGHT_ADVENTURES_GEN']={ -- Rocket Knight Adventures, Genesis
-		func=Rocket_Knight_Adventures_swap,
-		p1gethp=function() return memory.read_s16_be(0xC040, "68K RAM") end,
+		func=singleplayer_withlives_swap,
+		p1gethp = function() return math.max(memory.read_s16_be(0xC040, "68K RAM"), -1) end,
+		minhp = -1,
 		maxhp=function() return 32767 end, -- Realistically this won't be above 63, but the game handles this value *somewhat* gracefully
 		p1getlc = function()
 			-- This is stored in decimal mode, meaning 0x69 is treated as 69 and
@@ -4329,9 +4265,13 @@ local gamedata = {
 		-- the value for the continue/game over screen, and is basically the
 		-- only way I can find to detect that the player's run out of lives,
 		-- since 0 is a valid life value and it never goes negative (unlike HP).
+		
+		-- finally, 0xB008 is set to 1 in the demo (poking with 0 will give 1p control)
+		-- do not shuffle during demo (damage occurs in some of these)
 		gmode = function()
-			return memory.read_s16_be(0xC000, "68K RAM") == 1
-				and memory.read_s16_be(0xB02C, "68K RAM") ~= 3
+			return (memory.read_s16_be(0xC000, "68K RAM") == 1
+				or memory.read_s16_be(0xB02C, "68K RAM") == 3)
+				and memory.read_s16_be(0xB008, "68K RAM") ~= 1
 			end,
 		-- Life Bonus, ticks down alongside health during stage clear screen
 		gettogglecheck = function() return memory.read_u32_be(0xB174, "68K RAM") end,
