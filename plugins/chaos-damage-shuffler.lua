@@ -26,8 +26,6 @@ plugin.description =
 	Additional ideas from the TownEater fork have been implemented.
 	Thank you to Diabetus, Smight and ConstantineDTW for extensive playthroughs that tracked down bugs!
 
-	ENABLE EXPANSION SLOT FOR N64 GAMES! This should be the default configuration, but check!
-
 	YOU WILL NEED BizHawk 2.10 MINIMUM for Sega CD and Sega Saturn games to be recognized and shuffled correctly!
 
 	Supported games:
@@ -294,7 +292,6 @@ plugin.description =
 
 	----PREPARATION----
 	Set Min and Max Seconds VERY HIGH, assuming you don't want time swaps in addition to damage swaps.
-	If adding N64 games, enable the Expansion Slot. Some games will fail to shuffle or crash BizHawk without it.
 
 	Non-Battletoads games: just put your game in the games folder.
 
