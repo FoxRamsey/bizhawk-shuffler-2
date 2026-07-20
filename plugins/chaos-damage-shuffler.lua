@@ -151,7 +151,7 @@ plugin.description =
 	-Chip and Dale Rescue Rangers 1 (NES), 1-2p
 	-Chip and Dale Rescue Rangers 2 (NES), 1-2p
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
-	-Crash Bandicoot 4 (Bootleg) (NES), 1p
+	-Crash Bandicoot 4 (bootleg) (GBA), 1p
 	-Darkwing Duck (NES), 1p
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
@@ -174,7 +174,7 @@ plugin.description =
 	-Gremlins 2: The New Batch (NES), 1p
 	-Gunstar Heroes (Genesis/Mega Drive), 1p
 	-Hammerin' Harry (NES), 1p
-	-Hercules II (Bootleg) (Genesis/Mega Drive), 1p
+	-Hercules II (bootleg) (Genesis/Mega Drive), 1p
 	-High Seas Havoc (Genesis/Mega Drive), 1p
 	-Ice Climber (NES), 1-2p
 	--- check toggle for whether you want bonus game losses to swap!
@@ -6329,7 +6329,7 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!	
 	},
-	['CrashBandicoot4_NES']={ -- Crash Bandicoot 4 (Bootleg), NES
+	['CrashBandicoot4_NES']={ -- Crash Bandicoot 4 (bootleg), NES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x62a2, "IWRAM") end,
 		p1getlc=function() return memory.read_u8(0x009a, "IWRAM") end,
@@ -6340,7 +6340,7 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!	
 	},
-	['Hercules2_GEN']={ -- Hercules II (Bootleg), Genesis
+	['Hercules2_GEN']={ -- Hercules II (bootleg), Genesis
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0xe373, "68K RAM") end,
 		p1getlc=function() return memory.read_u8(0xe371, "68K RAM") end,
@@ -6351,7 +6351,7 @@ local gamedata = {
 		maxlives=function() return 5 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['LionKingI_NES']={ -- Lion King (Bootleg), NES
+	['LionKingI_NES']={ -- Lion King (bootleg), NES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x063c, "RAM") end,
 		p1getlc=function() return memory.read_s8(0x063d, "RAM") end,
@@ -6362,7 +6362,7 @@ local gamedata = {
 		maxlives=function() return 7 end,
 		ActiveP1=function() return true end, -- p1 is always active!	
 	},
-	['LionKingII_GEN']={ -- Lion King 2 (Bootleg), GEN
+	['LionKingII_GEN']={ -- Lion King 2 (bootleg), GEN
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x7217, "68K RAM") end,
 		p1getlc=function() return memory.read_s8(0x7219, "68K RAM") end,
