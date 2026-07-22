@@ -5538,14 +5538,14 @@ local gamedata = {
 	},
 	['BuckyOHare_NES']={ -- Bucky O'Hare, NES
 		func=singleplayer_withlives_swap,
-		p1gethp=function() return memory.read_u8(0x5a0, "RAM") end,
+		p1gethp=function() return memory.read_u8(0x05A0, "RAM") end,
 		p1getlc=function() return memory.read_u8(0x004C, "RAM") end,
-		maxhp=function() return 255 end,
-		grace=50, -- note, you appear to get 32 iframes with no recoil
+		maxhp=function() return 36 end, -- collecting L-heart at 36 only refills
+		grace=50, -- on hit, you get 32 iframes with no recoil (at 0x0680), extendable with a hack?
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "RAM" end,
 		p1livesaddr=function() return 0x004C end,
-		maxlives=function() return 127 end,
+		maxlives=function() return 69 end, -- true max is 99
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['DynamiteHeaddy_GEN']={ -- Dynamite Headdy, Genesis
