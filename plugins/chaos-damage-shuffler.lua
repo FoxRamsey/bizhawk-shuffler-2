@@ -799,100 +799,6 @@ local function twoplayers_withlives_swap(gamemeta)
 	end
 end
 
-local function SMAS_swap(gamemeta)
-	return function(data)
-		-- if a method is provided and we are not in normal gameplay, don't ever swap
-		if gamemeta.gmode and not gamemeta.gmode() then
-			return false
-		end
-
-		local p1currhp = gamemeta.p1gethp()
-		local p1currlc = gamemeta.p1getlc()
-		local p2currhp = gamemeta.p2gethp()
-		local p2currlc = gamemeta.p2getlc()
-		local currsmb2mode = gamemeta.getsmb2mode()
-		local currtogglecheck = 0
-		if gamemeta.gettogglecheck ~= nil then
-			currtogglecheck = gamemeta.gettogglecheck()
-		end
-		
-		-- we should now be able to use the typical shuffler functions normally.
-
-		local maxhp = gamemeta.maxhp()
-		local minhp = gamemeta.minhp or 0
-
-		-- health must be within an acceptable range to count
-		-- ON ACCOUNT OF ALL THE GARBAGE VALUES BEING STORED IN THESE ADDRESSES
-		if p1currhp < minhp or p1currhp > maxhp then
-			return false
-		elseif p2currhp < minhp or p2currhp > maxhp then
-			return false
-		end
-
-		-- retrieve previous health and lives before backup
-		local p1prevhp = data.p1prevhp
-		local p1prevlc = data.p1prevlc
-		local p2prevhp = data.p2prevhp
-		local p2prevlc = data.p2prevlc
-		local prevsmb2mode = data.prevsmb2mode
-		local prevtogglecheck = data.prevtogglecheck
-		
-		data.p1prevhp = p1currhp
-		data.p1prevlc = p1currlc
-		data.p2prevhp = p2currhp
-		data.p2prevlc = p2currlc
-		data.prevsmb2mode = currsmb2mode
-		data.prevtogglecheck = currtogglecheck
-		
-		-- DON'T SWAP WHEN WE JUST CAME OUT OF SMB2 SLOTS OR MENU
-		if currsmb2mode ~= prevsmb2mode then
-			return false
-		end
-		
-		--if we have found a toggle flag, that changes at the same time as a junk hp/lives change, then don't swap.
-		if prevtogglecheck ~= nil and prevtogglecheck ~= currtogglecheck then
-			return false
-		end
-
-		-- this delay ensures that when the game ticks away health for the end of a level,
-		-- we can catch its purpose and hopefully not swap, since this isnt damage related
-		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
-			data.p1hpcountdown = data.p1hpcountdown - 1
-			if data.p1hpcountdown == 0 and p1currhp > minhp then
-				return true
-			end
-		end
-
-		if data.p2hpcountdown ~= nil and data.p2hpcountdown > 0 then
-			data.p2hpcountdown = data.p2hpcountdown - 1
-			if data.p2hpcountdown == 0 and p2currhp > minhp then
-				return true
-			end
-		end
-
-		-- if the health goes to 0, we will rely on the life count to tell us whether to swap
-		if p1prevhp ~= nil and p1currhp < p1prevhp then
-			data.p1hpcountdown = gamemeta.delay or 3
-		end
-		
-		if p2prevhp ~= nil and p2currhp < p2prevhp then
-			data.p2hpcountdown = gamemeta.delay or 3
-		end
-
-		-- check to see if the life count went down
-		
-		if p1prevlc ~= nil and p1currlc == p1prevlc - 1 then
-			return true
-		end
-		
-		if p2prevlc ~= nil and p2currlc == p2prevlc - 1 then
-			return true
-		end
-
-		return false
-	end
-end
-
 local function sdbnes_swap(gamemeta)
 	return function(data)
 		-- if a method is provided and we are not in normal gameplay, don't ever swap
@@ -2803,51 +2709,35 @@ local gamedata = {
 		ActiveP1=function() return memory.read_u8(0x000DBE) > 0 and memory.read_u8(0x000DBE) < 255 end,
 	},
 	['SMAS_SNES']={ -- Super Mario All Stars (SNES)
-		-- to do, function to define "which game"
-		-- though I don't think that can go in this block and likely needs to go in the swap function instead
-		SMAS_which_game=function()
-			if memory.read_u8(0x01FF00, "WRAM") == 2 then
-				return "SMB1"
-			end
-			if memory.read_u8(0x01FF00, "WRAM") == 4 then
-				return "SMB2J"
-			end
-			if memory.read_u8(0x01FF00, "WRAM") == 6 and memory.read_u8(0x000547, "WRAM") < 128 then
-				return "SMB2U" -- >128 means slots or menu
-			end
-			if memory.read_u8(0x01FF00, "WRAM") == 10 then
-				return "SMW"
-			end
-			if memory.read_u8(0x01FF00, "WRAM") == 8 then
-				if memory.read_u8(0x00072B, "WRAM") == 3 then
-					return "SMB3Battle"
-				else
-					return "SMB3"
-				end
-			end
-			return false
-		end,
-		func=SMAS_swap,
+		-- which game is active is noted at 0x01FF00
+		-- 2 for SMB1, 4 for SMB2J, 6 for SMB2U, 10 for SMW (not used if ROM doesn't include SMW)
+		-- 8 for SMB3; if 0x00072B == 3 as well, then SMB3 is in Battle Mode
+		func=twoplayers_withlives_swap,
 		gmode=function()
 			if ((memory.read_u8(0x01FF00, "WRAM") == 2 or memory.read_u8(0x01FF00, "WRAM") == 4)
 				and memory.read_u8(0x000770, "WRAM") ~= 1) -- demo == 0, end of world == 2, game over == 3 false
+			then
+				return false
+			elseif
+				memory.read_u8(0x01FF00, "WRAM") == 0 -- no game selected
 			then
 				return false
 			else
 				return true
 			end
 		end,
-		getsmb2mode=function()
-			return memory.read_u8(0x0004C4, "WRAM")
-			-- number of health bars available, changes on entering slots and can cause false swaps
-		end,
 		gettogglecheck=function()
 			if memory.read_u8(0x01FF00, "WRAM") == 10 then
 				return memory.read_u8(0x000DB3, "WRAM")
 				-- tells us active character in SMW, so we know if we are switching
 			elseif memory.read_u8(0x01FF00, "WRAM") == 8 then
-				return memory.read_u8(0x000577, "WRAM")
-				-- tells us if we have the boot in SMB3, to not swap when we get/lose it
+				return memory.read_u8(0x00072B, "WRAM") + memory.read_u8(0x000577, "WRAM")
+				-- 0x72B tells us what mode we are in
+				-- if it switches, for example, activating battle mode, we should not swap
+				-- 0x577 tells us if we have the boot in SMB3 (1 for yes, 0 for no), to not swap when we get/lose it
+			elseif memory.read_u8(0x01FF00, "WRAM") == 6 then
+				return memory.read_u8(0x0004C4, "WRAM")
+				-- tells us the maxhp for SMB2U; we should not swap on any frame where this changes
 			else
 				return nil
 			end
