@@ -5738,7 +5738,7 @@ local gamedata = {
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "68K RAM" end,
 		p1livesaddr=function() return 0x7E3c end,
-		maxlives=function() return 55 end,
+		maxlives=function() return 55 end, -- 0 lives is 48, add 7 for infinite lives target
 		ActiveP1=function() return true end, -- p1 is always active!
 		grace=45,
 	},
@@ -5835,7 +5835,7 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	};	
-	['JungleBook_GEN']={ -- Jungle Book, G
+	['JungleBook_GEN']={ -- Jungle Book, Genesis
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0xf4da, "68K RAM") end,
 		p1getlc=function() return memory.read_s8(0xfad4, "68K RAM") end,
@@ -5843,7 +5843,7 @@ local gamedata = {
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "68K RAM" end,
 		p1livesaddr=function() return 0xfad4 end,
-		maxlives=function() return 55 end,
+		maxlives=function() return 55 end, -- 0 lives is 48, add 7 for infinite lives target
 		ActiveP1=function() return true end, -- p1 is always active!	
 	},
 	['JungleBook_NES']={ -- Jungle Book, NES
