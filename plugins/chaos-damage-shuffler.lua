@@ -1665,20 +1665,6 @@ local function NBA_Jam_swap(gamemeta)
 	end
 end
 
--- 240p Suite on NES has a stopwatch, so you can force a swap within a second
--- Useful if you only have one real game to test swaps on
-local function StopWatch_swap(gamemeta)
-	return function()
-		if gamemeta.gmode and not gamemeta.gmode() then
-			return false
-		end
-
-		local secondsChanged, seconds, prevSeconds = update_prev('seconds', memory.read_u8(0x0029, "RAM"));
-		if (secondsChanged) then return true end;
-		return false;
-	end
-end
-
 local function castlevania_n64_swap(gamemeta)
 	return function(data)
 		-- TODO: These games have poison DOTs. Every single tick would shuffle. Is that desirable?
@@ -4270,8 +4256,15 @@ local gamedata = {
 		gettogglecheck=function() return memory.read_u8(0xEF1, "WRAM") end,
 	},
 	['240P_NES']={
-		func=StopWatch_swap,
-		gmode=function() return memory.read_u8(0x01FB, "RAM") == 136 end, -- 136 is the stopwatch mode
+	-- 240p Suite on NES has a stopwatch, so you can force a swap within a second
+	-- Useful if you only have one real game to test swaps on
+		func=function()
+			return function()
+				local secondsChanged, seconds, prevSeconds = update_prev('seconds', memory.read_u8(0x0029, "RAM"));
+				if (secondsChanged) and memory.read_u8(0x01FB, "RAM") == 136 then return true end;
+				return false;
+			end
+		end,
 	},
 	['SOTN_PS1']={ -- Japan (1.0, 1.1) and North America releases
 		func=sotn_swap,
