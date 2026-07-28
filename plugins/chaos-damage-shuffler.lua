@@ -8108,7 +8108,7 @@ local gamedata = {
 	['JurassicPark2_SNES']={ -- Jurassic Park Part 2 - The Chaos Continues (USA) (En,Fr,De,It)
 		func=health_swap,
 		is_valid_gamestate=function() return memory.read_u8(0x000060, "WRAM")==255 end,
-		get_health=function() return memory.read_u8(0x00B032, "WRAM") end,
+		get_health=function() return memory.read_s8(0x00B032, "WRAM") end,
 		other_swaps=function() return false end,
 	},
 	['JimPower_SNES']={ -- Jim Power - The Lost Dimension in 3D, SNES (USA)
