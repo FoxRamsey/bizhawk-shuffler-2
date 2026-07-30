@@ -7280,7 +7280,7 @@ local gamedata = {
 				elseif current_arcade_stage == 11 then currdamage = memory.read_u16_be(0x240156, "RDRAM") -- 1p mode, race to the finish stage
 				elseif current_arcade_stage == 12 then currdamage = memory.read_u16_be(0x261C6E, "RDRAM") -- 1p mode, fighting polygon team stage
 				elseif current_arcade_stage == 13 then currdamage = memory.read_u16_be(0x27119E, "RDRAM") -- 1p mode, master hand stage
-				else return 1 end
+				else return 999 end
 			
 			return 999 - currdamage end,
 		p1getlc=function() return memory.read_s8(0x0A4B43, "RDRAM") end,
@@ -7292,6 +7292,7 @@ local gamedata = {
 		LivesWhichRAM=function() return "RDRAM" end,
 		maxlives=function() return 68 end,
 		ActiveP1=function() return memory.read_u8(0x0465BD, "RDRAM")==26 end, -- restricted to gameplay to prevent issues during boot
+		grace=15,
 	},	
 	['SuperSmashTV_SNES']={ -- Super Smash T.V., SNES
 		func=singleplayer_withlives_swap,
