@@ -6242,7 +6242,7 @@ local gamedata = {
 		gmode=function() return memory.read_u8(0x000BE3, "WRAM") == 8 end,
 		swap_exceptions=function() return memory.read_u8(0x0002F4, "WRAM") == 32 end, -- check for letterboxed cutscenes, which may otherwise cause shuffles
 		CanHaveInfiniteLives=true,
-		p1livesaddr=function() return 0x000990 end,
+		p1livesaddr=function() return 0x000994 end, -- infinite continues (0x000994) instead of infinite lives (0x000990) for greater penalty for failure
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
