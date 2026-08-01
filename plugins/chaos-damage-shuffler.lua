@@ -8577,8 +8577,7 @@ if type(tonumber(which_level)) == "number" then
 						if memory.read_u8(0x000E5E, "WRAM") > 1 then
 							memory.write_u8(0x000E5E, 0, "WRAM")
 							-- set Pimple's health to 0
-							swap_scheduled = false
-							-- override the swap being scheduled for a health drop
+							-- 0 is the minhp for this game, so swap should only occur when lives drop
 						end
 					end
 				end
