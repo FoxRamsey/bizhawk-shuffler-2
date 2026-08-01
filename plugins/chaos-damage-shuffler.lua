@@ -7866,7 +7866,7 @@ local gamedata = {
 	['AstroBoyOmegaFactor_GBA']={ -- Astro Boy - Omega Factor, GBA (USA)
 		func=health_swap,
 		is_valid_gamestate=function() return true end,
-		get_health=function() return memory.read_u32_le(0x2802, "IWRAM") end,
+		get_health=function() return memory.read_u16_le(0x2802, "IWRAM") end,
 		other_swaps=function() return false end,
 	},
 	['JurassicPark1_SNES']={ -- Jurassic Park, SNES (USA)
