@@ -5429,6 +5429,12 @@ local gamedata = {
 		maxhp=function() return 2 end,
 		gmode=function() return memory.read_u8(0x001801, "RAM")==56 end,
 		other_swaps=function() return false end,
+		swap_exceptions=function()
+			--[[ player landing on spikes or lava causes the player to directly enter a death animation, losing their armour at the start of the animation. suppress shuffling
+			on armour loss during death animation so that only the life loss triggers a shuffle ]]
+			local armour_status_changed, armour_status_curr, armour_status_prev = update_prev('armour_status', memory.read_s8(0x001A12, "RAM"))
+			local in_death_animation = memory.read_u8(0x001A1B, "RAM") == 1
+			return armour_status_changed and in_death_animation and armour_status_curr == 1 and armour_status_prev == 0 end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x001E2A end,
 		LivesWhichRAM=function() return "RAM" end,
