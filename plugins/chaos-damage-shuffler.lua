@@ -168,7 +168,7 @@ plugin.description =
 	-F-Zero (SNES), 1p
 	-Family Feud (SNES), 1-2p
 	-Garfield: A Week of Garfield (NES), 1p
-	-Gargoyle's Quest - Ghosts'n Goblins, (GB) (USA, Europe), 1p
+	-Gargoyle's Quest - Ghosts'n Goblins (GB), 1p
 	-Gargoyle's Quest II (NES), 1p
 	-Ghosts'n Goblins (NES), 1p
 	-Ghouls'n Ghosts (Genesis/Mega Drive), 1p
@@ -201,7 +201,7 @@ plugin.description =
 	-Lion King 2 (bootleg) (Genesis/Mega Drive), 1p
 	-Magical Kid's Doropie / Krion Conquest (NES), 1p
 	-Majuu Ou (Japan) / King of Demons (SNES), 1p
-	-Makai Mura for WonderSwan (Japan), 1p
+	-Makai Mura for WonderSwan (WS), 1p
 	-Marble Madness (NES), 1-2p
 	-Mario Kart: Super Circuit (SNES), 1p, Grand Prix - shuffles on collisions with other karts (lost coins or have 0 coins), falls
 	-Mario Paint (SNES), joystick hack, Gnat Attack, 1p
