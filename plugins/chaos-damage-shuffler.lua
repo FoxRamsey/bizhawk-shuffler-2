@@ -243,11 +243,11 @@ plugin.description =
 	-SD Gundam Sangokushi Rainbow Tairiku Senki (Japan) (Arcade), 1p
 	-Shaq-Fu (Genesis/Mega Drive), 1p
 	-Shatterhand (NES), 1p
-	-Shinobi (set 6, System 16A) (unprotected) (Arcade), 1p
-	-Revenge of Shinobi, The (W) (REV01) [!] (Genesis/Mega Drive), 1p
+	-Shinobi (Arcade), 1p
+	-Revenge of Shinobi, The (Genesis/Mega Drive), 1p
 	-Shinobi III (Genesis/Mega Drive), 1p
-	-Shinobi Legions (U) (Saturn), 1p
-	-Shinobi-X - Shin Shinobi Den (Europe) (Saturn), 1p
+	-Shinobi Legions (Saturn), 1p
+	-Shinobi-X - Shin Shinobi Den (Saturn), 1p
 	-Simpsons: Bart vs. the World (NES), 1p
 	-Snake Rattle 'n Roll (NES), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
