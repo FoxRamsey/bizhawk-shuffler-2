@@ -268,7 +268,7 @@ plugin.description =
 	-Teenage Mutant Ninja Turtles II: The Arcade Game (NES), 1-2p
 	-Teenage Mutant Ninja Turtles III: The Manhattan Project (NES), 1-2p
 	-Teenage Mutant Ninja Turtles IV: Turtles in Time (SNES), 1-2p
-	-The Cliffhanger - Edward Randy (World ver 3) (Arcade), 1p
+	-The Cliffhanger - Edward Randy (Arcade), 1p
 	-The Magical Quest Starring Mickey Mouse (SNES), 1-2p
 	-The Magical Quest 2: The Great Circus Mystery Starring Mickey & Minnie (SNES), 1-2p
 	-The Magical Quest 3: Mickey to Donald - Magical Adventure 3 (SNES), 1-2p
