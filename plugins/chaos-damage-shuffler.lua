@@ -248,8 +248,8 @@ plugin.description =
 	-Snake Rattle 'n Roll (NES), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
 	-Sparkster (SNES), 1p
-	-Spider-Man & Venom - Maximum Carnage, (SNES) (USA), 1p
-	-Spider-Man X-Men - Arcade's Revenge, (SNES) (USA), 1p
+	-Spider-Man & Venom - Maximum Carnage (SNES), 1p
+	-Spider-Man X-Men - Arcade's Revenge (SNES), 1p
 	-StarTropics (NES), 1p
 	-Street Fighter 2010: The Final Fight (NES), 1p
 	-Streets of Rage II (Genesis/Mega Drive), 1-2p (includes duel mode)
@@ -289,7 +289,7 @@ plugin.description =
 	-Wild Guns (SNES), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
 	-Wit's (NES), 1p
-	-Wolverine - Adamantium Rage, (SNES) (USA), 1p
+	-Wolverine - Adamantium Rage (SNES), 1p
 
 	NICHE ZONE
 	- NES 240p Suite: shuffles on every second that passes in Stopwatch Mode. Can be useful for testing a single game.
