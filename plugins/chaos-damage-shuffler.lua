@@ -207,7 +207,7 @@ plugin.description =
 	-Math Blaster - Episode 1 (SNES), 1p
 	-Mega Q*Bert (Genesis/Mega Drive), 1p
 	-Mendel Palace (NES), 1p
-	-Mercs (W) [!] (Genesis), 1p
+	-Mercs (Genesis/Mega Drive), 1p
 	-Metal Slug - Super Vehicle-001 (Arcade), 1p
 	-Metal Storm (NES), 1p
 	-Mighty Morphin Power Rangers - The Movie (SNES), 1p
