@@ -208,10 +208,10 @@ plugin.description =
 	-Mega Q*Bert (Genesis/Mega Drive), 1p
 	-Mendel Palace (NES), 1p
 	-Metal Slug - Super Vehicle-001 (Arcade), 1p
-	-Metal Slug X - Super Vehicle-001 (NGM-2500 ~ NGH-2500), 1p
-	-Metal Slug 3 (NGM-2560), 1p
-	-Metal Slug 4 (NGM-2630), 1p
-	-Metal Slug 5 (NGM-2680), 1p
+	-Metal Slug X - Super Vehicle-001 (Arcade), 1p
+	-Metal Slug 3 (Arcade), 1p
+	-Metal Slug 4 (Arcade), 1p
+	-Metal Slug 5 (Arcade), 1p
 	-Metal Storm (NES), 1p
 	-Mighty Morphin Power Rangers - The Movie (SNES), 1p
 	-Minnesota Fats - Pool Legend (Saturn), 1p story mode
