@@ -142,12 +142,12 @@ plugin.description =
 	-Batman (NES), 1p
 	-Blades of Steel (NES - NA/Europe), 1-2p
 	-Bonk's Adventure (TG-16), 1p
-	-Bonk's Revenge (U) (TurboGrafx-16), 1p
-	-Bonk III - Bonk's Big Adventure (U) (TG-16), 1p
+	-Bonk's Revenge (TG-16), 1p
+	-Bonk III - Bonk's Big Adventure (TG-16), 1p
 	-B.C. Kid / Bonk's Adventure / Kyukyoku!! PC Genjin (Arcade), 1p
-	-Super Bonk (USA) (SNES), 1p
-	-Super Genjin 2 (Japan) (Super Bonk 2) (SNES), 1p
-	-Super Air Zonk (U) (TG-CD), 1p
+	-Super Bonk (SNES), 1p
+	-Super Genjin 2 (Super Bonk 2) (SNES), 1p
+	-Super Air Zonk: Rockabilly-Paradise (TG-CD), 1p
 	-Bubble Bobble (NES), 1p
 	-Bubsy in Claws Encounters of the Furred Kind (aka Bubsy 1) (SNES), 1p
 	-Bubsy in Fractured Furry Tales (Jaguar), 1p
