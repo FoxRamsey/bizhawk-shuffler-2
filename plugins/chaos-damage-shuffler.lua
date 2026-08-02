@@ -101,7 +101,7 @@ plugin.description =
 	-Contra: Hard Corps (Genesis/Mega Drive), 1-2p
 
 	KONG BLOCK
-	-Donkey Kong (World) (Gameboy)
+	-Donkey Kong (GB), 1p
 	-Donkey Kong Country (SNES), 1p, 2p Contest, or 2p Team
 	-Donkey Kong Country 2: Diddy's Kong Quest (SNES), 1p, 2p Contest, or 2p Team
 	-Donkey Kong Country 3: Dixie Kong's Double Trouble (SNES), 1p, 2p Contest, or 2p Team
