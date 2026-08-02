@@ -167,7 +167,7 @@ plugin.description =
 	-Einhänder (PSX), 1p
 	-F-Zero (SNES), 1p
 	-Family Feud (SNES), 1-2p
-	-Frogger 2 - Swampy's Revenge (USA) (PS1), 1p
+	-Frogger 2 - Swampy's Revenge (PS1), 1p
 	-Garfield: A Week of Garfield (NES), 1p
 	-Gargoyle's Quest II (NES), 1p
 	-Ghosts'n Goblins (NES), 1p
