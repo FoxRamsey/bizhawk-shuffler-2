@@ -261,7 +261,7 @@ plugin.description =
 	-Super Mario Kart (SNES), 1-2p - shuffles on collisions with other karts (lost coins or have 0 coins), falls
 	-Sonic Mario Bros., Squirrel King mechanics (bootleg) (Genesis/Mega Drive), 1p
 	-Super Monkey Ball Jr. (GBA), 1p
-	-Super Smash Bros., N64 (USA), 1p
+	-Super Smash Bros. (N64), 1p
 	-Super Smash TV (SNES), 1p
 	-TaleSpin (NES), 1p
 	-Tarzan: Lord of the Jungle (unreleased) (SNES), 1p
