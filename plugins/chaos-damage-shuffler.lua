@@ -159,7 +159,7 @@ plugin.description =
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
 	-Do-Re-Mi Fantasy - Milon no Dokidoki Daibouken (SNES), 1p
-	-DoDonPachi (World, 1997 2/ 5 Master Ver.) (Arcade), 1p
+	-DoDonPachi (Arcade), 1p
 	-Double Dragon 1 (NES), 1-2p, Mode A or B, shuffles on knockdown and death
 	-Double Dragon 2 (NES), 1-2p, shuffles on knockdown and death
 	-DuckTales (NES), 1p
@@ -167,7 +167,7 @@ plugin.description =
 	-Dynamite Headdy (Genesis/Mega Drive), 1p
 	-Earnest Evans, Mega CD
 	-Einhänder (PSX), 1p
-	-ESP Ra.De. (World, 1998 4/22 International Ver.) (Arcade), 1p
+	-ESP Ra.De. (Arcade), 1p
 	-F-Zero (SNES), 1p
 	-Family Feud (SNES), 1-2p
 	-Garfield: A Week of Garfield (NES), 1p
@@ -191,7 +191,7 @@ plugin.description =
 	-Jaws (NES), 1p
 	-Jim Power - The Lost Dimension in 3D (SNES), 1p
 	-Journey to Silius (NES), 1p
-	-Judgement Silversword - Rebirth Edition (Japan) (Rev 4321) (WonderSwan), 1p
+	-Judgement Silversword - Rebirth Edition (WonderSwan), 1p
 	-Jungle Book, The (NES, SNES, Genesis/Mega Drive), 1p
 	-Jurassic Park (SNES), 1p
 	-Kabuki Quantum Fighter (NES), 1p
@@ -234,7 +234,7 @@ plugin.description =
 	-Power Blade (NES), 1p
 	-Power Blade 2 (NES), 1p
 	-Powerslave/Exhumed, Saturn
-	-Radiant Silvergun (Japan) (Saturn), 1p
+	-Radiant Silvergun (Saturn), 1p
 	-Rainbow Islands - The Story of Bubble Bobble 2 (NES), 1p
 	-Resident Evil (PSX), 1p - includes OG, Director's Cut, Dualshock and True Director's Cut Hack
 	-Resident Evil 2 (PSX), 1p - includes Regular & DualShock Ver (recommend using multi-disk bundler to work between disks)
