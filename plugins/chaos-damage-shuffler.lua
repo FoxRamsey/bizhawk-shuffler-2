@@ -7226,7 +7226,10 @@ local gamedata = {
 	},
 	['WarioLand1_GB']={ -- Wario Land - Super Mario Land 3 (World)
 		func=singleplayer_withlives_swap,
-		p1gethp=function() return 1 end, -- no health count
+		p1gethp=function()
+			-- powerup state. all damage returns Wario to small form, so for the purpose of damage we only need small and not small
+			return math.min(memory.read_u8(0x080A, "CartRAM"), 1) end,
+		minhp=-1, -- small Wario is value 0, so shuffling needs to occur with health at 0
 		p1getlc=function()
 			--(binary-coded decimal conversation taken from Bubsy Jaguar implementation)
 			-- Need to convert binary-coded decimal hexadecimal value to just plain decimal
@@ -7239,10 +7242,7 @@ local gamedata = {
 			local lives = (tens * 10) + ones
 			return lives end,
 		maxhp=function() return 1 end,
-		other_swaps=function()
-			-- Player can absorb hit when not in small form; swap when player is reduced to small form
-			local form_changed, form_curr, form_prev = update_prev('form', memory.read_u8(0x080A, "CartRAM"))
-			return form_changed and form_curr == 0 end,
+		other_swaps=function() return false end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x0809 end,
 		LivesWhichRAM=function() return "CartRAM" end,
