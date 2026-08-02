@@ -212,7 +212,7 @@ plugin.description =
 	-Minnesota Fats - Pool Legend (Saturn), 1p story mode
 	-Ms. Pac-Man (Tengen) (NES), 1p
 	-Monopoly (NES), 1-8p (on one controller), shuffles on any human player going bankrupt, going or failing to roll out of jail, and losing money (not when buying, trading, or setting up game)
-	-Monster Rancher Explorer (USA) (GBC), 1p
+	-Monster Rancher Explorer (GBC), 1p
 	-Mortal Kombat (Genesis/Mega Drive), 1p (for now)
 	-Mortal Kombat II (SNES), 1p (for now)
 	-Mystic Warriors (Arcade), 1p
@@ -247,7 +247,7 @@ plugin.description =
 	-Shinobi III (Genesis/Mega Drive), 1p
 	-Simpsons: Bart vs. the World (NES), 1p
 	-Snake Rattle 'n Roll (NES), 1p
-	-Solomon no Kagi (Japan) (Arcade), 1p
+	-Solomon no Kagi (Arcade), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
 	-Sparkster (SNES), 1p
 	-StarTropics (NES), 1p
