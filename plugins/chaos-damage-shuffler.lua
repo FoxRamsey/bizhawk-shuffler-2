@@ -283,9 +283,9 @@ plugin.description =
 	-Ultimate Mortal Kombat 3 (SNES), 1p (for now)
 	-Vice: Project Doom (NES), 1p
 	-Vs. Ice Climber, set IC4-4 B-1 (Arcade), 1p
-	-Wario Land - Super Mario Land 3 (World)
-	-Wario Land II (USA, Europe)
-	-Wario Land 3 (World) (En,Ja)
+	-Wario Land - Super Mario Land 3 (GB), 1p
+	-Wario Land II (GBC), 1p
+	-Wario Land 3 (GBC), 1p
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
 	-Wild Guns (SNES), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
