@@ -154,7 +154,7 @@ plugin.description =
 	-Chip and Dale Rescue Rangers 2 (NES), 1-2p
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
 	-Crash Bandicoot 4 (Bootleg) (NES), 1p
-	-Cyber-Lip (NGM-010) (Arcade), 1p
+	-Cyber-Lip (Arcade), 1p
 	-Darkwing Duck (NES), 1p
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
@@ -176,7 +176,7 @@ plugin.description =
 	-Goof Troop (SNES), 1-2p
 	-Gremlins 2: The New Batch (NES), 1p
 	-Gunstar Heroes (Genesis/Mega Drive), 1p
-	-Gunstar Super Heroes, (GBA) (USA), 1p
+	-Gunstar Super Heroes (GBA), 1p
 	-Hammerin' Harry (NES), 1p
 	-Hercules II (Bootleg) (Genesis/Mega Drive), 1p
 	-High Seas Havoc (Genesis/Mega Drive), 1p
@@ -192,7 +192,7 @@ plugin.description =
 	-Journey to Silius (NES), 1p
 	-Jungle Book, The (NES, SNES, Genesis/Mega Drive), 1p
 	-Jurassic Park (SNES), 1p
-	-Jurassic Park Part 2 - The Chaos Continues (USA) (En,Fr,De,It) (SNES), 1p
+	-Jurassic Park Part 2 - The Chaos Continues (SNES), 1p
 	-Kabuki Quantum Fighter (NES), 1p
 	-Kuru Kuru Kururin (GBA), 1p
 	-Last Alert (TG-16 CD), 1p
@@ -288,7 +288,7 @@ plugin.description =
 	-Vs. Ice Climber, set IC4-4 B-1 (Arcade), 1p
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
 	-Wild Guns (SNES), 1p
-	-Wild West C.O.W.-Boys of Moo Mesa (ver EAB), (Arcade), 1p
+	-Wild West C.O.W.-Boys of Moo Mesa (Arcade), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
 	-Wit's (NES), 1p
 
