@@ -3900,23 +3900,25 @@ local gamedata = {
 		-- being grabbed by an enemy needs to allow mashing out before swapping
 		suspend_updates = function() return memory.read_u8(0x3F9A, "IWRAM") & 128 ~= 0 end,
 		grace = 30, -- give the default iframe period to react after swapping in
+		grace_on_hit = true, -- prevent multiple swaps from spike floors and similar
 		-- OTHER NOTES:
 		-- gamestate is 0x1002 IWRAM: 0 title, 1 savefiles, 2 game, 3 gameover, 4 credits
 		-- display health is half other health values (4/heart vs 8/heart)
 		-- health flows 0x2AEA -> 0xAF03 EWRAM (plus an 0x11A5 IWRAM copy)
 		-- copy health should be updated on actual damage, will get re-set on area change
-		-- max health is +1 offset from current health (0x2AEB/0xAF04/0x11A6)
+		-- max health is +1 offset from current health (0x2AEB/0xAF04)
 		-- money is 0x2B00 -> 0xAF0E EWRAM, 2 bytes LE (0-999)
 		-- iframes is 0x119D IWRAM if needed, 0x11A2 perhaps also related?
-		-- 30 iframes on hit by default, 255 (or 254) while invulnerable (during text, etc)
-		-- some hits do less, down to 12
+		-- iframes value is signed, negative values count up to 0 w/o hurt animation
+		-- 30 iframes on hit by default, -1 (or -2) while invulnerable (during text, etc)
+		-- some hits do less (down to 12), others more (up to 124)
 		-- iframes from falling in water w/ no damage
 		-- 0x3F9A IWRAM & 128 for being grabbed (allow breaking out without swaps)
 		-- for enemy that grabs w/ damage: 12 iframes, max 4 hits, 40-56 frames between hits
 		-- 0x3FB1 IWRAM & 1 is wallmaster? (minish eviction from boss too uhhh)
 		-- for timed sequence, 0x2ECC EWRAM is set to 10800 frames (180s), gameover on hitting 0
 		
-		--get_iframes = function() return memory.read_u8(0x119D, "IWRAM") end,
+		--get_iframes = function() return memory.read_s8(0x119D, "IWRAM") end,
 		--iframe_minimum = function() return 15 end,
 	},
 	['MPAINT_DPAD_SNES']={ -- Gnat Attack in Mario Paint for SNES
