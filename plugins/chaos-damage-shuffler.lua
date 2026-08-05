@@ -7976,13 +7976,11 @@ local gamedata = {
 	['VsIceClimber_ARC']={ -- Vs. Ice Climber, arcade (set IC4-4 B-1)
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, 
-		p1getlc=function() return memory.read_u8(0x0020, "rp2a03 : ram : 0x0-0x7FF") end, -- if using coins instead of lives, use address 0797 at the same domain
+		p1getlc=function() -- if using coins instead of lives, use address 0797 at the same domain
+			-- it's possible to get an extra life while you have the maximum lives, but your lives will be pushed back down to 8 at the start of the next level. 
+			return math.min(memory.read_u8(0x0020, "rp2a03 : ram : 0x0-0x7FF"), 8) end,
 		maxhp=function() return 1 end, 
 		gmode=function() return memory.read_u8(0x0219, "rp2a03 : ram : 0x0-0x7FF") == 251 end,
-		swap_exceptions=function()
-			-- it's possible to get an extra life while you have the maximum lives, but your lives will be pushed back down to 8 at the start of the next level. 
-			local lives_changed, lives_curr, lives_prev = update_prev("lives", memory.read_u8(0x0020, "rp2a03 : ram : 0x0-0x7FF"))
-			return lives_changed and lives_prev > 8 end, -- no swapping when lives from drop above max
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x0020 end,
 		LivesWhichRAM=function() return "rp2a03 : ram : 0x0-0x7FF" end,
