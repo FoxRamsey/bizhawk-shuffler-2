@@ -6045,6 +6045,7 @@ local gamedata = {
 		is_valid_gamestate = function() return memory.read_u8(0x14F8C, "EWRAM") == 1 end,
 		other_swaps = function() return false end,
 		grace = 90,
+		grace_on_hit = true,
 		-- OTHER NOTES:
 		-- 60 iframes on hit by default, (poison, infection, etc) damage gives none
 		-- health value is 25 on startup, but not valid (8500) on the title screen
@@ -6065,6 +6066,7 @@ local gamedata = {
 		is_valid_gamestate = function() return memory.read_u8(0x0EEA4C, "Main RAM") == 1 end,
 		other_swaps = function() return false end,
 		grace = 90,
+		grace_on_hit = true,
 		-- OTHER NOTES:
 		-- generally the same as the GBA version but with different memory addresses
 		-- maxhp is 0x0EEA14, same notes
