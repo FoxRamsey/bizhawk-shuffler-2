@@ -2637,27 +2637,14 @@ local gamedata = {
 		maxhp=function() return 60 end,
 	},
 	['SuperDodgeBall_ARC']={ -- Super Dodge Ball / Kunio no Nekketsu Toukyuu Densetsu (Arcade)
-		--[[ NOTE: try with health as 16 bit and signed . If it doesn't work, add details to the pull request]]
 		func=health_swap,
 		is_valid_gamestate=function() return memory.read_u8(0x001075, "m68000 : ram : 0x100000-0x10FFFF")==7 end,
 		get_health=function()
 			-- the three team members have their own life bars, so we can treat them like one giant life bar
-			return memory.read_u8(0x005CBD, "m68000 : ram : 0x100000-0x10FFFF") -- p1 team member 1 health
-			+ memory.read_u8(0x005CBF, "m68000 : ram : 0x100000-0x10FFFF") -- p1 team member 2 health
-			+ memory.read_u8(0x005CC1, "m68000 : ram : 0x100000-0x10FFFF") end, -- p1 team member 3 health
-		other_swaps=function()
-			--[[ a value of 255 (unsigned) or -1 (signed) is used both to represent a full life bar and empty life bar. since we're always treating it as 255 for the health
-			calculation, the finishing blow against a character will be treated as health increasing, and so we need to separately consider the case where a character is
-			knocked out. ]]
-			local p1_member1_health_changed, p1_member1_health_curr, _ = update_prev('p1_member1_health', memory.read_s8(0x005CBD, "m68000 : ram : 0x100000-0x10FFFF"))
-			local p1_member2_health_changed, p1_member2_health_curr, _ = update_prev('p1_member2_health', memory.read_s8(0x005CBF, "m68000 : ram : 0x100000-0x10FFFF"))
-			local p1_member3_health_changed, p1_member3_health_curr, _ = update_prev('p1_member3_health', memory.read_s8(0x005CC1, "m68000 : ram : 0x100000-0x10FFFF"))
-			
-			if p1_member1_health_changed and p1_member1_health_curr == -1 then return true end
-			if p1_member2_health_changed and p1_member2_health_curr == -1 then return true end
-			if p1_member3_health_changed and p1_member3_health_curr == -1 then return true end
-			
-			return false end,
+			return memory.read_s16_be(0x005CBC, "m68000 : ram : 0x100000-0x10FFFF") -- p1 team member 1 health
+			+ memory.read_s16_be(0x005CBE, "m68000 : ram : 0x100000-0x10FFFF") -- p1 team member 2 health
+			+ memory.read_s16_be(0x005CC0, "m68000 : ram : 0x100000-0x10FFFF") end, -- p1 team member 3 health
+		other_swaps=function() return false end,
 		grace=10,
 	},
 	['CaptainNovolin']={ -- Captain Novolin SNES
