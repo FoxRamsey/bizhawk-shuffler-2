@@ -8229,6 +8229,24 @@ local gamedata = {
 		-- alternatively, use 2, for max first aid kits
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['KirbysDreamCourse_SNES']={ -- Kirby's Dream Course, SNES
+		func=singleplayer_withlives_swap,
+		-- Using strokes as HP to keep parity with other golf games.
+		-- There are actual HP/damage mechanics in this game, but it feels wrong to shuffle someone twice for a single stroke?
+		-- Food address is 0x00D7F0 if someone wants to fight me over that
+		p1gethp=function() return (0 - memory.read_u8(0x00D9B2, "WRAM")) end,
+		-- Swapping on losing lives is irrelevant when you get a stroke when you lose a life anyway.
+		-- This could probably use health_swap but I want max/min hp for error checking ;-;
+		-- p1getlc=function() return memory.read_u8(0x00D7F4, "WRAM") end,
+		p1getlc=function() return 1 end,
+		maxhp=function() return -1 end,
+		minhp=-99,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00D7F4 end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 }
 
 local backupchecks = {
