@@ -4920,15 +4920,15 @@ local gamedata = {
 		p1gethp=function() return 1 end, -- no health system
 		p1getlc=function() return memory.read_u8(0x1A43, "WRAM") end,
 		maxhp=function() return 1 end,
+		other_swaps=function()  
+			-- when player is carrying an item, getting hit stuns them instead of killing them. add an additional shuffle for this circumstance
+			local stunstate_changed, stunstate_curr, stunstate_prev = update_prev('stunstate', memory.read_u8(0x1DD7, "WRAM"))
+			return stunstate_changed and stunstate_curr == 160 end, -- stunstate should be 160 only when hit while carrying item
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x1A43 end,
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
-		other_swaps=function()  
-			-- when player is carrying an item, getting hit stuns them instead of killing them. add an additional shuffle for this circumstance
-			local stunstate_changed, stunstate_curr, stunstate_prev = update_prev('stunstate', memory.read_u8(0x1DD7, "WRAM"))
-			return stunstate_changed and stunstate_curr == 160 end, -- stunstate should be 160 only when hit while carrying item
 	},
 	['DKC1_SNES']={ -- Donkey Kong Country (SNES)
 		func=iframe_health_swap,
