@@ -67,6 +67,8 @@ plugin.description =
 	-Castlevania (N64), 1p (in-progress, grabbing shuffles excessively)
 	-Castlevania: Legacy of Darkness (N64), 1p (in-progress, grabbing and poison shuffle excessively)
 	-Castlevania: Symphony of the Night (PSX), 1p
+	-Castlevania: Circle of the Moon (GBA), 1p
+	-Castlevania: Harmony of Dissonance (GBA), 1p
 	-Castlevania: Aria of Sorrow (GBA), 1p
 	-Castlevania: Dawn of Sorrow (DS), 1p
 	-Castlevania: Portrait of Ruin (DS), 1p
