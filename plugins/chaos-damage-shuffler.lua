@@ -7256,12 +7256,12 @@ local gamedata = {
 			if memory.read_u8(0x0757, "WRAM")~=85 then return false end
 			
 			-- check iframes value for player being damaged. address starts at 0, goes to 1 when hit, then counts up to some value when the player regains control
-			local iframes_changed, iframes_curr, iframes_prev = update_prev('iframes', memory.read_u8(0x06DC, "WRAM"))
+			local iframes = memory.read_u8(0x06DC, "WRAM")
 			
 			-- also check that player is stunned to affirm they were hit by a damaging attack. 
 			-- stun value changes slightly after the iframes value, so we check if the stun has changed in this frame but that the iframes were increased previously
-			local isstunned_changed, isstunned_curr, isstunned_prev = update_prev('isstunned', memory.read_u8(0x0D60, "WRAM")) -- changes to 100 when stunned
-			return isstunned_changed and isstunned_curr == 100 and iframes_curr > 0 end 
+			local isstunned_changed, isstunned_curr, _ = update_prev('isstunned', memory.read_u8(0x0D60, "WRAM")) -- changes to 100 when stunned
+			return isstunned_changed and isstunned_curr == 100 and iframes > 0 end 
 		end,
 	},
 	['WarioLand3_GBC']={ -- Wario Land 3 (World) (En,Ja)
