@@ -4304,7 +4304,7 @@ local gamedata = {
 		func=health_swap,
 		is_valid_gamestate=function() return memory.read_u8(0x000163, "m68000 : ram : 0x100000-0x10FFFF")==178 -- gmode
 			and memory.read_u8(0x002EA6, "m68000 : ram : 0x100000-0x10FFFF")~=255 end, -- preventing additional swapping for stroke penalties (value is 255 for penalty stroke)
-		get_health=function() return 0 - memory.read_u8(0x007006, "m68000 : ram : 0x100000-0x10FFFF") end,
+		get_health=function() return -memory.read_u8(0x007006, "m68000 : ram : 0x100000-0x10FFFF") end,
 		other_swaps=function() return false end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x00D572 end, -- holes remaining
