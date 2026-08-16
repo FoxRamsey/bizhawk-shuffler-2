@@ -4626,7 +4626,7 @@ local gamedata = {
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x00209D end,
 		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
-		maxlives=function() return 112 end, -- lives stored in hex
+		maxlives=function() return 0x70 end, -- lives stored in hex
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['DarkwingDuck_NES']={ -- Darkwing Duck (NES)
