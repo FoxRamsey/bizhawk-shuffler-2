@@ -544,6 +544,8 @@ local function singleplayer_withlives_swap(gamemeta)
 		
 		local p1currhp = gamemeta.p1gethp()
 		local p1currlc = gamemeta.p1getlc()
+		local p1currcc = gamemeta.p1getcc and gamemeta.p1getcc() or 0
+		
 		local currtogglecheck = 0
 		if gamemeta.gettogglecheck ~= nil then
 			currtogglecheck = gamemeta.gettogglecheck()
@@ -561,10 +563,12 @@ local function singleplayer_withlives_swap(gamemeta)
 		-- retrieve previous health and lives before backup
 		local p1prevhp = data.p1prevhp
 		local p1prevlc = data.p1prevlc
+		local p1prevcc = data.p1prevcc
 		local prevtogglecheck = data.prevtogglecheck
 
 		data.p1prevhp = p1currhp
 		data.p1prevlc = p1currlc
+		data.p1prevcc = p1currcc
 		data.prevtogglecheck = currtogglecheck
 		
 		-- if we have found a toggle flag, that changes at the same time as a junk hp/lives change, then don't swap.
@@ -596,6 +600,11 @@ local function singleplayer_withlives_swap(gamemeta)
 		
 		if p1prevlc ~= nil and p1currlc == p1prevlc - 1 then
 			-- MUST CHECK THAT LIVES ALWAYS GO DOWN BY 1. BUT THIS SHOULD HELP REMOVE NONSENSE SWAPS
+			return true
+		end
+		
+		-- swap if a continue/credit was deducted
+		if p1prevcc ~= nil and p1currcc == p1prevcc - 1 then
 			return true
 		end
 
@@ -712,8 +721,11 @@ local function twoplayers_withlives_swap(gamemeta)
 
 		local p1currhp = gamemeta.p1gethp()
 		local p1currlc = gamemeta.p1getlc()
+		local p1currcc = gamemeta.p1getcc and gamemeta.p1getcc() or 0
 		local p2currhp = gamemeta.p2gethp()
 		local p2currlc = gamemeta.p2getlc()
+		local p2currcc = gamemeta.p2getcc and gamemeta.p2getcc() or 0
+		
 		local currtogglecheck = 0
 		if gamemeta.gettogglecheck ~= nil then
 			currtogglecheck = gamemeta.gettogglecheck()
@@ -735,14 +747,18 @@ local function twoplayers_withlives_swap(gamemeta)
 		-- retrieve previous health and lives before backup
 		local p1prevhp = data.p1prevhp
 		local p1prevlc = data.p1prevlc
+		local p1prevcc = data.p1prevcc
 		local p2prevhp = data.p2prevhp
 		local p2prevlc = data.p2prevlc
+		local p2prevcc = data.p2prevcc
 		local prevtogglecheck = data.prevtogglecheck
 
 		data.p1prevhp = p1currhp
 		data.p1prevlc = p1currlc
+		data.p1prevcc = p1currcc
 		data.p2prevhp = p2currhp
 		data.p2prevlc = p2currlc
+		data.p2prevcc = p2currcc
 		data.prevtogglecheck = currtogglecheck
 		
 		
@@ -789,6 +805,15 @@ local function twoplayers_withlives_swap(gamemeta)
 		end
 		
 		if p2prevlc ~= nil and p2currlc == p2prevlc - 1 then
+			return true
+		end
+		
+		-- swap if a continue/credit was deducted
+		if p1prevcc ~= nil and p1currcc == p1prevcc - 1 then
+			return true
+		end
+		
+		if p2prevcc ~= nil and p2currcc == p2prevcc - 1 then
 			return true
 		end
 
