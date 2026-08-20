@@ -1396,7 +1396,9 @@ local function health_swap(gamemeta)
 		if not gamemeta.is_valid_gamestate() then
 			return false
 		end
-		if health_changed and health_curr < health_prev then
+		-- only swap if health drops below current max health
+		local max_health = gamemeta.get_max_health and gamemeta.get_max_health()
+		if health_changed and health_curr < health_prev and (not max_health or health_curr < max_health) then
 			data.delayCountdown = gamemeta.delay or 3
 		end
 		-- sometimes you want to swap for things that don't reduce health
