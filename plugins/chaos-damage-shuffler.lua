@@ -4044,7 +4044,6 @@ local gamedata = {
 		LivesWhichRAM = function() return "MainRAM" end,
 		maxlives = function() return 9 end,
 		ActiveP1 = function() return true end,
-		delay = 45,
 	},
 	['ROCKET_KNIGHT_ADVENTURES_GEN']={ -- Rocket Knight Adventures, Genesis
 		func=singleplayer_withlives_swap,
@@ -5048,6 +5047,7 @@ local gamedata = {
 			
 		end,
 		grace=50, -- just make sure we don't combo on deaths (previously 20)
+		delay=10, -- should make damage more perceptible given frame rate
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x157911 end,
 		-- importantly, we have to write just one byte
@@ -6312,7 +6312,7 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 		grace=60,
-		delay=30,
+		delay=10,
 	},
 	['TMNT2_NES']={ -- Teenage Mutant Ninja Turtles II: The Arcade Game (NES)
 		func=twoplayers_withlives_swap,
@@ -6330,7 +6330,7 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x0047, "RAM") == 1 end, -- 1 means 2p mode
 		maxhp=function() return 60 end,
 		grace=60,
-		delay=30,
+		delay=10,
 	},
 	['TMNT3_NES']={ -- Teenage Mutant Ninja Turtles III: The Manhattan Project (NES)
 		func=twoplayers_withlives_swap,
@@ -6348,7 +6348,7 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x0028, "RAM") == 1 end, -- 1 means 2p mode
 		maxhp=function() return 127 end,
 		grace=60,
-		delay=30,
+		delay=10,
 		swap_exceptions=function()
 			-- if both HP goes down and "doing a special/desperation move" is true, don't swap.
 			local p1_special_changed, p1_special_curr = update_prev("p1_special", memory.read_u8(0x04E9, "RAM"))
@@ -6373,7 +6373,7 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x00A8, "WRAM") == 1 end, -- 1 means 2p mode
 		maxhp=function() return 96 end,
 		grace=60,
-		delay=30,
+		delay=10,
 		swap_exceptions=function()
 		-- special moves cost HP if they hit, either during the special or on their finishing frame
 		-- so, if turtle status is "special," or goes back from special to normal, don't swap
