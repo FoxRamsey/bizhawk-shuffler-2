@@ -7127,7 +7127,7 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['JoyMechFight_NES']={ -- Joy Mech Fight
+	['JoyMechFight_NES']={ -- Joy Mech Fight, NES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x0529, "RAM") end,
 		p1getlc=function() return memory.read_u8(0x0540, "RAM") end,
@@ -7260,7 +7260,7 @@ local gamedata = {
 		maxlives=function() return 5 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['SmashBros_N64']={ -- Super Smash Bros., N64 (USA)
+	['SmashBros_N64']={ -- Super Smash Bros., N64
 		func=singleplayer_withlives_swap,
 		p1gethp=function()
 			local currdamage
