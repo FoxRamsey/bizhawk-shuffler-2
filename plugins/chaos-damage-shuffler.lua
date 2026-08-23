@@ -7224,7 +7224,7 @@ local gamedata = {
 		grace=80,
 		delay=7,
 	},
-	['WarioLand1_GB']={ -- Wario Land - Super Mario Land 3 (World)
+	['WarioLand1_GB']={ -- Wario Land - Super Mario Land 3
 		func=singleplayer_withlives_swap,
 		p1gethp=function()
 			-- powerup state. all damage returns Wario to small form, so for the purpose of damage we only need small and not small
@@ -7249,7 +7249,7 @@ local gamedata = {
 		maxlives=function() return 0x69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['WarioLand2_GBC']={ -- Wario Land II (USA, Europe)
+	['WarioLand2_GBC']={ -- Wario Land II
 		func=function() 
 			return function()
 			-- gmode, no shuffling outside of gameplay
@@ -7264,7 +7264,7 @@ local gamedata = {
 			return isstunned_changed and isstunned_curr == 100 and iframes > 0 end 
 		end,
 	},
-	['WarioLand3_GBC']={ -- Wario Land 3 (World) (En,Ja)
+	['WarioLand3_GBC']={ -- Wario Land 3
 		func=function() 
 				return function()
 				-- check iframes value for player being damaged. address starts at 0, goes to 1 when hit, then counts up from 16 to some value when the player regains control
