@@ -4915,7 +4915,7 @@ local gamedata = {
 		delay=7,
 		-- let players see the knockdown happen
 	},
-	['DonkeyKong94_GB']={ -- Donkey Kong (World) (Gameboy)
+	['DonkeyKong94_GB']={ -- Donkey Kong (GB)
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, -- no health system
 		p1getlc=function() return memory.read_u8(0x1A43, "WRAM") end,
