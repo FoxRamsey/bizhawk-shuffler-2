@@ -5422,7 +5422,7 @@ local gamedata = {
 		p1livesaddr=function() return 0x0043 end,
 		LivesWhichRAM=function() return "RAM" end,
 	},
-	['MakaiMuraForWS_WS']={ -- Makai Mura for WonderSwan (Japan)
+	['MakaiMuraForWS_WS']={ -- Makai Mura for WonderSwan, WS
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 2 - memory.read_s8(0x001A12, "RAM") end, -- armour status. address flags armor as 1 for broken and 0 for unbroken, so damage is adding 1
 		p1getlc=function() return memory.read_u8(0x001E2A, "RAM") end,
@@ -7801,7 +7801,7 @@ local gamedata = {
 			local balloon_changed, balloon_curr, balloon_prev = update_prev('balloon', memory.read_u8(0x050C, "RAM"))
 			return balloon_changed and balloon_curr < balloon_prev end,
     },
-	['GargoylesQuest1_GB']={ -- Gargoyle's Quest - Ghosts'n Goblins (USA, Europe)
+	['GargoylesQuest1_GB']={ -- Gargoyle's Quest - Ghosts'n Goblins, GB
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x020A, "WRAM") end,
 		p1getlc=function() return memory.read_u8(0x1F17, "WRAM") end,
@@ -7812,7 +7812,7 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['GargoylesQuest2_NES']={ -- Gargoyle's Quest II, NES, (US)
+	['GargoylesQuest2_NES']={ -- Gargoyle's Quest II, NES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x0038, "RAM") end,
 		p1getlc=function() return memory.read_u8(0x0039, "RAM") end,
