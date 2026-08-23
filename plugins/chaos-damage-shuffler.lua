@@ -155,7 +155,7 @@ plugin.description =
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
 	-Crash Bandicoot 4 (Bootleg) (NES), 1p
 	-Darkwing Duck (NES), 1p
-	-Demon Front / Moyu Zhanxian (68k label V105, ROM M105XX 08/05/02) (ARM label V105, ROM 08/05/02 S105XX), 1p
+	-Demon Front / Moyu Zhanxian (Arcade), 1p
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
 	-Do-Re-Mi Fantasy - Milon no Dokidoki Daibouken (SNES), 1p
@@ -4138,7 +4138,7 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['DemonFront_ARC']={ -- Demon Front / Moyu Zhanxian (68k label V105, ROM M105XX 08/05/02) (ARM label V105, ROM 08/05/02 S105XX)
+	['DemonFront_ARC']={ -- Demon Front / Moyu Zhanxian, (Arcade)
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end,
 		p1getlc=function() return memory.read_u8(0x01C90F, "m68000 : ram : 0x800000-0x81FFFF") end,
@@ -8127,7 +8127,7 @@ local gamedata = {
 		maxlives=function() return 2 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['MetalSlug1_ARC']={ -- Metal Slug - Super Vehicle-001, arcade (US)
+	['MetalSlug1_ARC']={ -- Metal Slug - Super Vehicle-001, arcade
 		func=singleplayer_withlives_swap,
 		-- 0xfdb6 and 0xfdb7 are P2 and P1 states: 0x00=Inactive, 0x01=Playing, 0x02=Continue, 0x03=Game Over
 		gmode=function() 
@@ -8151,7 +8151,7 @@ local gamedata = {
 		maxlives=function() return 71 end,
 		ActiveP1=function() return true end, -- p1 is always active (until p2 support added!)
 	},
-	['MetalSlugX_ARC']={ -- Metal Slug X - Super Vehicle-001 (NGM-2500 ~ NGH-2500)
+	['MetalSlugX_ARC']={ -- Metal Slug X - Super Vehicle-001, arcade
 		func=singleplayer_withlives_swap,
 		p1gethp=function()
 			-- 0x00C621: slug health
@@ -8168,7 +8168,7 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['MetalSlug3_ARC']={ -- Metal Slug 3 (NGM-2560)
+	['MetalSlug3_ARC']={ -- Metal Slug 3, arcade
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
 		p1getlc=function() return memory.read_u8(0x0002BB, "m68000 : ram : 0x100000-0x10FFFF") end,
@@ -8185,7 +8185,7 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!		
 	},	
-	['MetalSlug4_ARC']={ -- Metal Slug 4 (NGM-2630)
+	['MetalSlug4_ARC']={ -- Metal Slug 4, arcade
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
 		p1getlc=function() return memory.read_u8(0x000A89, "m68000 : ram : 0x100000-0x10FFFF") end,
@@ -8212,7 +8212,7 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!		
 	},
-	['MetalSlug5_ARC']={ -- Metal Slug 5 (NGM-2680)
+	['MetalSlug5_ARC']={ -- Metal Slug 5, arcade
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
 		p1getlc=function() return memory.read_u8(0x000A41, "m68000 : ram : 0x100000-0x10FFFF") end,
