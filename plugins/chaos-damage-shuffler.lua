@@ -368,6 +368,7 @@ local debug_timer
 local last_hit
 local swap_scheduled
 local shouldSwap
+local game_settings
 local gamesleft
 local prev_framecount
 
@@ -399,6 +400,14 @@ local bt_snes_level_names = { "Khaos Mountains",
 
 local bt_snes_level_recoder = { 0, 1, 2, 3, 4, 6, 8, 7 } -- THIS GAME DOESN'T STORE LEVELS IN THE ORDER YOU PLAY THEM, COOL
 ---------------
+
+---
+-- get the value of the named setting
+-- if default is provided, it will be returned instead of a nil value
+local function get_setting(name, default)
+	local value = game_settings[name]
+	if value ~= nil then return value else return default end
+end
 
 -- update value in prevdata and return whether the value has changed, new value, and old value
 -- value is only considered changed if it wasn't nil before
@@ -8028,6 +8037,7 @@ function plugin.on_game_load(data, settings)
 	last_hit = 0
 	swap_scheduled = false
 	shouldSwap = function() return false end
+	game_settings = {}
 
 	prev_framecount = emu.framecount()
 	
@@ -8185,6 +8195,12 @@ function plugin.on_game_load(data, settings)
 		gamemeta = gamedata[tag]
 		local func = gamemeta.func
 		shouldSwap = func(gamemeta)
+		
+		if gamemeta.settings then
+			for _, name in ipairs(gamemeta.settings) do
+				game_settings[name] = settings[name]
+			end
+		end
 		
 		-- Infinite* Lives - set lives to max on game load
 		local CanHaveInfiniteLives = gamemeta.CanHaveInfiniteLives
@@ -8350,7 +8366,7 @@ if type(tonumber(which_level)) == "number" then
 		end
 		
 		-- AND NOW WE SWAP
-		local schedule_swap, delay = shouldSwap(prevdata)
+		local schedule_swap, delay = shouldSwap(prevdata, game_settings)
 		if schedule_swap then
 			if frames_since_restart > last_hit + grace then
 				delay = delay or 3
