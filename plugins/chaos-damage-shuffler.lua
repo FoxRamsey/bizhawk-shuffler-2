@@ -558,6 +558,15 @@ local function singleplayer_withlives_swap(gamemeta)
 			return false
 		end
 
+		-- this delay ensures that when the game ticks away health for the end of a level,
+		-- we can catch its purpose and hopefully not swap, since this isnt damage related
+		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
+			data.p1hpcountdown = data.p1hpcountdown - 1
+			if data.p1hpcountdown == 0 and p1currhp > minhp then
+				return true
+			end
+		end
+		
 		-- retrieve previous health and lives before backup
 		local p1prevhp = data.p1prevhp
 		local p1prevlc = data.p1prevlc
@@ -576,15 +585,6 @@ local function singleplayer_withlives_swap(gamemeta)
 		-- If a method is provided for swap_exceptions and its conditions are true, process the hp and lives but don't swap.
 		if gamemeta.swap_exceptions and gamemeta.swap_exceptions(gamemeta) then
 			return false
-		end
-		
-		-- this delay ensures that when the game ticks away health for the end of a level,
-		-- we can catch its purpose and hopefully not swap, since this isnt damage related
-		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
-			data.p1hpcountdown = data.p1hpcountdown - 1
-			if data.p1hpcountdown == 0 and p1currhp > minhp then
-				return true
-			end
 		end
 		
 		-- if the health goes to 0, we will rely on the life count to tell us whether to swap
@@ -733,6 +733,22 @@ local function twoplayers_withlives_swap(gamemeta)
 			return false
 		end
 
+		-- this delay ensures that when the game ticks away health for the end of a level,
+		-- we can catch its purpose and hopefully not swap, since this isnt damage related
+		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
+			data.p1hpcountdown = data.p1hpcountdown - 1
+			if data.p1hpcountdown == 0 and p1currhp > minhp then
+				return true
+			end
+		end
+
+		if data.p2hpcountdown ~= nil and data.p2hpcountdown > 0 then
+			data.p2hpcountdown = data.p2hpcountdown - 1
+			if data.p2hpcountdown == 0 and p2currhp > minhp then
+				return true
+			end
+		end
+
 		-- retrieve previous health and lives before backup
 		local p1prevhp = data.p1prevhp
 		local p1prevlc = data.p1prevlc
@@ -756,22 +772,6 @@ local function twoplayers_withlives_swap(gamemeta)
 		-- If a method is provided for swap_exceptions and its conditions are true, process the hp and lives but don't swap.
 		if gamemeta.swap_exceptions and gamemeta.swap_exceptions(gamemeta) then
 			return false
-		end
-
-		-- this delay ensures that when the game ticks away health for the end of a level,
-		-- we can catch its purpose and hopefully not swap, since this isnt damage related
-		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
-			data.p1hpcountdown = data.p1hpcountdown - 1
-			if data.p1hpcountdown == 0 and p1currhp > minhp then
-				return true
-			end
-		end
-
-		if data.p2hpcountdown ~= nil and data.p2hpcountdown > 0 then
-			data.p2hpcountdown = data.p2hpcountdown - 1
-			if data.p2hpcountdown == 0 and p2currhp > minhp then
-				return true
-			end
 		end
 
 		-- if the health goes to 0, we will rely on the life count to tell us whether to swap
