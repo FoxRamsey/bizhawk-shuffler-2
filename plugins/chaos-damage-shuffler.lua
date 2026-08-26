@@ -4337,28 +4337,23 @@ local gamedata = {
 	},
 	['IceClimber_NES']={ -- Ice Climber NES
 		func=twoplayers_withlives_swap,
-		maxhp=function() return 2 end,
+		maxhp=function() return 1 end,
+		p1gethp=function() return 1 end,
+		p2gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x0020, "RAM") end,
+		p2getlc=function() return memory.read_u8(0x0021, "RAM") end,
+		gmode=function() return memory.read_u8(0x0053, "RAM") ~= 1 end, -- 1 == in demo
 		-- we can implement a swap on failing the bonus game
 		-- 0x0055 RAM is a sort of game mode, 0 title, 1 main level, 2 bonus, 3 and 4 bonus screen, 5 fly up to preview level
 		-- 0x001E RAM is "got dactyl", 0 no, 1 1p, 2 2p
 		-- so, if 0x0055 == 3 and 0x001E == 0, you just lost the bonus game
-		p1gethp=function()
-			if memory.read_u8(0x0055, "RAM") == 3 and
-				memory.read_u8(0x001E, "RAM") == 0
-				then return 1
-			else return 2
+		other_swaps=function()
+			if get_setting('IceClimberBonusSwaps') then
+				return memory.read_u8(0x0055, "RAM") == 3 and memory.read_u8(0x001E, "RAM") == 0
 			end
+			return false
 		end,
-		p2gethp=function()
-			if memory.read_u8(0x0055, "RAM") == 3 and
-				memory.read_u8(0x001E, "RAM") == 0
-				then return 1
-			else return 2
-			end
-		end,
-		p1getlc=function() return memory.read_u8(0x0020, "RAM") end,
-		p2getlc=function() return memory.read_u8(0x0021, "RAM") end,
-		gmode=function() return memory.read_u8(0x0053, "RAM") ~= 1 end, -- 1 == in demo
+		settings={'IceClimberBonusSwaps'},
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "RAM" end,
 		p1livesaddr=function() return 0x0020 end,
@@ -4366,10 +4361,6 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return memory.read_u8(0x0020, "RAM") ~= 252 end, -- 0 on start, 252 if player out of lives
 		ActiveP2=function() return memory.read_u8(0x0021, "RAM") ~= 252 end, -- 0 on start, 252 if player out of lives
-		DisableExtraSwaps=function() return 
-			(memory.read_u8(0x0055, "RAM") == 3 and memory.read_u8(0x001E, "RAM") == 0) or -- p1 fails at bonus
-			(memory.read_u8(0x0055, "RAM") == 3 and memory.read_u8(0x001E, "RAM") == 0) -- p2 fails at bonus
-		end
 	},
 	['DarkwingDuck_NES']={ -- Darkwing Duck (NES)
 		func=singleplayer_withlives_swap,
@@ -8349,15 +8340,6 @@ if type(tonumber(which_level)) == "number" then
 		
 		-- Yoshi's Island (SNES)
 		if tag == "SMW2YI_SNES" and settings.SMW2YI_MiniBonusSwaps ~= true then
-		-- can add "or this game+setting, that game+setting, etc." in the future
-			if gamemeta.DisableExtraSwaps() == true then 
-				return 
-				-- don't swap
-			end
-		end
-		
-		-- Ice Climber (NES)
-		if tag == "IceClimber_NES" and settings.IceClimberBonusSwaps ~= true then
 		-- can add "or this game+setting, that game+setting, etc." in the future
 			if gamemeta.DisableExtraSwaps() == true then 
 				return 
