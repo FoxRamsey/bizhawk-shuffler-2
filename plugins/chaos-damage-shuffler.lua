@@ -7262,27 +7262,7 @@ local gamedata = {
 	},
 	['SmashBros_N64']={ -- Super Smash Bros., N64
 		func=singleplayer_withlives_swap,
-		p1gethp=function()
-			local currdamage
-		
-			local current_arcade_stage = memory.read_u8(0x0A4AE7, "RDRAM")
-			
-			-- damage is stored in a different location depending on differnt stages. 
-			if current_arcade_stage == 0 then currdamage = memory.read_u16_be(0x26805E, "RDRAM") -- 1p mode, link stage
-				elseif current_arcade_stage == 1 then currdamage = memory.read_u16_be(0x26839E, "RDRAM") -- 1p mode, yoshi stage
-				elseif current_arcade_stage == 2 then currdamage = memory.read_u16_be(0x2705F6, "RDRAM") -- 1p mode, fox stage
-				elseif current_arcade_stage == 4 then currdamage = memory.read_u16_be(0x26329E, "RDRAM") -- 1p mode, mario brothers stage
-				elseif current_arcade_stage == 5 then currdamage = memory.read_u16_be(0x272F96, "RDRAM") -- 1p mode, pikachu stage
-				elseif current_arcade_stage == 6 then currdamage = memory.read_u16_be(0x26FFCE, "RDRAM") -- 1p mode, giant donkey kong stage
-				elseif current_arcade_stage == 8 then currdamage = memory.read_u16_be(0x26D03E, "RDRAM") -- 1p mode, kirby stage
-				elseif current_arcade_stage == 9 then currdamage = memory.read_u16_be(0x26F4A6, "RDRAM") -- 1p mode, samus stage
-				elseif current_arcade_stage == 10 then currdamage = memory.read_u16_be(0x262AE6, "RDRAM") -- 1p mode, metal mario stage
-				elseif current_arcade_stage == 11 then currdamage = memory.read_u16_be(0x240156, "RDRAM") -- 1p mode, race to the finish stage
-				elseif current_arcade_stage == 12 then currdamage = memory.read_u16_be(0x261C6E, "RDRAM") -- 1p mode, fighting polygon team stage
-				elseif current_arcade_stage == 13 then currdamage = memory.read_u16_be(0x27119E, "RDRAM") -- 1p mode, master hand stage
-				else return 999 end
-			
-			return 999 - currdamage end,
+		p1gethp=function() return 999 - memory.read_u32_be(0x131598, "RDRAM") end,
 		p1getlc=function() return memory.read_s8(0x0A4B43, "RDRAM") end,
 		maxhp=function() return 999 end,
 		minhp=-1,
