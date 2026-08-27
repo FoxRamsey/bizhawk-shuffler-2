@@ -3311,13 +3311,19 @@ local gamedata = {
 			-- countdown, active race, or crashed
 			return substate == 3 or substate == 5 or substate == 10
 		end,
-		p1gethp = function() return memory.read_u16_le(0x12DEA, "EWRAM") end,
+		p1gethp = function() return memory.read_s16_le(0x12DEA, "EWRAM") end,
 		p1getlc = function() return 1 end, -- only swap on health loss
 		-- don't swap if vehicle selection forces a health change
 		gettogglecheck = function() return memory.read_u8(0x12E16, "EWRAM") end,
 		-- different per vehicle, but this seems like the max value
 		maxhp = function() return 16320 end, -- 255*64
 		minhp = -1, -- swap on 0 health as well
+		swap_exceptions = function()
+			-- if health remains, exempt grazing walls without hitting them
+			return memory.read_s16_le(0x12DEA, "EWRAM") > 0
+				and memory.read_u8(0x12E1F, "EWRAM") == 1
+				and memory.read_u8(0x12E20, "EWRAM") ~= 0
+		end,
 		delay = 30,
 		grace = 120,
 		-- Infinite* Lives section
@@ -3339,6 +3345,7 @@ local gamedata = {
 		-- 0x12DF0 EWRAM is the timer for failing a boost start
 		-- 0x12DF4 EWRAM is the 'ui scale' health (0-64)
 		-- 0x12E16 EWRAM is the player machine id, proxy for max health changes
+		-- 0x12E1F EWRAM is the current 'terrain type' id
 		-- demo mode is actually a good tutorial with input overlays ([select] on title to force)
 	},
 	['FZeroGPLegend_GBA'] = { -- F-Zero: GP Legend, GBA
@@ -3353,7 +3360,7 @@ local gamedata = {
 			-- countdown, racing, crashed, (maybe just failed)
 			return substate == 4 or substate == 6 or substate == 11 or prev_substate == 6
 		end,
-		p1gethp = function() return memory.read_u16_le(0x149BA, "EWRAM") end,
+		p1gethp = function() return memory.read_s16_le(0x149BA, "EWRAM") end,
 		p1getlc = function() return 1 end, -- only swap on health loss
 		-- don't swap if vehicle selection forces a health change
 		gettogglecheck = function() return memory.read_u8(0x149E0, "EWRAM") end,
@@ -3366,7 +3373,11 @@ local gamedata = {
 			-- boosting costs health in this one, so don't swap for that
 			local boost_changed, boost, prev_boost = update_prev('boost', memory.read_u16_le(0x149BC, "EWRAM"))
 			-- health is taken once, right when the boost activates
-			return boost_changed and boost > prev_boost
+			if boost_changed and boost > prev_boost then return true end
+			-- if health remains, exempt grazing walls without hitting them
+			return memory.read_s16_le(0x149BA, "EWRAM") > 0
+				and memory.read_u8(0x149F3, "EWRAM") == 1
+				and memory.read_u8(0x149F4, "EWRAM") ~= 0
 		end,
 		other_swaps = function()
 			-- state pre-filtered by gmode checks
@@ -3394,6 +3405,7 @@ local gamedata = {
 		-- 0x149C0 EWRAM is the timer for failing a boost start
 		-- 0x149C4 EWRAM is the 'ui scale' health (0-64)
 		-- 0x149E0 EWRAM is the player machine id
+		-- 0x149F3 EWRAM is the current 'terrain type' id
 		-- 0x1759C EWRAM controls the race timer (see notes for Climax)
 		-- attacking successfully doesn't seem to cost health
 	},
@@ -3409,7 +3421,7 @@ local gamedata = {
 			-- countdown, racing, crashed, (maybe just failed)
 			return substate == 4 or substate == 5 or substate == 10 or prev_substate == 5
 		end,
-		p1gethp = function() return memory.read_u16_le(0x15556, "EWRAM") end,
+		p1gethp = function() return memory.read_s16_le(0x15556, "EWRAM") end,
 		p1getlc = function() return 1 end, -- only swap on health loss
 		-- don't swap if vehicle selection forces a health change
 		gettogglecheck = function() return memory.read_u8(0x1557D, "EWRAM") end,
@@ -3422,7 +3434,11 @@ local gamedata = {
 			-- boosting costs health in this one, so don't swap for that
 			local boost_changed, boost, prev_boost = update_prev('boost', memory.read_u16_le(0x15558, "EWRAM"))
 			-- health is taken once, right when the boost activates
-			return boost_changed and boost > prev_boost
+			if boost_changed and boost > prev_boost then return true end
+			-- if health remains, exempt grazing walls without hitting them
+			return memory.read_s16_le(0x15556, "EWRAM") > 0
+				and memory.read_u8(0x1557E, "EWRAM") == 1
+				and memory.read_u8(0x1557F, "EWRAM") ~= 0
 		end,
 		other_swaps = function()
 			-- state pre-filtered by gmode checks
@@ -3451,6 +3467,7 @@ local gamedata = {
 		-- 0x1555C EWRAM is the timer for failing a boost start
 		-- 0x15560 EWRAM is the 'ui scale' health (0-64)
 		-- 0x1557D EWRAM is the player machine id
+		-- 0x1557E EWRAM is the current 'terrain type' id
 		-- 0x18E54 EWRAM controls the race timer:
 		--   during a moving start under cpu control the game state reads (0,5) instead of (0,4)
 		--   in this specific case, this value will be -1 until the *actual* start
