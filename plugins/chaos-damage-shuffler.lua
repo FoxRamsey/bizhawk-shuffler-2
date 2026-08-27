@@ -369,6 +369,7 @@ local debug_timer
 local last_hit
 local swap_scheduled
 local shouldSwap
+local game_settings
 local gamesleft
 local prev_framecount
 
@@ -400,6 +401,14 @@ local bt_snes_level_names = { "Khaos Mountains",
 
 local bt_snes_level_recoder = { 0, 1, 2, 3, 4, 6, 8, 7 } -- THIS GAME DOESN'T STORE LEVELS IN THE ORDER YOU PLAY THEM, COOL
 ---------------
+
+---
+-- get the value of the named setting
+-- if default is provided, it will be returned instead of a nil value
+local function get_setting(name, default)
+	local value = game_settings[name]
+	if value ~= nil then return value else return default end
+end
 
 -- update value in prevdata and return whether the value has changed, new value, and old value
 -- value is only considered changed if it wasn't nil before
@@ -471,6 +480,38 @@ local function value_in_range(value, min, max, fallback)
 	else
 		return fallback
 	end
+end
+
+-- converts an unsigned value from BCD format, e.g. 0x1234 -> 1234
+local function from_bcd(value)
+
+	local acc, mul = 0, 1
+	
+	while value > 0 do
+		local digit = value & 0xF
+		acc = acc + digit * mul
+		
+		value = value >> 4
+		mul = mul * 10
+	end
+	
+	return acc
+end
+
+-- converts an unsigned value to BCD format, e.g. 1234 -> 0x1234
+local function to_bcd(value)
+
+	local acc, mul = 0, 1
+	
+	while value > 0 do
+		local digit = value % 10
+		acc = acc + digit * mul
+		
+		value = value // 10
+		mul = mul << 4
+	end
+	
+	return acc
 end
 
 -- Follow a 32-bit pointer chain, given a start address and a series of offsets.
@@ -577,6 +618,15 @@ local function singleplayer_withlives_swap(gamemeta)
 			return false
 		end
 
+		-- this delay ensures that when the game ticks away health for the end of a level,
+		-- we can catch its purpose and hopefully not swap, since this isnt damage related
+		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
+			data.p1hpcountdown = data.p1hpcountdown - 1
+			if data.p1hpcountdown == 0 and p1currhp > minhp then
+				return true
+			end
+		end
+		
 		-- retrieve previous health and lives before backup
 		local p1prevhp = data.p1prevhp
 		local p1prevlc = data.p1prevlc
@@ -597,15 +647,6 @@ local function singleplayer_withlives_swap(gamemeta)
 			return false
 		end
 		
-		-- this delay ensures that when the game ticks away health for the end of a level,
-		-- we can catch its purpose and hopefully not swap, since this isnt damage related
-		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
-			data.p1hpcountdown = data.p1hpcountdown - 1
-			if data.p1hpcountdown == 0 and p1currhp > minhp then
-				return true
-			end
-		end
-		
 		-- if the health goes to 0, we will rely on the life count to tell us whether to swap
 		if p1prevhp ~= nil and p1currhp < p1prevhp and p1currhp > minhp and p1currhp < maxhp then
 			data.p1hpcountdown = gamemeta.delay or 3
@@ -619,8 +660,9 @@ local function singleplayer_withlives_swap(gamemeta)
 		end
 
 		-- sometimes you want to swap for things that don't take standard health or lives, like non-standard game overs
-		if gamemeta.other_swaps and gamemeta.other_swaps() then
-			data.p1hpcountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 		
 		return false
@@ -751,6 +793,22 @@ local function twoplayers_withlives_swap(gamemeta)
 			return false
 		end
 
+		-- this delay ensures that when the game ticks away health for the end of a level,
+		-- we can catch its purpose and hopefully not swap, since this isnt damage related
+		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
+			data.p1hpcountdown = data.p1hpcountdown - 1
+			if data.p1hpcountdown == 0 and p1currhp > minhp then
+				return true
+			end
+		end
+
+		if data.p2hpcountdown ~= nil and data.p2hpcountdown > 0 then
+			data.p2hpcountdown = data.p2hpcountdown - 1
+			if data.p2hpcountdown == 0 and p2currhp > minhp then
+				return true
+			end
+		end
+
 		-- retrieve previous health and lives before backup
 		local p1prevhp = data.p1prevhp
 		local p1prevlc = data.p1prevlc
@@ -776,22 +834,6 @@ local function twoplayers_withlives_swap(gamemeta)
 			return false
 		end
 
-		-- this delay ensures that when the game ticks away health for the end of a level,
-		-- we can catch its purpose and hopefully not swap, since this isnt damage related
-		if data.p1hpcountdown ~= nil and data.p1hpcountdown > 0 then
-			data.p1hpcountdown = data.p1hpcountdown - 1
-			if data.p1hpcountdown == 0 and p1currhp > minhp then
-				return true
-			end
-		end
-
-		if data.p2hpcountdown ~= nil and data.p2hpcountdown > 0 then
-			data.p2hpcountdown = data.p2hpcountdown - 1
-			if data.p2hpcountdown == 0 and p2currhp > minhp then
-				return true
-			end
-		end
-
 		-- if the health goes to 0, we will rely on the life count to tell us whether to swap
 		if p1prevhp ~= nil and p1currhp < p1prevhp and p1currhp > minhp and p1currhp < maxhp then
 			data.p1hpcountdown = gamemeta.delay or 3
@@ -812,9 +854,9 @@ local function twoplayers_withlives_swap(gamemeta)
 		end
 
 		-- sometimes you want to swap for things that don't take standard health or lives, like non-standard game overs
-		if gamemeta.other_swaps and gamemeta.other_swaps() then
-			data.p1hpcountdown = gamemeta.delay or 3
-			data.p2hpcountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 
 		return false
@@ -1351,16 +1393,6 @@ local function iframe_health_swap(gamemeta)
 	return function(data)
 		local iframes_changed, iframes_curr, iframes_prev = update_prev('iframes', gamemeta.get_iframes())
 		local health_changed, health_curr, health_prev = false, 0, 0
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		if gamemeta.get_health then
 			health_changed, health_curr, health_prev = update_prev('health', gamemeta.get_health())
 		end
@@ -1381,14 +1413,15 @@ local function iframe_health_swap(gamemeta)
 		if gamemeta.get_health then
 			-- check 0 health for games that don't set iframes on death
 			if (iframes_valid or health_curr == 0) and health_changed and health_curr < health_prev then
-				data.delayCountdown = gamemeta.delay or 3
+				return true, gamemeta.delay
 			end
 		elseif iframes_valid then
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 		-- sometimes you want to swap for things that don't give iframes and change health, like non-standard game overs
-		if gamemeta.other_swaps() then
-			data.delayCountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 	end
 end
@@ -1401,26 +1434,17 @@ local function health_swap(gamemeta)
 		end
 		-- for games where iframes are unhelpful
 		local health_changed, health_curr, health_prev = update_prev('health', gamemeta.get_health())
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		-- check if we're in a valid gamestate
 		if not gamemeta.is_valid_gamestate() then
 			return false
 		end
 		if health_changed and health_curr < health_prev then
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 		-- sometimes you want to swap for things that don't reduce health
-		if gamemeta.other_swaps() then
-			data.delayCountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 	end
 end
@@ -1467,16 +1491,6 @@ local function jonathan_charlotte_swap(gamemeta)
 		local j_iframes_changed, j_iframes_curr, j_iframes_prev = update_prev('jonathan iframes', gamemeta.get_jonathan_iframes())
 		local c_iframes_changed, c_iframes_curr, c_iframes_prev = update_prev('charlotte iframes', gamemeta.get_charlotte_iframes())
 		local health_changed, health_curr, health_prev = update_prev('health', gamemeta.get_health())
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		if not gamemeta.is_valid_gamestate() then
 			return false
 		end
@@ -1485,12 +1499,12 @@ local function jonathan_charlotte_swap(gamemeta)
 			and health_changed and health_curr < health_prev
 		then
 			-- jonathan!
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		elseif not gamemeta.is_jonathan() and c_iframes_changed and c_iframes_prev <= 1
 			and health_changed and health_curr < health_prev
 		then
 			-- charlotte!
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 	end
 end
@@ -1500,27 +1514,18 @@ local function damage_buffer_swap(gamemeta)
 		-- games that instead of decreasing health directly, set a "damage buffer" value that then decreases health per frame
 		local iframes_changed, iframes_curr, iframes_prev = update_prev('iframes', gamemeta.get_iframes())
 		local buffer_changed, buffer_curr, buffer_prev = update_prev('damage buffer', gamemeta.get_damage_buffer())
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		if not gamemeta.is_valid_gamestate() then
 			return false
 		end
 		if iframes_changed and iframes_prev == 0 and buffer_changed and buffer_curr > buffer_prev then
 			-- if the buffer is very large, it may not hit 0 before iframes run out
 			-- will this ever actually happen in practice? maybe not, but may as well future-proof this
-			data.delayCountdown = gamemeta.delay or 3
+			return true, gamemeta.delay
 		end
 		-- sometimes you want to swap for things that don't reduce health
-		if gamemeta.other_swaps() then
-			data.delayCountdown = gamemeta.delay or 3
+		if gamemeta.other_swaps then
+			local swap, delay = gamemeta.other_swaps()
+			return swap, delay or gamemeta.delay
 		end
 	end
 end
@@ -1611,17 +1616,6 @@ end
 
 local function Pebble_Beach_Golf_Links_swap(gamemeta)
 	return function(data)
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
-
 		if (gamemeta.gmode and not gamemeta.gmode()) then
 			return false; -- Not actually in a round
 		end
@@ -1639,7 +1633,7 @@ local function Pebble_Beach_Golf_Links_swap(gamemeta)
 			--console.log("P1 Strokes on hole "..hole.." has changed from "..prevPlayer1Strokes.." to "..player1Strokes);
 		end
 		if (player1StrokesChanged and (player1Strokes == (prevPlayer1Strokes + 1) or player1Strokes == (prevPlayer1Strokes + 2))) then
-			data.delayCountdown = gamemeta.delay;
+			return true, gamemeta.delay;
 		end
 	end
 end
@@ -1658,16 +1652,6 @@ local function NBA_Jam_swap(gamemeta)
 			--console.log(string.format("Quarter went from %d to %d; swapping", prevQuarter, quarter));
 			return true;
 		end
-		-- If a swap is already scheduled, decrease it but do no further processing.
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
 		-- Don't do any further processing if the game mode is wrong.
 		if (gamemeta.gmode and not gamemeta.gmode()) then
 			return false;
@@ -1675,13 +1659,13 @@ local function NBA_Jam_swap(gamemeta)
 		-- If opposing team score went up, swap after a delay
 		if (opposingTeamScoreChanged and opposingTeamScore > prevOpposingTeamScore) then
 			--console.log(string.format("Opposing team score went from %d to %d; swapping in %d frames", prevOpposingTeamScore, opposingTeamScore, gamemeta.delay));
-			data.delayCountdown = gamemeta.delay;
+			return true, gamemeta.delay;
 		end
 		-- If "SHOT CLOCK VIOLATION" is flashing on-screen and the player's team had the ball, swap after a delay
 		if (shotClockViolationMessageTimerChanged and shotClockViolationMessageTimer > prevShotClockViolationMessageTimer) then
 			if (teamWithBall == 0 or (teamWithBall == -1 and teamWithBallChanged and prevTeamWithBall == 0)) then
 				--console.log(string.format("Player held the ball too long without shooting; swapping in %d frames", gamemeta.delay));
-				data.delayCountdown = gamemeta.delay;
+				return true, gamemeta.delay;
 			end
 		end
 	end
@@ -2124,16 +2108,8 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 			data.p1_injured_music_cued = false
 		end
 		
-		-- we need to implement a delay for certain swaps, so we will add a countdown here
-		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
-			--console.log("delayCountdown: "..data.delayCountdown);
-			data.delayCountdown = data.delayCountdown - 1
-			if data.delayCountdown == 0 then
-				--console.log("delayCountdown is 0; swapping");
-				return true;
-			end
-			return false;
-		end
+		-- we need to implement a delay for certain swaps
+		local swap_delay = nil
 		
 		-- SWAPS
 		-- first, swap on p2 scoring a TD or FG, after a 60-frame delay
@@ -2145,13 +2121,13 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 		if data.p2_scored == true and 
 			((p2_kickoff_curr == true and p2_kickoff_prev == false) or (p1_kickoff_curr == true and p1_kickoff_prev == false)) -- latter will handle kickoffs back to p2 after halftime if p2 to end 2Q and gets possession to start Q3
 		then
-			data.delayCountdown = 3
+			swap_delay = 3
 			data.p2_scored = false
 		end
 		-- We need to shuffle if p2 wins the game.
 		if gamemeta.get_end_of_game() == true and p2_points_curr > p1_points_curr
 		then
-			data.delayCountdown = 169 -- wait for scoreboard
+			swap_delay = 169 -- wait for scoreboard
 		end
 		-- We need to shuffle if a p1 player gets injured. We'll know because the music (0x2B) played.
 		-- conveniently, music and sound cues only last for one frame
@@ -2159,13 +2135,13 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 		-- When the cue goes through to silence the music (0x01), swap
 		if music_cue_curr == 0x01 and data.p1_injured_music_cued == true
 		then
-			data.delayCountdown = 3
+			swap_delay = 3
 		end
 		-- next, swap on possession losses by checking if possession changed to p2 ("p1 now has ball" is irrelevant here)
 		if p1_possession_curr == false and p1_possession_prev == true then
 			-- compare p1's score before and after the possession change (the only time we would not swap right away is if p1 scored and is kicking off)
 			if p1_points_curr == data.p1_score_on_load then -- p1 gave up the ball and didn't score? swap now
-				data.delayCountdown = 3
+				swap_delay = 3
 			else -- p1 is kicking off after a score? update that stored score, and reset "play picker seen" to 0 because it's about to be a new drive for p2
 				data.p1_score_on_load = p1_points_curr
 				data.play_picker_seen = 0
@@ -2174,17 +2150,18 @@ local function TecmoSuperBowl_NES_swap(gamemeta)
 		-- now that we've handled possession changes, we need to check mid-drive failures (p1 doesn't get a first down, or p2 gets one)
 		if picking_play_curr == true and picking_play_prev == false then -- down just changed if the playbook screen just came up
 			if p1_possession_curr and whatdown_curr > data.down_at_start_of_play then -- did down just go up? oh, then you didn't get a first down, huh? swap now
-				data.delayCountdown = 3
+				swap_delay = 3
 			-- next, we need to swap if the opponent has earned a first down - this would happen after the play picker has been seen at least once
 			elseif p1_possession_curr == false and whatdown_curr == 0 and -- it's p2's ball and first down?
 				picking_play_curr == true and picking_play_prev == false and data.play_picker_seen > 0 then -- and the play picker just showed up, and we've seen them pick a play already? swap now
-				data.delayCountdown = 3
+				swap_delay = 3
 			-- and, if none of that is true, update the down we saw the last time the play picker came up
 			else
 				data.down_at_start_of_play = whatdown_curr
 			end
 		end
 		
+		return swap_delay ~= nil, swap_delay
     end
 end
 
@@ -4127,7 +4104,6 @@ local gamedata = {
 		LivesWhichRAM = function() return "MainRAM" end,
 		maxlives = function() return 9 end,
 		ActiveP1 = function() return true end,
-		delay = 45,
 	},
 	['ROCKET_KNIGHT_ADVENTURES_GEN']={ -- Rocket Knight Adventures, Genesis
 		func=singleplayer_withlives_swap,
@@ -4412,28 +4388,23 @@ local gamedata = {
 	},
 	['IceClimber_NES']={ -- Ice Climber NES
 		func=twoplayers_withlives_swap,
-		maxhp=function() return 2 end,
+		maxhp=function() return 1 end,
+		p1gethp=function() return 1 end,
+		p2gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x0020, "RAM") end,
+		p2getlc=function() return memory.read_u8(0x0021, "RAM") end,
+		gmode=function() return memory.read_u8(0x0053, "RAM") ~= 1 end, -- 1 == in demo
 		-- we can implement a swap on failing the bonus game
 		-- 0x0055 RAM is a sort of game mode, 0 title, 1 main level, 2 bonus, 3 and 4 bonus screen, 5 fly up to preview level
 		-- 0x001E RAM is "got dactyl", 0 no, 1 1p, 2 2p
 		-- so, if 0x0055 == 3 and 0x001E == 0, you just lost the bonus game
-		p1gethp=function()
-			if memory.read_u8(0x0055, "RAM") == 3 and
-				memory.read_u8(0x001E, "RAM") == 0
-				then return 1
-			else return 2
+		other_swaps=function()
+			if get_setting('IceClimberBonusSwaps') then
+				return memory.read_u8(0x0055, "RAM") == 3 and memory.read_u8(0x001E, "RAM") == 0
 			end
+			return false
 		end,
-		p2gethp=function()
-			if memory.read_u8(0x0055, "RAM") == 3 and
-				memory.read_u8(0x001E, "RAM") == 0
-				then return 1
-			else return 2
-			end
-		end,
-		p1getlc=function() return memory.read_u8(0x0020, "RAM") end,
-		p2getlc=function() return memory.read_u8(0x0021, "RAM") end,
-		gmode=function() return memory.read_u8(0x0053, "RAM") ~= 1 end, -- 1 == in demo
+		settings={'IceClimberBonusSwaps'},
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "RAM" end,
 		p1livesaddr=function() return 0x0020 end,
@@ -4441,10 +4412,6 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return memory.read_u8(0x0020, "RAM") ~= 252 end, -- 0 on start, 252 if player out of lives
 		ActiveP2=function() return memory.read_u8(0x0021, "RAM") ~= 252 end, -- 0 on start, 252 if player out of lives
-		DisableExtraSwaps=function() return 
-			(memory.read_u8(0x0055, "RAM") == 3 and memory.read_u8(0x001E, "RAM") == 0) or -- p1 fails at bonus
-			(memory.read_u8(0x0055, "RAM") == 3 and memory.read_u8(0x001E, "RAM") == 0) -- p2 fails at bonus
-		end
 	},
 	['DarkwingDuck_NES']={ -- Darkwing Duck (NES)
 		func=singleplayer_withlives_swap,
@@ -5131,6 +5098,7 @@ local gamedata = {
 			
 		end,
 		grace=50, -- just make sure we don't combo on deaths (previously 20)
+		delay=10, -- should make damage more perceptible given frame rate
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x157911 end,
 		-- importantly, we have to write just one byte
@@ -6395,7 +6363,7 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 		grace=60,
-		delay=30,
+		delay=10,
 	},
 	['TMNT2_NES']={ -- Teenage Mutant Ninja Turtles II: The Arcade Game (NES)
 		func=twoplayers_withlives_swap,
@@ -6413,7 +6381,7 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x0047, "RAM") == 1 end, -- 1 means 2p mode
 		maxhp=function() return 60 end,
 		grace=60,
-		delay=30,
+		delay=10,
 	},
 	['TMNT3_NES']={ -- Teenage Mutant Ninja Turtles III: The Manhattan Project (NES)
 		func=twoplayers_withlives_swap,
@@ -6431,7 +6399,7 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x0028, "RAM") == 1 end, -- 1 means 2p mode
 		maxhp=function() return 127 end,
 		grace=60,
-		delay=30,
+		delay=10,
 		swap_exceptions=function()
 			-- if both HP goes down and "doing a special/desperation move" is true, don't swap.
 			local p1_special_changed, p1_special_curr = update_prev("p1_special", memory.read_u8(0x04E9, "RAM"))
@@ -6456,7 +6424,7 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x00A8, "WRAM") == 1 end, -- 1 means 2p mode
 		maxhp=function() return 96 end,
 		grace=60,
-		delay=30,
+		delay=10,
 		swap_exceptions=function()
 		-- special moves cost HP if they hit, either during the special or on their finishing frame
 		-- so, if turtle status is "special," or goes back from special to normal, don't swap
@@ -8135,6 +8103,7 @@ function plugin.on_game_load(data, settings)
 	last_hit = 0
 	swap_scheduled = false
 	shouldSwap = function() return false end
+	game_settings = {}
 
 	prev_framecount = emu.framecount()
 	
@@ -8292,6 +8261,12 @@ function plugin.on_game_load(data, settings)
 		gamemeta = gamedata[tag]
 		local func = gamemeta.func
 		shouldSwap = func(gamemeta)
+		
+		if gamemeta.settings then
+			for _, name in ipairs(gamemeta.settings) do
+				game_settings[name] = settings[name]
+			end
+		end
 		
 		if gamemeta.cheats and settings.UngenuineGameplay then
 			apply_cheats(gamemeta.cheats, settings, false)
@@ -8451,17 +8426,8 @@ if type(tonumber(which_level)) == "number" then
 			end
 		end
 		
-		-- Ice Climber (NES)
-		if tag == "IceClimber_NES" and settings.IceClimberBonusSwaps ~= true then
-		-- can add "or this game+setting, that game+setting, etc." in the future
-			if gamemeta.DisableExtraSwaps() == true then 
-				return 
-				-- don't swap
-			end
-		end
-		
 		-- AND NOW WE SWAP
-		local schedule_swap, delay = shouldSwap(prevdata)
+		local schedule_swap, delay = shouldSwap(prevdata, game_settings)
 		if schedule_swap then
 			if frames_since_restart > last_hit + grace then
 				delay = delay or 3
