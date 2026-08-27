@@ -2293,6 +2293,16 @@ local gamedata = {
 		p2getlc=function() return memory.read_u8(0x0012, "RAM") end,
 		gettogglecheck=function() return memory.read_u8(0x0011, "RAM") == 255 or memory.read_u8(0x0011, "RAM") == 255 end, --did a toad just join or drop?
 		maxhp=function() return 6 end,
+		cheats = {
+			ClingerSpeed = { -- This enables the Game Genie code for always moving at max speed in Clinger Winger. Can only be applied to the unpatched ROM.
+				func = function()
+					if memory.read_u8(0x000D, "RAM") == 11 and memory.read_u8(0xA706, "System Bus") == 5 then
+						memory.write_u8(0xA706, 0, "System Bus")
+					end
+				end,
+				on_frame = true,
+			},
+		},
 	},
 	['BT_NES_patched']={ -- Battletoads NES with bugfix patch
 		func=twoplayers_withlives_swap,
@@ -8521,15 +8531,6 @@ if type(tonumber(which_level)) == "number" then
 		end
 
 		-- Battletoads NES
-		
-		-- CLINGER-WINGER SPEED
-		-- This enables the Game Genie code for always moving at max speed in Clinger Winger.
-		-- The bugfix makes this not work! This will only work on an unpatched ROM. The proper, non-patched tag handles this.
-		if tag == "BT_NES" then
-			if settings.ClingerSpeed == true and memory.read_u8(0x000D, "RAM") == 11 and memory.read_u8(0xA706, "System Bus") == 5 then
-				memory.write_u8(0xA706, 0, "System Bus")
-			end
-		end
 		
 		-- Set the memory value that represents the starting stage to the number specified by the file name.
 		if tag == "BT_NES" or tag == "BT_NES_patched" then
