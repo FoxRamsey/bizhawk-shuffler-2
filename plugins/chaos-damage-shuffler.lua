@@ -262,6 +262,7 @@ plugin.description =
 	-Sonic Mario Bros., Squirrel King mechanics (bootleg) (Genesis/Mega Drive), 1p
 	-Super Monkey Ball Jr. (GBA), 1p
 	-Super Smash Bros. (N64), 1p
+	-Smash Remix (N64), 1p
 	-Super Smash TV (SNES), 1p
 	-TaleSpin (NES), 1p
 	-Tarzan: Lord of the Jungle (unreleased) (SNES), 1p
@@ -7272,7 +7273,8 @@ local gamedata = {
 		LivesWhichRAM=function() return "RDRAM" end,
 		maxlives=function() return 68 end,
 		ActiveP1=function() return memory.read_u8(0x0465BD, "RDRAM")==26 end, -- restricted to gameplay to prevent issues during boot
-		grace=15,
+		grace=40,
+		grace_on_hit=true,
 	},	
 	['SuperSmashTV_SNES']={ -- Super Smash T.V., SNES
 		func=singleplayer_withlives_swap,
