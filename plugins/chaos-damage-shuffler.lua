@@ -6,6 +6,7 @@ plugin.minversion = "2.9.1"
 plugin.settings =
 {
 	{ name='InfiniteLives', type='boolean', label='Infinite* Lives (see notes)' },
+	{ name='UngenuineGameplay', type='boolean', label='Enable other QoL cheats where applicable' },
 	{ name='ClingerSpeed', type='boolean', label='BT NES: Auto-Clinger-Winger (unpatched ONLY)' },
 	{ name='BTSNESRash', type='boolean', label='BT SNES: I want Rash, pick 2P, give Pimple 1 HP'},
 	{ name='SuppressLog', type='boolean', label='Suppress "ROM unrecognized"/"on Level 1" logs'},
@@ -451,6 +452,24 @@ local function update_countdown(key)
 		end
 	end
 	return false
+end
+
+-- gets a value that may be stored in a table, using the named key if needed
+local function unwrap(value, name)
+	if type(value) == "table" then
+		return value[name]
+	else
+		return value
+	end
+end
+
+-- if value is not already a table, stores it in a table using the named key
+local function wrap(value, name)
+	if type(value) == "table" then
+		return value
+	else
+		return { [name] = value }
+	end
 end
 
 -- If value is a number between min and max (inclusive), return value.
@@ -8056,6 +8075,30 @@ local function BT_NES_Zitz_Override()
 	return false
 end
 
+local shared_cheats = {
+	
+}
+
+local function apply_cheats(cheats, settings, on_frame)
+	for name, value in pairs(cheats) do
+		-- unspecified settings default to true
+		if settings[name] ~= false then
+			-- check for shared functions first
+			local shared = shared_cheats[name]
+			if shared then
+				shared(value, on_frame)
+			else
+				-- ensure table format for value
+				local cheat = wrap(value, "func")
+				-- only run on frame if requested
+				if not on_frame or cheat.on_frame then
+					cheat:func()
+				end
+			end
+		end
+	end
+end
+
 function plugin.on_game_load(data, settings)
 	prevdata = {}
 	debug_timer = 0
@@ -8225,6 +8268,10 @@ function plugin.on_game_load(data, settings)
 			for _, name in ipairs(gamemeta.settings) do
 				game_settings[name] = settings[name]
 			end
+		end
+		
+		if gamemeta.cheats and settings.UngenuineGameplay then
+			apply_cheats(gamemeta.cheats, settings, false)
 		end
 		
 		-- Infinite* Lives - set lives to max on game load
@@ -8403,6 +8450,11 @@ if type(tonumber(which_level)) == "number" then
 	end
 	
 	if gamemeta then
+		
+		if gamemeta.cheats and settings.UngenuineGameplay then
+			apply_cheats(gamemeta.cheats, settings, true)
+		end
+		
 		-- Infinite* Lives ON FRAME - set lives to max on frame when we are either on the last game or in a game that requires it
 		local MustDoInfiniteLivesOnFrame = false
 		if gamemeta.MustDoInfiniteLivesOnFrame then MustDoInfiniteLivesOnFrame = gamemeta.MustDoInfiniteLivesOnFrame() end
