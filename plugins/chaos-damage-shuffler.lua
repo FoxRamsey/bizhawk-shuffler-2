@@ -13,6 +13,7 @@ plugin.settings =
 	{ name='DebugSingleGame', type='boolean', label='Debugging: Rearm the shuffler logic even if no new game was loaded' },
 	{ name='SMW2YI_MiniBonusSwaps', type='boolean', label="Yoshi's Island: Shuffle on Mini Battle damage/loss", default=true},
 	{ name='IceClimberBonusSwaps', type='boolean', label="Ice Climber (NES): Shuffle on failing the bonus game"},
+	{ name='GQ1NoRandomEncounters', type='boolean', label="Gargoyle's Quest 1: No random encounters" },
 	{ name='grace', type='number', label="Minimum grace period before swapping (won't go < 10 frames)", default=10 },
 	{ name='GraceOnHit', type='boolean', label="Apply grace period from last hit instead of last swap" },
 }
@@ -7660,6 +7661,15 @@ local gamedata = {
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+		cheats = {
+			GQ1NoRandomEncounters = { -- This surpresses random encounters from occurring on the map screen.
+				func = function()
+					if memory.read_u8(0x00FD, "WRAM") == 215 then -- indicator of being on map screen
+						memory.write_u8(0x1F36, 0, "WRAM") end -- controls chances of random encounter
+				end,
+				on_frame = true,
+			},
+		},
 	},
 	['GargoylesQuest2_NES']={ -- Gargoyle's Quest II, NES
 		func=singleplayer_withlives_swap,
@@ -8685,12 +8695,6 @@ if type(tonumber(which_level)) == "number" then
 		if tag == "MPAINT_DPAD_SNES" and memory.read_u8(0x000206) == 1 then
 			-- give the player some Gnat Attack instructions!
 			gui.drawText(0,0,"GNAT ATTACK! Dpad moves, face buttons click, hold one/both of L/R to go fast", "green")
-		end
-		if tag == "GargoylesQuest1_GB" then
-			-- suppress random encounters
-			if settings.InfiniteLives
-			and memory.read_u8(0x00FD, "WRAM") == 215 then -- indicator of being on map screen
-				memory.write_u8(0x1F36, 0, "WRAM") end -- controls chances of random encounter
 		end
 	end
 end
