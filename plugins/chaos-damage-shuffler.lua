@@ -5752,8 +5752,8 @@ local gamedata = {
 				return false
 			end
 		end,
-		get_health = function() return memory.read_u8(0x5450, "IWRAM") end,
-		get_max_health = function() return memory.read_u8(0x5451, "IWRAM") end,
+		get_health = function() return memory.read_s8(0x5450, "IWRAM") end,
+		get_max_health = function() return memory.read_s8(0x5451, "IWRAM") end,
 		-- normal gameplay, not in a minigame, needed for health changes to be valid
 		is_valid_gamestate = function() return memory.read_u8(0x0644, "IWRAM") == 0 end,
 		other_swaps = function()
