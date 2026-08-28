@@ -5567,7 +5567,7 @@ local gamedata = {
 		p1gethp=function() return memory.read_u8(0x00D7, "RAM") end,
 		p1getlc=function() return memory.read_u8(0x00D6, "RAM") end,
 		maxhp=function() return 4 end,
-		gmode=function() return memory.read_u8(0x016F, "RAM")==48 end,
+		gmode=function() return memory.read_u8(0x0019, "RAM")==6 end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x00D6 end,
 		LivesWhichRAM=function() return "RAM" end,
