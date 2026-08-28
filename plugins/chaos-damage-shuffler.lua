@@ -1168,31 +1168,48 @@ local function smk_swap(gamemeta)
 end
 
 local function fzero_snes_swap(gamemeta)
-	-- alternative option for F-Zero swapping, currently testing this out
-	-- 0x00F5 is "collided with a wall", pops up to 9 then drops by 1 every frame back down to 0.
-	-- We don't want a swap on just being "in" the wall or grazing it, necessarily.
-	-- 0x00E9 is "hitting a guardrail" and is separate from colliding with the wall.
-	-- So, you can say "no swaps" on hitting a guardrail == true when colliding with wall == false.
-	-- can experiment with "invuln frames just popped from 0" AND either wall bump or other bump?
-	return function()
-		if 	memory.read_u8(0x0054, "WRAM") == 2 -- gamestate = "racing," and
-			and memory.read_u8(0x0055, "WRAM") == 3 -- the race has started, and
-			and memory.read_u8(0x00C8, "WRAM") == 0 -- invulnerability frames are done (0)
-		then
-			return false -- don't swap when all of those are true	
+	-- goals for this function:
+	-- identify triggers for starting a swap countdown
+	-- extend the countdown to a swap IF hp goes down at any point (trigger condition or not)
+	return function(data)
+		-- if we are not in an active gamestate, or back at max hp, 
+		-- do not swap AND cancel any pending swaps
+		if gamemeta.getgamestate() == false then
+			data.delayCountdown = nil
+			return false
 		end
 		
-		local hitwall_changed, hittingwall, prev_hittingwall = update_prev('hittingwall', gamemeta.gethittingwall())
-		-- when this variable pops up from 0, you're hitting a wall.
-		local invuln_changed, invuln, prev_invuln = update_prev('invuln', gamemeta.getinvuln())
-		-- this pops up from 0 if you get i-frames, only goes up slightly for being in a wall
-		local bump_changed, bump, prev_bump = update_prev('bump', gamemeta.getbump())
-		-- this variable pops up if you are bounced by another car, a mine, etc.
-
-		return
-			(hitwall_changed and prev_hittingwall == 0) or
-			(invuln_changed and invuln > prev_invuln and invuln >6) or
-			(bump_changed and prev_bump == 0)
+		local currhp = gamemeta.gethp()
+		-- retrieve previous health before backup
+		local prevhp = data.prevhp
+		-- backup
+		data.prevhp = currhp
+		
+		-- If a swap is already scheduled:
+		-- check if hp has dropped again
+		-- if so, reload the delay timer
+		-- if not, tick down the delay timer
+		if data.delayCountdown ~= nil and data.delayCountdown > 0 then
+			if currhp < prevhp then 
+				data.delayCountdown = gamemeta.delay or 30
+			else
+			data.delayCountdown = data.delayCountdown - 1
+			end
+			if data.delayCountdown == 0 then
+				return true
+			end
+			return false
+		end
+		-- determine whether a swap should be cued based on designated triggers
+		-- rather than hp loss alone
+		if gamemeta.getlost() == true or -- took a death or lost
+			prevhp ~= nil and currhp < prevhp and
+			(gamemeta.getbumpedcar() == true or -- bumped a car
+			gamemeta.getbumpedrail() == true or
+			gamemeta.getblasted() == true)
+		then
+			data.delayCountdown = gamemeta.delay or 30
+		end
 	end
 end
 
@@ -3250,31 +3267,30 @@ local gamedata = {
 		-- requiring the 0x03BD34 value of 3 filters this nonsense thankfully
 	},
 	['FZERO_SNES']={ -- F-ZERO, SNES
-		func=singleplayer_withlives_swap,
-		p1gethp=function() return memory.read_s16_le(0x00C9, "WRAM") end,
-		p1getlc=function() return 1 end,
-		-- health function will take care of lives.
-		-- health drops to 0 on loading from losing a life (like when you go over a cliff).
-		maxhp=function() return 2048 end,
-		minhp=-40, -- F-ZERO health value can be negative, who knew...
+		func=fzero_snes_swap,
+		gethp=function() return memory.read_s16_le(0x00C9, "WRAM") end,
+		maxhp=function() return 2048 end, -- if health reaches this, we can cancel swaps
+		getgamestate=function() return memory.read_u8(0x0054, "WRAM") == 2 and memory.read_u8(0x0055, "WRAM") == 3 and memory.read_u8(0x005B, "WRAM") == 0 end,
+		getlost=function() 
+			local lost_changed, lost_curr = update_prev("lost", memory.read_u8(0x00C3, "WRAM") >= 0x40)
+			return lost_changed == true and lost_curr == true
+		end,
+		getblasted=function()
+			local blasted_changed, blasted_curr = update_prev("blasted", 
+				-- car is careening based on collision/sprite type; occurs with mines or exploded enemies
+				memory.read_u8(0x00E0, "WRAM") >= 0x40 and
+				memory.read_u8(0x00E0, "WRAM") <= 0x47)
+			return blasted_changed == true and blasted_curr == true
+			end,
+		getbumpedcar=function() return memory.read_u8(0x00C8, "WRAM") > 6 end,
+		getbumpedrail=function() 
+			local bumpedrail_changed, bumpedrail_curr, bumpedrail_prev = update_prev("bumpedrail", memory.read_u8(0x00F5, "WRAM"))
+			return bumpedrail_changed == true and bumpedrail_curr == 7
+		end,
+		grace=120, -- give 2 seconds for reorienting on returning from a swap, let's not go higher than this
 		delay=30,
 		-- because F-ZERO can drain health continuously on every frame,
 		-- you want to build in some kind of sane delay before swapping.
-		gmode=function() return
-			memory.read_u8(0x0054, "WRAM") == 2 -- gamestate = "racing,"
-			and memory.read_u8(0x0055, "WRAM") == 3 -- and the race has started
-			and memory.read_u8(0x00C8, "WRAM") == 0 -- and invulnerability frames are done (0)
-		end,
-		gettogglecheck=function() return memory.read_u8(0x0054, "WRAM") end,
-		-- if gamestate is being changed, sometimes health drops to 0, so don't swap on that frame
-		grace=120, -- give 2 seconds for reorienting on returning from a swap, let's not go higher than this
-
-		--FUTURE POSSIBLE REVISION
-		--func=fzero_snes_swap,
-		--gethittingwall=function() return memory.read_u8(0x00F5, "WRAM") end,
-		--getinvuln=function() return memory.read_u8(0x00C8, "WRAM") end,
-		--getbump=function() return memory.read_u8(0x00E0, "WRAM") end,
-		--delay=30, -- because F-ZERO can drain health continuously on every frame, you want to build in some kind of sane delay before swapping. WILL REQUIRE IMPLEMENTING A COUNTDOWN
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "WRAM" end,
 		p1livesaddr=function() return 0x0059 end,
