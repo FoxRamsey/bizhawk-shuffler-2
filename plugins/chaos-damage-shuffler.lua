@@ -116,7 +116,9 @@ plugin.description =
 	
 	SONIC BLOCK
 	-Sonic the Hedgehog (Genesis/Mega Drive), 1p
+	-Sonic the Hedgehog (Game Gear/Master System), 1p
 	-Sonic the Hedgehog 2 (Genesis/Mega Drive), 1p (2p support someday)
+	-Sonic the Hedgehog 2 (Game Gear/Master System), 1p
 	-Sonic the Hedgehog 3 (Genesis/Mega Drive), 1p (2p support someday)
 	-Sonic & Knuckles (Genesis/Mega Drive), 1p
 	-Sonic the Hedgehog 3 & Knuckles (Genesis/Mega Drive), 1p (2p support someday)
@@ -6724,6 +6726,64 @@ local gamedata = {
 		LivesWhichRAM=function() return "68K RAM" end,
 		maxlives=function() return 9 end, -- Anything higher does not display
 		ActiveP1=function() return true end, -- TODO: this actually supports 4P turn-taking...
+	},
+	['Sonic1_SMS']={ -- Sonic the Hedgehog (Master System)
+		func=sonic_swap,
+		gmode=function() return ((memory.read_u8(0x1205, "Main RAM") & 0x2) == 0) end, -- If a demo is running, don't count it. Otherwise, count it.
+		get_rings=function() return memory.read_u8(0x12AA, "Main RAM") end,
+		get_shield=function() return (memory.read_u8(0x1206, "Main RAM") & 0x20)>>5 end,
+		-- Okay, this is a bit hacky; in order for the entire death animation to
+		-- play out, treat the "you died" flag as your lives count, instead of
+		-- the literal lives count. It's set to true as you die, and reset to 0
+		-- when it's time to return to gameplay.
+		get_lives=function() return memory.read_u8(0x1205, "Main RAM") & 0x1 end,
+		-- I cannot find the stun timer. I know it's in there, you have a period
+		-- of mercy invulnerability, but nothing counts up or down cleanly! But
+		-- this flag is set when you're stunned, which is hopefully good enough?
+		get_iframes=function() return (memory.read_u8(0x1206, "Main RAM") & 0x40)>>6 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x1246 end,
+		LivesWhichRAM=function() return "Main RAM" end,
+		maxlives=function() return 69 end, -- The HUD stops counting at 9; the code itself does not
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['Sonic1_GG']={ -- Sonic the Hedgehog (Game Gear)
+		func=sonic_swap,
+		gmode=function() return ((memory.read_u8(0x1205, "Main RAM") & 0x2) == 0) end, -- If a demo is running, don't count it. Otherwise, count it.
+		get_rings=function() return memory.read_u8(0x12A9, "Main RAM") end,
+		get_shield=function() return (memory.read_u8(0x1206, "Main RAM") & 0x20)>>5 end,
+		-- Okay, this is a bit hacky; in order for the entire death animation to
+		-- play out, treat the "you died" flag as your lives count, instead of
+		-- the literal lives count. It's set to true as you die, and reset to 0
+		-- when it's time to return to gameplay.
+		get_lives=function() return memory.read_u8(0x1205, "Main RAM") & 0x1 end,
+		-- I cannot find the stun timer. I know it's in there, you have a period
+		-- of mercy invulnerability, but nothing counts up or down cleanly! But
+		-- this flag is set when you're stunned, which is hopefully good enough?
+		get_iframes=function() return (memory.read_u8(0x1206, "Main RAM") & 0x40)>>6 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x1240 end,
+		LivesWhichRAM=function() return "Main RAM" end,
+		maxlives=function() return 69 end, -- The HUD stops counting at 9; the code itself does not
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['Sonic2_SMSGG']={ -- Sonic the Hedgehog 2 (Master System/Game Gear)
+		func=sonic_swap,
+		gmode=function() return (memory.read_u8(0x1292, "Main RAM")  ~= 0x08) end, -- If a demo is running, don't count it. Otherwise, count it.
+		get_rings=function() return memory.read_u8(0x1299, "Main RAM") end,
+		get_shield=function() return 0 end, -- For some reason, this game dropped shields, and they wouldn't come back until Sonic Blast like 4 years later.
+		-- Same hack as Sonic 1 8-bit, for the same reason; let the jingle play
+		-- in full by treating the "you died" flag as the lives count, instead
+		-- of the literal lives count. It's set to true as you die, and reset to
+		-- 0 when it's time to return to gameplay.
+		get_lives=function() return (memory.read_u8(0x1293, "Main RAM") & 0x8)>>3 end,
+		-- Thankfully, THIS game has a proper i-frames timer.
+		get_iframes=function() return memory.read_u8(0x13A9, "Main RAM") end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x1298 end,
+		LivesWhichRAM=function() return "Main RAM" end,
+		maxlives=function() return 69 end, -- The HUD stops counting at 9; the code itself does not
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['IQ_PS1_NA']={ -- I.Q.: Intelligent Qube, PS1 (TODO: PAL? Japan?)
 		func=iq_swap,
