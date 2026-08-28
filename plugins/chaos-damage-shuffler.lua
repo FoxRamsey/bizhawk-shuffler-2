@@ -55,6 +55,13 @@ plugin.description =
 	-Super Mario 64 (N64), 1p - including Better Non-Stop hack
 	-New Super Mario Bros. (DS), 1p
 
+	F-ZERO BLOCK
+	-F-Zero (SNES), 1p
+	-F-Zero: Maximum Velocity (GBA), 1p
+	-F-Zero: GP Legend (GBA), 1p
+	-F-Zero: Climax (GBA), 1p
+	-F-Zero X (N64), 1p
+
 	CASTLEVANIA BLOCK
 	-Castlevania (NES), 1p
 	-Castlevania II (NES), 1p
@@ -165,7 +172,6 @@ plugin.description =
 	-Dynamite Headdy (Genesis/Mega Drive), 1p
 	-Earnest Evans, Mega CD
 	-Einhänder (PSX), 1p
-	-F-Zero (SNES), 1p
 	-Family Feud (SNES), 1-2p
 	-Garfield: A Week of Garfield (NES), 1p
 	-Gargoyle's Quest II (NES), 1p
@@ -3274,6 +3280,224 @@ local gamedata = {
 		p1livesaddr=function() return 0x0059 end,
 		maxlives=function() return 8 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['FZeroMaxVel_GBA'] = { -- F-Zero: Maximum Velocity, GBA
+		func = singleplayer_withlives_swap,
+		gmode = function()
+			-- make sure some kind of racing is happening
+			if memory.read_u8(0x0BFA, "IWRAM") ~= 1 then return false end
+			local mode = memory.read_u8(0x0BFD, "IWRAM")
+			-- not demo, ghost replay
+			if mode == 3 or mode == 7 then return false end
+			local substate = memory.read_u8(0x0BFB, "IWRAM")
+			-- countdown, active race, or crashed
+			return substate == 3 or substate == 5 or substate == 10
+		end,
+		p1gethp = function() return memory.read_s16_le(0x12DEA, "EWRAM") end,
+		p1getlc = function() return 1 end, -- only swap on health loss
+		-- don't swap if vehicle selection forces a health change
+		gettogglecheck = function() return memory.read_u8(0x12E16, "EWRAM") end,
+		-- different per vehicle, but this seems like the max value
+		maxhp = function() return 16320 end, -- 255*64
+		minhp = -1, -- swap on 0 health as well
+		swap_exceptions = function()
+			-- if health remains, exempt grazing walls without hitting them
+			return memory.read_s16_le(0x12DEA, "EWRAM") > 0
+				and memory.read_u8(0x12E1F, "EWRAM") == 1
+				and memory.read_u8(0x12E20, "EWRAM") ~= 0
+		end,
+		delay = 30,
+		grace = 120,
+		-- Infinite* Lives section
+		CanHaveInfiniteLives = true,
+		LivesWhichRAM = function() return "IWRAM" end,
+		p1livesaddr = function() return 0x2B6A end,
+		maxlives = function() return 5 end,
+		ActiveP1 = function() -- just grand prix mode
+			return memory.read_u8(0x0BFA, "IWRAM") == 1
+				and memory.read_u8(0x0BFD, "IWRAM") == 0
+		end,
+		-- OTHER NOTES:
+		-- 0x0BFA IWRAM works as a 'gamestate' value: 0 on main menu, 1 when 'gameplay adjacent', etc
+		-- 0x0BFB IWRAM is a 'subvalue' for 0x0BFA e.g. (1,3) countdown, (1,5) racing, (1,10) crash
+		--   rarely damage happens post-race, filter here
+		-- 0x0BFD IWRAM is used here only with 0x0BFA = 1 as stale values can persist
+		--   this is more of a 'gamemode' - used to filter out demo mode and ghost replays (3 and 7)
+		--   as otherwise they will produce the same gamestate values (and can take damage)
+		-- 0x12DF0 EWRAM is the timer for failing a boost start
+		-- 0x12DF4 EWRAM is the 'ui scale' health (0-64)
+		-- 0x12E16 EWRAM is the player machine id, proxy for max health changes
+		-- 0x12E1F EWRAM is the current 'terrain type' id
+		-- demo mode is actually a good tutorial with input overlays ([select] on title to force)
+	},
+	['FZeroGPLegend_GBA'] = { -- F-Zero: GP Legend, GBA
+		func = singleplayer_withlives_swap,
+		gmode = function()
+			-- make sure some kind of racing is happening
+			if memory.read_u8(0x121A, "IWRAM") ~= 1 then return false end
+			local mode = memory.read_u8(0x121D, "IWRAM")
+			-- not credits, demo
+			if mode == 6 or mode == 7 then return false end
+			local _, substate, prev_substate = update_prev('substate', memory.read_u8(0x121B, "IWRAM"))
+			-- countdown, racing, crashed, (maybe just failed)
+			return substate == 4 or substate == 6 or substate == 11 or prev_substate == 6
+		end,
+		p1gethp = function() return memory.read_s16_le(0x149BA, "EWRAM") end,
+		p1getlc = function() return 1 end, -- only swap on health loss
+		-- don't swap if vehicle selection forces a health change
+		gettogglecheck = function() return memory.read_u8(0x149E0, "EWRAM") end,
+		-- different per vehicle, but this seems like the max value
+		maxhp = function() return 16320 end, -- 255*64
+		minhp = -1, -- swap on 0 health as well
+		swap_exceptions = function()
+			-- even if 'racing', don't swap until you actually get control
+			if memory.read_s32_le(0x1759C, "EWRAM") < 0 then return true end
+			-- boosting costs health in this one, so don't swap for that
+			local boost_changed, boost, prev_boost = update_prev('boost', memory.read_u16_le(0x149BC, "EWRAM"))
+			-- health is taken once, right when the boost activates
+			if boost_changed and boost > prev_boost then return true end
+			-- if health remains, exempt grazing walls without hitting them
+			return memory.read_s16_le(0x149BA, "EWRAM") > 0
+				and memory.read_u8(0x149F3, "EWRAM") == 1
+				and memory.read_u8(0x149F4, "EWRAM") ~= 0
+		end,
+		other_swaps = function()
+			-- state pre-filtered by gmode checks
+			-- failed w/o crashing, wait for fadeout
+			return memory.read_u8(0x121B, "IWRAM") == 9, 90
+		end,
+		delay = 30,
+		grace = 120,
+		-- Infinite* Lives section
+		CanHaveInfiniteLives = true,
+		LivesWhichRAM = function() return "IWRAM" end,
+		p1livesaddr = function() return 0x122D end,
+		maxlives = function() return 5 end,
+		ActiveP1 = function() -- just grand prix mode
+			return memory.read_u8(0x121A, "IWRAM") == 1
+				and memory.read_u8(0x121D, "IWRAM") == 0
+		end,
+		-- OTHER NOTES:
+		-- state tracking is similar to Maximum Velocity here, same notes apply
+		-- 0x121A IWRAM: 1 is gameplay, other values assume this unless noted
+		-- 0x121B IWRAM: 4 countdown, 6 racing, 9 fail, 10 give up, 11 crash
+		-- 0x121D IWRAM: 0 gp, 5 time atk, 8 training, 9 story, 10 test, (6 credits, 7 demo)
+		-- status values are also similar
+		-- 0x149BC EWRAM is the timer for player boosts
+		-- 0x149C0 EWRAM is the timer for failing a boost start
+		-- 0x149C4 EWRAM is the 'ui scale' health (0-64)
+		-- 0x149E0 EWRAM is the player machine id
+		-- 0x149F3 EWRAM is the current 'terrain type' id
+		-- 0x1759C EWRAM controls the race timer (see notes for Climax)
+		-- attacking successfully doesn't seem to cost health
+	},
+	['FZeroClimax_GBA'] = { -- F-Zero: Climax, GBA
+		func = singleplayer_withlives_swap,
+		gmode = function()
+			-- make sure some kind of racing is happening
+			if memory.read_u8(0x1796, "IWRAM") ~= 0 then return false end
+			local mode = memory.read_u8(0x1799, "IWRAM")
+			-- not demo, credits, watch
+			if mode == 3 or mode == 6 or mode == 12 then return false end
+			local _, substate, prev_substate = update_prev('substate', memory.read_u8(0x1797, "IWRAM"))
+			-- countdown, racing, crashed, (maybe just failed)
+			return substate == 4 or substate == 5 or substate == 10 or prev_substate == 5
+		end,
+		p1gethp = function() return memory.read_s16_le(0x15556, "EWRAM") end,
+		p1getlc = function() return 1 end, -- only swap on health loss
+		-- don't swap if vehicle selection forces a health change
+		gettogglecheck = function() return memory.read_u8(0x1557D, "EWRAM") end,
+		-- different per vehicle, but this seems like the max value
+		maxhp = function() return 16320 end, -- 255*64
+		minhp = -1, -- swap on 0 health as well
+		swap_exceptions = function()
+			-- even if 'racing', don't swap until you actually get control
+			if memory.read_s32_le(0x18E54, "EWRAM") < 0 then return true end
+			-- boosting costs health in this one, so don't swap for that
+			local boost_changed, boost, prev_boost = update_prev('boost', memory.read_u16_le(0x15558, "EWRAM"))
+			-- health is taken once, right when the boost activates
+			if boost_changed and boost > prev_boost then return true end
+			-- if health remains, exempt grazing walls without hitting them
+			return memory.read_s16_le(0x15556, "EWRAM") > 0
+				and memory.read_u8(0x1557E, "EWRAM") == 1
+				and memory.read_u8(0x1557F, "EWRAM") ~= 0
+		end,
+		other_swaps = function()
+			-- state pre-filtered by gmode checks
+			-- failed w/o crashing, wait for fadeout
+			return memory.read_u8(0x1797, "IWRAM") == 8, 90
+		end,
+		delay = 30,
+		grace = 120,
+		-- Infinite* Lives section
+		CanHaveInfiniteLives = true,
+		LivesWhichRAM = function() return "IWRAM" end,
+		p1livesaddr = function() return 0x17AB end,
+		maxlives = function() return 5 end,
+		ActiveP1 = function() -- grand prix, survival
+			if memory.read_u8(0x1796, "IWRAM") ~= 0 then return false end
+			local mode = memory.read_u8(0x1799, "IWRAM")
+			return mode == 0 or mode == 11
+		end,
+		-- OTHER NOTES:
+		-- similar state tracking to the other GBA F-Zeros
+		-- 0x1796 IWRAM: 0 is gameplay, other values assume this unless noted
+		-- 0x1797 IWRAM: 4 countdown, 5 racing, 8 failure, 9 give up, 10 crash
+		-- 0x1799 IWRAM: 0 gp, 5 time atk, 8 edit run, 10 test, 11 survival, (3 demo, 6 credits, 12 watch)
+		-- additional logic is similar to GP Legend, similar notes
+		-- 0x15558 EWRAM is the timer for player boosts
+		-- 0x1555C EWRAM is the timer for failing a boost start
+		-- 0x15560 EWRAM is the 'ui scale' health (0-64)
+		-- 0x1557D EWRAM is the player machine id
+		-- 0x1557E EWRAM is the current 'terrain type' id
+		-- 0x18E54 EWRAM controls the race timer:
+		--   during a moving start under cpu control the game state reads (0,5) instead of (0,4)
+		--   in this specific case, this value will be -1 until the *actual* start
+		--   yes, sometimes the cpu grazes walls and takes damage in this window >_>
+		-- attacking successfully doesn't seem to cost health
+	},
+	['FZeroX_N64'] = { -- F-Zero X, N64
+		func = singleplayer_withlives_swap,
+		gmode = function()
+			-- filter to states with active gameplay
+			return memory.read_u8(0x0DCE46, "RDRAM") | memory.read_u8(0x0DCE4A, "RDRAM") == 0
+				-- need to filter out demo gameplay (cpu control flag)
+				and memory.read_u8(0x2C4925, "RDRAM") & 128 == 0
+		end,
+		p1gethp = function() return memory.readfloat(0x2C4B48, true, "RDRAM") end,
+		-- a 'virtual' life that is lost whenever your machine explodes
+		p1getlc = function() return memory.read_u8(0x2C4925, "RDRAM") & 4 ~= 0 and 0 or 1 end,
+		maxhp = function() return memory.readfloat(0x2C4B4C, true, "RDRAM") end,
+		swap_exceptions = function()
+			-- boosting drains health, so check for damage flags
+			local flags = memory.read_u8(0x2C4925, "RDRAM")
+			-- pretend attacks give iframes for the sake of gameplay
+			return flags & 6 == 0 or flags & 4 == 0 and memory.read_u8(0x2C4A86, "RDRAM") == 1
+		end,
+		delay = 30,
+		grace = 120,
+		-- Infinite* Lives section
+		CanHaveInfiniteLives = true,
+		LivesWhichRAM = function() return "RDRAM" end,
+		p1livesaddr = function() return 0x0E5ED9 end, -- s16 value, lower byte
+		-- set to 2 rows of icons for UI reasons, you *could* have more but...
+		maxlives = function() return 10 end,
+		ActiveP1 = function() return memory.read_u8(0x0DCE47, "RDRAM") == 1 end, -- gp mode
+		-- OTHER NOTES:
+		-- 0x0DCE47 and 0x0DCE4B store a 'gamestate' value (e.g. 0 title, 1 gp, 7 menu, ...)
+		-- 0x0DCE46 and 0x0DCE4A store the 'type' of this state: 128 menus, 0 gameplay
+		--   the two values are for transitions, one is set first, the other follows
+		--   demo gameplay will still use the same state values, handled separately
+		-- data for p1 machine is a 936-byte block starting at 0x2C4920, other machines follow
+		-- these addresses are mostly bitsets for various things
+		--   0x2C4924: 1 boost from pad, ???
+		--   0x2C4925: 1 ?, 2 damage, 4 exploded, 8 ?, 16 'boost power', 32 ?, 64 racing, 128 cpu
+		--   0x2C4926: ???  64 crashing
+		--   0x2C4927 is what 'surface' you're on: 0 track, 1 heal, 2 dirt, 3 boost, 4 ice
+		--   0x2C4928: 1 'indoors', 2 sliding, 8 healing, 16 boosted, 32 in air, 128 ?
+		-- 0x2C4A86 is set to 1 during attacks, otherwise 0
+		--   it's difficult to attack without taking damage, so this is used as a filter
+		-- max health values are [142,154,166,178,190] for E,D,C,B,A stats
 	},
 	['CV1_NES']={ -- Castlevania I, NES
 		func=singleplayer_withlives_swap,
