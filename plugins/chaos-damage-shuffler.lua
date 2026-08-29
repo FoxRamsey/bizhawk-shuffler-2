@@ -126,6 +126,7 @@ plugin.description =
 	-Sonic 3D Blast (Saturn), 1p
 	-Sonic Advance (GBA), 1p
 	-Sonic Advance 2 (GBA), 1p
+	-Sonic Advance 3 (GBA), 1p
 
 	ADDITIONAL SUPPORTED GAMES
 	-ActRaiser (SNES), 1p
@@ -6659,6 +6660,19 @@ local gamedata = {
 		get_iframes=function() return memory.read_u16_le(0x5a0c, "IWRAM") end,
 		CanHaveInfiniteLives=true,
 		p1livesaddr=function() return 0x5448 end,
+		LivesWhichRAM=function() return "IWRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['SonicAdvance3_GBA']={ -- Sonic Advance 3 (GBA)
+		func=sonic_swap,
+		--gmode=function() return memory.read_u8(..., "IWRAM") ~= 0 end,
+		get_rings=function() return memory.read_u16_le(0x94c, "IWRAM") end,
+		get_shield=function() return memory.read_u8(0x16fc, "IWRAM") & 0x30 end,
+		get_lives=function() return memory.read_u8(0x954, "IWRAM") end,
+		get_iframes=function() return memory.read_u16_le(0x160a, "IWRAM") end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x954 end,
 		LivesWhichRAM=function() return "IWRAM" end,
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
