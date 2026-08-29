@@ -214,6 +214,7 @@ plugin.description =
 	-Majuu Ou (Japan) / King of Demons (SNES), 1p
 	-Marble Madness (NES), 1-2p
 	-Mario Kart: Super Circuit (SNES), 1p, Grand Prix - shuffles on collisions with other karts (lost coins or have 0 coins), falls
+	-Mario Kart (DS), 1p
 	-Mario Paint (SNES), joystick hack, Gnat Attack, 1p
 	-Math Blaster - Episode 1 (SNES), 1p
 	-Mega Q*Bert (Genesis/Mega Drive), 1p
@@ -8232,7 +8233,48 @@ local gamedata = {
 		ActiveP1=function() return true end, -- p1 is always active!
 		delay=5, -- good to give a slightly higher delay to make the damage more readable to the player
 	},
-
+	['MarioKart_DS'] = { -- Mario Kart DS
+		func = function(gamemeta)
+			return function()
+				local swap = false
+				
+				local stun = gamemeta.get_value(0x17B408, 0x110) > 0
+				local fall = gamemeta.get_value(0x17ACF8, 0x3C0) > 0
+				local squish = gamemeta.get_value(0x17ACF8, 0x48) & 0x4000000 ~= 0
+				
+				local damage = stun or fall or squish
+				
+				if update_prev('damage', damage) and damage then swap = true end
+				
+				if not gamemeta.is_valid_gamestate() then swap = false end
+				
+				return swap, gamemeta.delay
+			end
+		end,
+		get_value = function(location, offset)
+			local ptr = memory.read_u32_le(location, "Main RAM")
+			if ptr >> 24 == 0x02 then -- DS Main RAM
+				local addr = (ptr & 0x3FFFFF) + offset
+				return memory.read_u32_le(addr, "Main RAM")
+			end
+			return 0
+		end,
+		is_valid_gamestate = function()
+			-- during a race and not a demo/replay
+			return memory.read_u32_le(0x17C800, "Main RAM") == 1
+				and memory.read_u32_le(0x175644, "Main RAM") == 2
+		end,
+		delay = 10,
+		-- OTHER NOTES:
+		-- 0x17ACF8: pointer to kart data
+		--   +0x048: status word, bitset of many status flags
+		--     << 26: flag for being squished
+		--   +0x3C0: timer that counts up after falls, before lakitu rescue
+		-- 0x17B408: pointer to data
+		--   +0x110: timer that counts up on hits from items/stage hazards
+		-- 0x17C800 is the race status: 0 before, 1 during, 2 after
+		-- 0x175644: 0 menus, 1 for replays, 2 in races, 3 in demos/after race
+	},
 	['CrashBandicoot1_PS1_USA']={
 		-- TODO: swap on death in bonus stages
 		func=function(gamemeta)
