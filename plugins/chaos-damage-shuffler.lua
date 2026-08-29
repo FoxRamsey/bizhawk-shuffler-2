@@ -182,6 +182,7 @@ plugin.description =
 	-Ghosts'n Goblins (NES), 1p
 	-Ghouls'n Ghosts (Genesis/Mega Drive), 1p
 	-Gimmick! (NES/Famicom), 1p
+	-Goldeneye: 007 (N64), 1p
 	-Goof Troop (SNES), 1-2p
 	-Gremlins 2: The New Batch (NES), 1p
 	-Gunstar Heroes (Genesis/Mega Drive), 1p
@@ -6320,6 +6321,34 @@ local gamedata = {
 		-- so, only refill continues, not lives
 		maxlives=function() return 2 end,
 		ActiveP1=function() return true end, -- p1 is always active!	
+	},
+	['Goldeneye007_N64'] = { -- Goldeneye: 007, N64
+		func = health_swap,
+		get_health = function() -- health + body armour
+			local ptr = memory.read_u32_be(0x079EE0, "RDRAM") -- p1 data
+			-- expect a 'standard format' pointer
+			if ptr >> 24 ~= 0x80 then return 0.0 end
+			ptr = ptr & 0x7FFFFF
+			return memory.readfloat(ptr + 0xDC, true, "RDRAM")
+				+ memory.readfloat(ptr + 0xE0, true, "RDRAM")
+		end,
+		is_valid_gamestate = function()
+			return memory.read_s32_be(0x02A8C0, "RDRAM") == 11 -- in a level
+				and memory.read_s32_be(0x02A8DC, "RDRAM") == 1 -- not a demo
+				and memory.read_s32_be(0x065378, "RDRAM") == 0 -- not loading
+		end,
+		other_swaps = function() return false end,
+		delay = 15,
+		grace = 90,
+		-- OTHER NOTES:
+		-- 0x079EE[0/4/8/C]: pointers to p1/2/3/4 data
+		--   data size is 0x2A80 (10880) bytes?
+		-- 0x07A0B0: pointer to 'active' player data?
+		--   in multiplayer, rapidly cycles between players
+		-- 0x02A8C0 is the current gamestate: 11 is the 'gameplay' value
+		-- 0x02A8DC is 1 during active gameplay, 0 during demos/ending
+		-- 0x065378 is set to 1 while pointers change
+		--   newly-allocated health values are defaulted to 1.0 + 0.0
 	},
 	['HammerinHarry_NES']={ -- Hammerin' Harry, NES
 		func=singleplayer_withlives_swap,
