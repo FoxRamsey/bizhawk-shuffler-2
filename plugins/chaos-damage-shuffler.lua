@@ -246,6 +246,7 @@ plugin.description =
 	-Rubble Saver II (GB), 1p
 	-Sanrio World Smash Ball! (SNES), 1-2p
 	-Saturday Night Slam Masters (SNES), 1p
+	-Scurge: Hive (GBA, DS), 1p
 	-SD Gundam Sangokushi Rainbow Tairiku Senki (Japan) (Arcade), 1p
 	-Shaq-Fu (Genesis/Mega Drive), 1p
 	-Shatterhand (NES), 1p
@@ -6276,6 +6277,44 @@ local gamedata = {
 		p1livesaddr=function() return 0x00b6 end,
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['Scurge_GBA'] = { -- Scurge: Hive, GBA
+		func = iframe_health_swap,
+		get_iframes = function() return memory.read_u16_le(0x50E0, "IWRAM") end,
+		get_health = function() return memory.read_u16_le(0xB704, "EWRAM") end,
+		-- needed to filter quitting which sets health to zero (so no iframe checks)
+		is_valid_gamestate = function() return memory.read_u8(0x14F8C, "EWRAM") == 1 end,
+		other_swaps = function() return false end,
+		grace = 90,
+		grace_on_hit = true,
+		-- OTHER NOTES:
+		-- 60 iframes on hit by default, (poison, infection, etc) damage gives none
+		-- health value is 25 on startup, but not valid (8500) on the title screen
+		-- max health is visible at 0x14F54 EWRAM, range is 25-999, depends on player level
+		--   this is the display value, sometimes -1, actual value probably just calculated
+		-- infection level is 0x50F5 IWRAM (1-100)
+		-- experience is 0x18FEC EWRAM, 4-byte LE (max level is 66)
+		-- 0x50E4 IWRAM is a non-null pointer while you're grabbed?
+		-- quitting is basically a soft reset that's hard to filter :<
+		--   0x14F8C EWRAM is one of the few values that is actively set before the reset
+		--   set to 0 for this, as well as room transitions and loading, 1 otherwise
+	},
+	['Scurge_DS'] = { -- Scurge: Hive, DS
+		func = iframe_health_swap,
+		get_iframes = function() return memory.read_u16_le(0x1E7D50, "Main RAM") end,
+		get_health = function() return memory.read_u16_le(0x1E9790, "Main RAM") end,
+		-- needed to filter quitting which sets health to zero (so no iframe checks)
+		is_valid_gamestate = function() return memory.read_u8(0x0EEA4C, "Main RAM") == 1 end,
+		other_swaps = function() return false end,
+		grace = 90,
+		grace_on_hit = true,
+		-- OTHER NOTES:
+		-- generally the same as the GBA version but with different memory addresses
+		-- maxhp is 0x0EEA14, same notes
+		-- infection level is 0x1E7D65
+		-- experience is 0x1E85E0
+		-- quitting might be easier as max health value gets zeroed out first here
+		--   currently the 0x0EEA4C state filter is the same as on GBA
 	},
 	['ShinobiIII_GEN']={ -- Shinobi III, Genesis
 		func=singleplayer_withlives_swap,
