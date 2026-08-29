@@ -198,6 +198,7 @@ plugin.description =
 	-Jurassic Park (SNES), 1p
 	-Kabuki Quantum Fighter (NES), 1p
 	-Kuru Kuru Kururin (GBA), 1p
+	-Kururin Paradise (GBA), 1p
 	-Last Alert (TG-16 CD), 1p
 	-Little Samson (NES), 1p
 	-Lion King, The (NES), 1p
@@ -5927,6 +5928,62 @@ local gamedata = {
 		maxhp=function() return 3 end,
 		gmode=function() return memory.read_u8(0x1CE, "IWRAM") == 85 end, -- Not 100% sure about this, but seems good
 		grace=45,
+	},
+	['KururinParadise_GBA'] = { -- Kururin Paradise, GBA
+		func = function(gamemeta)
+			-- minimal version of health_swap that does other_swaps first
+			return function()
+				local swap, delay = gamemeta.other_swaps()
+				if swap then
+					return true, delay or gamemeta.delay
+				end
+				local health_changed, health, prev_health = update_prev('health', gamemeta.get_health())
+				if not gamemeta.is_valid_gamestate() then
+					return false
+				end
+				local max_health = gamemeta.get_max_health and gamemeta.get_max_health()
+				if health_changed and health < prev_health and (not max_health or health < max_health) then
+					return true, gamemeta.delay
+				end
+				return false
+			end
+		end,
+		get_health = function() return memory.read_s8(0x5450, "IWRAM") end,
+		get_max_health = function() return memory.read_s8(0x5451, "IWRAM") end,
+		-- normal gameplay, not in a minigame, needed for health changes to be valid
+		is_valid_gamestate = function() return memory.read_u8(0x0644, "IWRAM") == 0 end,
+		other_swaps = function()
+			local minigame = memory.read_u8(0x0644, "IWRAM")
+			if minigame > 0 and memory.read_u8(0x0645, "IWRAM") == 0 then
+				local result_changed, result, prev_result = update_prev('result', memory.read_s32_le(0x0650, "IWRAM"))
+				-- swap if a story mode minigame was just failed
+				if result_changed and result == 0 and prev_result < 0 then
+					-- some minigames fail immediately, others wait until returning to the map
+					if minigame == 9 or minigame == 12 then return true, 0
+					-- *this game specifically* will also set this value if you quit manually
+					-- so also check that the minigame finished when this result came in
+					-- (can cause a 'failure' cutscene to play, seems like a bug)
+					elseif minigame == 7 then return memory.read_u8(0x067A, "IWRAM") == 2, 0
+					else return true, 115 end -- add delay for the minigames that need it
+				end
+			end
+			return false
+		end,
+		grace = 45,
+		-- OTHER NOTES:
+		-- 0x3449 IWRAM works as a game state: 0 menus/etc, 1 minigames, 2 gameplay
+		--   set on screen wipes, actual value may include 0x3448 and be an offset?
+		-- 0x53A8 IWRAM holds status flags during normal gameplay
+		--   8 is the flag for cpu stage demos in practice mode (health is 0 during this)
+		-- 0x0644 IWRAM is the minigame id, 1-16 (0 for main game)
+		--   each minigame and the main game have different uses of the same memory space
+		--   regular health is not valid during minigames for this reason
+		-- 0x0645 IWRAM is 0 for minigames in story mode, 1 if from the menu
+		-- 0x0650 IWRAM holds the minigame result: -1 during play, then either:
+		--   1 or 0 for pass/fail if played in story mode
+		--   a value representing 'score' if played from the menu (time/points/etc)
+		-- 0x067A IWRAM is 0 during active gameplay, 1 when paused, 2 on minigame end
+		--   minigame 12 doesn't set this to 2 on ending for whatever reason
 	},
 	['KirbySuperStar_SNES']={ -- Kirby Super Star, (SNES)
 		func=singleplayer_withlives_swap,
