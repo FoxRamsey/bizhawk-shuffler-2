@@ -296,6 +296,7 @@ plugin.description =
 	-Ultimate Mortal Kombat 3 (SNES), 1p (for now)
 	-Vice: Project Doom (NES), 1p
 	-Vs. Ice Climber, set IC4-4 B-1 (Arcade), 1p
+	-Wario Land 4 (GBA), 1p
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
 	-Wild Guns (SNES), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
@@ -6677,6 +6678,27 @@ local gamedata = {
 			end
 		return false
 		end,
+	},
+	['WarioLand4_GBA'] = { -- Wario Land 4, GBA
+		func = iframe_health_swap,
+		get_iframes = function() return memory.read_u8(0x189C, "IWRAM") end,
+		get_health = function() return memory.read_u8(0x1910, "IWRAM") end,
+		is_valid_gamestate = function() return memory.read_u16_le(0x0C3A, "IWRAM") == 2 end,
+		other_swaps = function()
+			local timer = memory.read_u8(0x0047, "IWRAM")
+			return update_prev('timer', timer) and timer == 10 -- loss due to timer
+		end,
+		-- OTHER NOTES: (addresses in IWRAM unless stated otherwise)
+		-- 1 iframe on hit, remainder given when unstunned
+		-- gamestate at 0x0C3A, subvalue at 0x0C3C
+		-- health countdown at end of level is a copy
+		-- real health is reset on level start (normally to 4)
+		-- state changes to 2 before health is reset (check iframes?)
+		--   otherwise, health is reset in substate 0, filter that?
+		-- timer status hits 4 on time over, ends at 10 (after animations)
+		-- actual timer at 0x0BF0, sparse BCD format (2:45 -> 00 02 04 05)
+		-- total money at 0x0BF4, per-level at 0x0BF8 (stored value * 10)
+		-- medals (shop currency) at 0x0008
 	},
 	['IndianaJonesLC_GEN']={ -- Indiana Jones & The Last Crusade, Genesis
 		func=singleplayer_withlives_swap,
