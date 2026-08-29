@@ -164,7 +164,7 @@ plugin.description =
 	-Chip and Dale Rescue Rangers 1 (NES), 1-2p
 	-Chip and Dale Rescue Rangers 2 (NES), 1-2p
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
-	-Crash Bandicoot 4 (bootleg) (NES), 1p
+	-Crash Bandicoot 4 (bootleg) (GBA), 1p
 	-Darkwing Duck (NES), 1p
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
@@ -6712,7 +6712,7 @@ local gamedata = {
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!	
 	},
-	['CrashBandicoot4_NES']={ -- Crash Bandicoot 4 (bootleg), NES
+	['CrashBandicoot4_GBA']={ -- Crash Bandicoot 4 (bootleg), GBA
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x62a2, "IWRAM") end,
 		p1getlc=function() return memory.read_u8(0x009a, "IWRAM") end,
