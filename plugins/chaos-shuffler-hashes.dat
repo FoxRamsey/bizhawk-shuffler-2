@@ -289,8 +289,9 @@ D3EFD32B68F1FE37A82DB9D9929B7CA7CC1A3AF4 FZERO_SNES                   -- F-Zero 
 A582DF3B880A0C8DDC1CDA358C96E306C1E222BB FZERO_SNES                   -- F-Zero SNES with 3 lap hack
 3F20C2C8749CCEE3A53732B41AE026BF3AAA2158 FamilyFeud_SNES              -- Family Feud SNES (US 1.0)
 8556B6545B78022FE55705A83C3E751C463F56C7 FamilyFeud_SNES              -- Family Feud SNES (US 1.1)
-5F3CE44716754BF0423AEDDE7CB1693CEA328A0D GunstarSuperHeroes_GBA       -- Gunstar Super Heroes, GBA (USA)
 1DA5834CD7CEA711195CD8581614C5022DA768B7 GargoylesQuest1_GB           -- Gargoyle's Quest - Ghosts'n Goblins, GB (USA, Europe)
+5F3CE44716754BF0423AEDDE7CB1693CEA328A0D GunstarSuperHeroes_GBA       -- Gunstar Super Heroes, GBA (USA)
+704721C0B1209CB2BAE8AC1C22F2D3BC3FD53EDB Gyruss_NES                   -- Gyruss (NES)
 09D97003BF9D676F24A75CF3E1DCED28CDA3BE59 IceClimber_NES               -- Ice Climber (North America, Europe)
 1690E419BC2435739EFBE59A64D83538FF7E16B4 IceClimber_NES               -- Ice Climber (Japan)
 86C392A1D9A731FA48E148AFBE60AF75F918CB5A Jackal_NES                   -- Jackal NES
@@ -324,6 +325,7 @@ B1796660E4A4CEFC72181D4BF4F97999BC048A77 NinjaGaiden2_NES             -- Ninja G
 3F2E6DAC76BA14EFC177B5653AB043E53A04D365 NinjaGaiden3_NES             -- Ninja Gaiden III NES (US)
 6958358C4A554BDC6D4F8571F83829989D0BB018 NinjaGaiden3_NES             -- Ninja Gaiden III NES (Restored & Restored+ hack)
 2FF9443C                                 NBA_JAM_PS1                  -- NBA Jam Tournament Edition, PS1 (North America)
+CC4580A855AE032E87C3419DDA773FA600397873 PanoramaCotton_GEN           -- Panorama Cotton (English v1.0.1)
 BA9742A4                                 PaRappa1_PS1                 -- PaRappa the Rapper, PS1 (US)
 24AD606614D7D2A510F5FD58FCDC28FE         PEBBLE_BEACH_GOLF_LINKS_SAT  -- Pebble Beach Golf Links, Saturn (North America)
 6531FF3A062C2A83FA9683BF8A859A3500E8D9AF Contra_NES                   -- Probotector (NES) (Europe)
