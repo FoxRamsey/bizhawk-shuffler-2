@@ -185,6 +185,7 @@ plugin.description =
 	-Einhänder (PSX), 1p
 	-ESP Ra.De. (Arcade), 1p
 	-Family Feud (SNES), 1-2p
+	-Frogger 2 - Swampy's Revenge (PS1), 1p
 	-Garfield: A Week of Garfield (NES), 1p
 	-Gargoyle's Quest - Ghosts'n Goblins (GB), 1p
 	-Gargoyle's Quest II (NES), 1p
@@ -4386,6 +4387,17 @@ local gamedata = {
 		getstrike=function() return memory.read_u8(0x020E, "WRAM") end,
 		getwhichplayer=function() return memory.read_u8(0x08DF, "WRAM") end,
 		CanHaveInfiniteLives=false
+	},
+	['Frogger2_PS1']={ -- Frogger 2 - Swampy's Revenge (USA)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x0908EC, "MainRAM") end,
+		maxhp=function() return 1 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0908EC end,
+		LivesWhichRAM=function() return "MainRAM" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['Monopoly_NES']={ -- Monopoly (NES)
 		func=Monopoly_NES_swap,
