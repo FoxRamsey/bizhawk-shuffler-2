@@ -76,6 +76,8 @@ plugin.description =
 	-Castlevania (N64), 1p (in-progress, grabbing shuffles excessively)
 	-Castlevania: Legacy of Darkness (N64), 1p (in-progress, grabbing and poison shuffle excessively)
 	-Castlevania: Symphony of the Night (PSX), 1p
+	-Castlevania: Circle of the Moon (GBA), 1p
+	-Castlevania: Harmony of Dissonance (GBA), 1p
 	-Castlevania: Aria of Sorrow (GBA), 1p
 	-Castlevania: Dawn of Sorrow (DS), 1p
 	-Castlevania: Portrait of Ruin (DS), 1p
@@ -3742,6 +3744,46 @@ local gamedata = {
 		p1livesaddr=function() return 0x008D end,
 		maxlives=function() return 105 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['CV_CotM'] = { -- Circle of the Moon, GBA
+		func = iframe_health_swap, -- need to filter poison and environmental damage
+		get_iframes = function() -- as iframes are not given on hit, adds a value that is
+			return memory.read_u32_le(0x00C0, "EWRAM") + memory.read_u8(0x00F8, "EWRAM")
+		end,
+		get_health = function() return memory.read_u16_le(0x2562E, "EWRAM") end,
+		iframe_minimum = function() return 20 end, -- see iframe notes
+		is_valid_gamestate = function() -- in game and not a demo
+			return memory.read_u8(0x4534, "EWRAM") == 6 and memory.read_u8(0x25364, "EWRAM") == 0
+		end,
+		other_swaps = function() return false end,
+		grace = 75,
+		-- OTHER NOTES:
+		-- 0x4534 EWRAM gamestate (6 in game)
+		-- 0x00F8 EWRAM set to 23 for hits w/o knockback, 24 for hits with, cleared when iframes start
+		--   also set to 4 for an instant when activating DSS abilities, 46 on death
+		-- 60 iframes default on recovery (set by 0x00C4)
+		-- 0x00D4 EWRAM is status effect timer (poison, curse)
+		--   effect id is 0x00D0, poison damage is done when 0x00D8 cycles
+		-- 0x00E0 EWRAM is set when in cursed water, rapidly cycles 0x00E4 for damage
+		-- other non-health stats: 0x25636 mp, 0x2563C hearts, 0x25640 subweapon, 0x25668 exp
+		-- 0x25364 EWRAM holds id for demos (1-4), 0 for actual gameplay
+	},
+	['CV_HoD'] = { -- Harmony of Dissonance, GBA
+		func = iframe_health_swap,
+		-- not actual iframes, but set on health loss from 'regular' damage
+		get_iframes = function() return memory.read_u16_le(0x18540, "EWRAM") end,
+		get_health = function() return memory.read_u16_le(0x1854E, "EWRAM") end,
+		is_valid_gamestate = function() return memory.read_u8(0x000C, "EWRAM") == 3 end,
+		other_swaps = function() return false end,
+		grace = 60,
+		-- OTHER NOTES: (addresses in EWRAM unless stated otherwise)
+		-- 'iframes' at 0x0458 (0x045A for visuals), maintains invuln but doesn't cause it
+		--   actual effect is controlled by 0x048C: (13 no damage, 14 no pickups)
+		-- other stats: 0x18550 mp, 0x18794 hearts, 0x18798 exp, 0x1879C gold, 0x1877E subweapon
+		--   equipped spellbook is 0x1877F, with bit 0x80 set if active
+		-- status effects are at 0x1852E as bits (poison, curse, stone, [underwater])
+		-- 0x18540: damage amount not set by poison or drowning (lasts 1 frame, triggers hit invuln)
+		-- underwater: sets 0x043D to 1, increments 0x18536, damage every 32 frames
 	},
 	['CV_AoS']={ -- Aria of Sorrow, GBA
 		-- touching enemy during invincibility from final guard soul, julius backdash etc gives iframes despite not doing damage
