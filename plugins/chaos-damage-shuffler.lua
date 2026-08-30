@@ -171,6 +171,7 @@ plugin.description =
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
 	-Do-Re-Mi Fantasy - Milon no Dokidoki Daibouken (SNES), 1p
+	-Double Dare (NES), 1p
 	-Double Dragon 1 (NES), 1-2p, Mode A or B, shuffles on knockdown and death
 	-Double Dragon 2 (NES), 1-2p, shuffles on knockdown and death
 	-DuckTales (NES), 1p
@@ -613,6 +614,21 @@ local function FamilyFeud_SNES_swap(gamemeta)
 		return
 			(strike_changed and strike == 1) and  -- we just got a strike or 0
 			(player < 2), 30 -- It's player 1 or 2, not the CPU; give 30 frames of buzzer before and after (roughly) swaps
+		end
+	end
+
+local function DoubleDare_NES_swap(gamemeta)
+	return function()
+		local score_changed, score, prev_score = update_prev('score', gamemeta.getscore())
+		local player_changed, player, prev_player = update_prev('player', gamemeta.getplayer())
+		local text_changed, text, prev_text = update_prev('text', gamemeta.gettext())
+		local round_changed, round, prev_round = update_prev('round', gamemeta.getround())
+		local parse_changed, parse, prev_parse = update_prev('parse', gamemeta.getparse())
+		return
+			--(score_changed and score > prev_score) or -- covers all instances of opponent getting money, including losing challenges and base value questions
+			(score_changed and score > prev_score and round == 0 and parse ~= 774910244) or -- Use these instead to not shuffle on base value questions in Round 1
+			(score_changed and score > prev_score and round == 1 and parse ~= 774910500) or -- Round 2
+			(text == 12 and player == 0), 50 -- covers getting a question wrong without a dare
 		end
 	end
 
@@ -4305,6 +4321,15 @@ local gamedata = {
 		func=FamilyFeud_SNES_swap,
 		getstrike=function() return memory.read_u8(0x020E, "WRAM") end,
 		getwhichplayer=function() return memory.read_u8(0x08DF, "WRAM") end,
+		CanHaveInfiniteLives=false
+	},
+	['DoubleDare_NES']={ -- Double Dare (NES)
+		func=DoubleDare_NES_swap,
+		getscore=function() return memory.read_u8(0x0607, "RAM") end,
+		getplayer=function() return memory.read_u8(0x0570, "RAM") end,
+		gettext=function() return memory.read_u8(0x05F0, "RAM") end,
+		getround=function() return memory.read_u8(0x05F8, "RAM") end,
+		getparse=function() return memory.read_u32_le(0x05C8, "RAM") end,
 		CanHaveInfiniteLives=false
 	},
 	['Monopoly_NES']={ -- Monopoly (NES)
