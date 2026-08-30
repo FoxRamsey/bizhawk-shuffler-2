@@ -202,6 +202,7 @@ plugin.description =
 	-Jaws (NES), 1p
 	-Jim Power - The Lost Dimension in 3D (SNES), 1p
 	-Journey to Silius (NES), 1p
+	-Joy Mech Fight (NES), 1p
 	-Jungle Book, The (NES, SNES, Genesis/Mega Drive), 1p
 	-Jurassic Park (SNES), 1p
 	-Kabuki Quantum Fighter (NES), 1p
@@ -279,6 +280,7 @@ plugin.description =
 	-Sonic Mario Bros., Squirrel King mechanics (bootleg) (Genesis/Mega Drive), 1p
 	-Super Monkey Ball Jr. (GBA), 1p
 	-Super Monkey Ball: Touch & Roll (DS), 1p
+	-Super Smash Bros. (N64), 1p - also supports Smash Remix mod
 	-Super Smash TV (SNES), 1p
 	-TaleSpin (NES), 1p
 	-Tarzan: Lord of the Jungle (unreleased) (SNES), 1p
@@ -7567,6 +7569,14 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['JoyMechFight_NES']={ -- Joy Mech Fight, NES
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0529, "RAM") end,
+		p1getlc=function() return memory.read_u8(0x0540, "RAM") end,
+		maxhp=function() return 88 end,
+		gmode=function() return memory.read_u8(0x01FE, "RAM")==122 end,
+		grace=13,
+	},
 	['SunsetRiders_SNES']={ -- Sunset Riders, SNES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end,
@@ -7733,6 +7743,21 @@ local gamedata = {
 		maxlives=function() return 5 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['SmashBros_N64']={ -- Super Smash Bros., N64
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 999 - memory.read_u32_be(0x131598, "RDRAM") end,
+		p1getlc=function() return memory.read_s8(0x0A4B43, "RDRAM") end,
+		maxhp=function() return 999 end,
+		minhp=-1,
+		gmode=function() return memory.read_u8(0x0465BD, "RDRAM")==26 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0A4B43 end,
+		LivesWhichRAM=function() return "RDRAM" end,
+		maxlives=function() return 68 end,
+		ActiveP1=function() return memory.read_u8(0x0465BD, "RDRAM")==26 end, -- restricted to gameplay to prevent issues during boot
+		grace=40,
+		grace_on_hit=true,
+	},	
 	['SuperSmashTV_SNES']={ -- Super Smash T.V., SNES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end,
