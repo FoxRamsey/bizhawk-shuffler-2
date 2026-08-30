@@ -166,6 +166,7 @@ plugin.description =
 	-Chip and Dale Rescue Rangers 1 (NES), 1-2p
 	-Chip and Dale Rescue Rangers 2 (NES), 1-2p
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
+	-Cyber-Lip (Arcade), 1p
 	-Crash Bandicoot 4 (bootleg) (GBA), 1p
 	-Darkwing Duck (NES), 1p
 	-Demon's Crest (SNES), 1p
@@ -189,6 +190,7 @@ plugin.description =
 	-Goof Troop (SNES), 1-2p
 	-Gremlins 2: The New Batch (NES), 1p
 	-Gunstar Heroes (Genesis/Mega Drive), 1p
+	-Gunstar Super Heroes (GBA), 1p
 	-Hammerin' Harry (NES), 1p
 	-Hercules II (bootleg) (Genesis/Mega Drive), 1p
 	-High Seas Havoc (Genesis/Mega Drive), 1p
@@ -205,6 +207,7 @@ plugin.description =
 	-Joy Mech Fight (NES), 1p
 	-Jungle Book, The (NES, SNES, Genesis/Mega Drive), 1p
 	-Jurassic Park (SNES), 1p
+	-Jurassic Park Part 2 - The Chaos Continues (SNES), 1p
 	-Kabuki Quantum Fighter (NES), 1p
 	-Kuru Kuru Kururin (GBA), 1p
 	-Kururin Paradise (GBA), 1p
@@ -313,6 +316,7 @@ plugin.description =
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
 	-WarioWare: Twisted! (GBA), 1p
 	-Wild Guns (SNES), 1p
+	-Wild West C.O.W.-Boys of Moo Mesa (Arcade), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
 	-Wit's (NES), 1p
 
@@ -4791,6 +4795,17 @@ local gamedata = {
 		ActiveP1=function() return memory.read_u8(0x0020, "RAM") ~= 252 end, -- 0 on start, 252 if player out of lives
 		ActiveP2=function() return memory.read_u8(0x0021, "RAM") ~= 252 end, -- 0 on start, 252 if player out of lives
 	},
+	['CyberLip_ARC']={ -- Cyber-Lip (NGM-010)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return from_bcd(memory.read_u8(0x00209D, "m68000 : ram : 0x100000-0x10FFFF")) end,
+		maxhp=function() return 1 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00209D end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 0x70 end, -- lives stored in hex
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['DarkwingDuck_NES']={ -- Darkwing Duck (NES)
 		func=singleplayer_withlives_swap,
 		maxhp=function() return 4 end,
@@ -6081,6 +6096,13 @@ local gamedata = {
 		other_swaps=function() return false end,
 		get_health=function() return memory.read_u16_be(0xA424, "68K RAM") end, -- note; health will not go above 999
 		grace=60,
+	},
+	['GunstarSuperHeroes_GBA']={ -- Gunstar Super Heroes, GBA (USA)
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x0291B0, "EWRAM")==6 end,
+		get_health=function() return memory.read_u8(0x029220, "EWRAM") end,
+		other_swaps=function() return false end,
+		grace=25,
 	},
 	['ContraHardCorps_GEN']={ -- Contra - Hard Corps, Genesis
 		func=twoplayers_withlives_swap,
@@ -7768,6 +7790,19 @@ local gamedata = {
 		maxlives=function() return 5 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['MooMesa_ARC']={ -- Wild West C.O.W.-Boys of Moo Mesa (ver EAB)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00131F, "m68000 : ram : 0x180000-0x18FFFF") end,
+		p1getlc=function() return memory.read_u8(0x000945, "m68000 : ram : 0x180000-0x18FFFF") end,
+		maxhp=function() return 3 end,
+		CanHaveInfiniteLives=true,
+		gmode=function() return memory.read_u8(0x003916, "m68000 : ram : 0x180000-0x18FFFF") == 129 end,
+		p1livesaddr=function() return 0x000B01 end, -- coins provided instead of lives so that players can change characters
+		LivesWhichRAM=function() return "m68000 : ram : 0x180000-0x18FFFF" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		other_swaps=function() end,
+	},
 	['SmashBros_N64']={ -- Super Smash Bros., N64
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 999 - memory.read_u32_be(0x131598, "RDRAM") end,
@@ -8654,6 +8689,12 @@ local gamedata = {
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 4 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['JurassicPark2_SNES']={ -- Jurassic Park Part 2 - The Chaos Continues (USA) (En,Fr,De,It)
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x000060, "WRAM")==255 end,
+		get_health=function() return memory.read_s8(0x00B032, "WRAM") end,
+		other_swaps=function() return false end,
 	},
 	['JimPower_SNES']={ -- Jim Power - The Lost Dimension in 3D, SNES (USA)
 		func=singleplayer_withlives_swap,
