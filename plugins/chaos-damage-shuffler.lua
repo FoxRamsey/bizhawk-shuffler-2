@@ -242,6 +242,7 @@ plugin.description =
 	-Ms. Pac-Man (Tengen) (NES), 1p
 	-Monopoly (NES), 1-8p (on one controller), shuffles on any human player going bankrupt, going or failing to roll out of jail, and losing money (not when buying, trading, or setting up game)
 	-Monster Rancher Explorer (GBC), 1p
+	-Monster Rancher Hop-A-Bout (PSX), 1p
 	-Mortal Kombat (Genesis/Mega Drive), 1p (for now)
 	-Mortal Kombat II (SNES), 1p (for now)
 	-Mystic Warriors (Arcade), 1p
@@ -4491,6 +4492,13 @@ local gamedata = {
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 0x69 end, -- stored as hex
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['MonsterRancherHopABout_PS1']={ -- Monster Rancher Hop-A-Bout (USA)
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x1FD6A0, "MainRAM")==160 end,
+		get_health=function() return memory.read_u8(0x141451, "MainRAM") end,
+		other_swaps=function() return false end,
+		suspend_updates=function() return memory.read_u8(0x07D2BE, "MainRAM")==160 end, -- suppresses shuffle from life reset to default at the beginning of the stage
 	},
 	['BUBSY1_SNES']={ -- Bubsy in Claws Encounters of the Furred Kind, SNES
 		func=singleplayer_withlives_swap,
