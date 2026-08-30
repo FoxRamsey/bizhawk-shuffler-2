@@ -4716,6 +4716,7 @@ local gamedata = {
 		LivesWhichRAM=function() return "Work Ram High" end,
 		maxlives=function() return 0x69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['SolomonsKey_ARC']={ -- Solomon no Kagi (Japan)
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end,
