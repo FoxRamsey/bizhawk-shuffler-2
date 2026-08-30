@@ -261,8 +261,7 @@ plugin.description =
 	-Super Mario Kart (SNES), 1-2p - shuffles on collisions with other karts (lost coins or have 0 coins), falls
 	-Sonic Mario Bros., Squirrel King mechanics (bootleg) (Genesis/Mega Drive), 1p
 	-Super Monkey Ball Jr. (GBA), 1p
-	-Super Smash Bros. (N64), 1p
-	-Smash Remix (N64), 1p
+	-Super Smash Bros. (N64), 1p - also supports Smash Remix mod
 	-Super Smash TV (SNES), 1p
 	-TaleSpin (NES), 1p
 	-Tarzan: Lord of the Jungle (unreleased) (SNES), 1p
@@ -6983,7 +6982,6 @@ local gamedata = {
 		p1getlc=function() return memory.read_u8(0x0540, "RAM") end,
 		maxhp=function() return 88 end,
 		gmode=function() return memory.read_u8(0x01FE, "RAM")==122 end,
-		ActiveP1=function() return true end, -- p1 is always active!
 		grace=13,
 	},
 	['SunsetRiders_SNES']={ -- Sunset Riders, SNES
