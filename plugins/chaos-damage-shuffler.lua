@@ -6687,6 +6687,7 @@ local gamedata = {
 		LivesWhichRAM=function() return "68K RAM" end,
 		maxlives=function() return 10 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['Scurge_GBA'] = { -- Scurge: Hive, GBA
 		func = iframe_health_swap,
 		get_iframes = function() return memory.read_u16_le(0x50E0, "IWRAM") end,
