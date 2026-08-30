@@ -234,6 +234,7 @@ plugin.description =
 	-Mortal Kombat II (SNES), 1p (for now)
 	-Mystic Warriors (Arcade), 1p
 	-NBA JAM Tournament Edition (PSX), 1p - shuffles on points scored by opponent and on end of quarter
+	-Neo Turf Masters / Big Tournament Golf (Arcade), 1p
 	-Ninja Gaiden (NES), 1p
 	-Ninja Gaiden II - The Dark Sword of Chaos (NES), 1p
 	-Ninja Gaiden III - The Ancient Ship of Doom (NES), 1p
@@ -275,6 +276,7 @@ plugin.description =
 	-Super Aladdin (bootleg) (NES), 1p
 	-Super Contra 7 (bootleg) (NES), 1-2p
 	-Super Dodge Ball (NES), 1-2p, all modes
+	-Super Dodge Ball / Kunio no Nekketsu Toukyuu Densetsu (Arcade), 1p
 	-Super Ghouls'n Ghosts (SNES), 1p
 	-Super Mario Kart (SNES), 1-2p - shuffles on collisions with other karts (lost coins or have 0 coins), falls
 	-Sonic Mario Bros., Squirrel King mechanics (bootleg) (Genesis/Mega Drive), 1p
@@ -2537,6 +2539,17 @@ local gamedata = {
 		-- several potential values, but if it's ever odd, we're not in-game.
 		maxhp=function() return 60 end,
 	},
+	['SuperDodgeBall_ARC']={ -- Super Dodge Ball / Kunio no Nekketsu Toukyuu Densetsu (Arcade)
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x001075, "m68000 : ram : 0x100000-0x10FFFF")==7 end,
+		get_health=function()
+			-- the three team members have their own life bars, so we can treat them like one giant life bar
+			return memory.read_s16_be(0x005CBC, "m68000 : ram : 0x100000-0x10FFFF") -- p1 team member 1 health
+			+ memory.read_s16_be(0x005CBE, "m68000 : ram : 0x100000-0x10FFFF") -- p1 team member 2 health
+			+ memory.read_s16_be(0x005CC0, "m68000 : ram : 0x100000-0x10FFFF") end, -- p1 team member 3 health
+		other_swaps=function() return false end,
+		grace=10,
+	},
 	['CaptainNovolin']={ -- Captain Novolin SNES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x0BDA, "WRAM") end,
@@ -4446,6 +4459,18 @@ local gamedata = {
 		getQuarter = function() return memory.read_u16_le(0x07CF88, "MainRAM") end,
 		delay = 120,
 		gmode=function() return memory.read_u16_le(0x086560, "MainRAM") == 25932 end, -- This absolutely isn't the actual game mode variable, but it's consistently this value during a match, so, close enough for government work
+	},
+	['NeoTurfMasters_ARC']={ -- Neo Turf Masters / Big Tournament Golf
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x000163, "m68000 : ram : 0x100000-0x10FFFF")==178 -- gmode
+			and memory.read_u8(0x002EA6, "m68000 : ram : 0x100000-0x10FFFF")~=255 end, -- preventing additional swapping for stroke penalties (value is 255 for penalty stroke)
+		get_health=function() return -memory.read_u8(0x007006, "m68000 : ram : 0x100000-0x10FFFF") end,
+		other_swaps=function() return false end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00D572 end, -- holes remaining
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['EINHANDER_PS1']={ -- Einhänder, PS1
 		func=singleplayer_withlives_swap,
