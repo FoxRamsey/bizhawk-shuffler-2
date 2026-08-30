@@ -165,6 +165,7 @@ plugin.description =
 	-Celeste 2 [Pico-8] (homebrew port) (GBA), 1p
 	-Chip and Dale Rescue Rangers 1 (NES), 1-2p
 	-Chip and Dale Rescue Rangers 2 (NES), 1-2p
+	-Classic Concentration (NES), 1p
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
 	-Crash Bandicoot 4 (bootleg) (GBA), 1p
 	-Darkwing Duck (NES), 1p
@@ -613,6 +614,20 @@ local function FamilyFeud_SNES_swap(gamemeta)
 		return
 			(strike_changed and strike == 1) and  -- we just got a strike or 0
 			(player < 2), 30 -- It's player 1 or 2, not the CPU; give 30 frames of buzzer before and after (roughly) swaps
+		end
+	end
+
+local function ClassicConcentration_NES_swap(gamemeta)
+	return function()
+		local prize_changed, prize, prev_prize = update_prev('prize', gamemeta.getprize())
+		local solve_changed, solve, prev_solve = update_prev('solve', gamemeta.getsolve())
+		local scene_changed, scene, prev_scene = update_prev('scene', gamemeta.getscene())
+		local active_changed, active, prev_active = update_prev('active', gamemeta.getactive())
+
+		return
+			--(prize_changed and prize > prev_prize) or -- Activate to swaps on any opponent matches.
+			(scene ~= 127 and active_changed and active == 1) or -- Swaps when P1 misses a match in main rounds. Does not trigger in bonus rounds.
+			(solve_changed and solve > prev_solve), 30  -- Swaps on P2 solving
 		end
 	end
 
@@ -4305,6 +4320,14 @@ local gamedata = {
 		func=FamilyFeud_SNES_swap,
 		getstrike=function() return memory.read_u8(0x020E, "WRAM") end,
 		getwhichplayer=function() return memory.read_u8(0x08DF, "WRAM") end,
+		CanHaveInfiniteLives=false
+	},
+	['ClassicConcentration_NES']={ -- Classic Concentration (NES)
+		func=ClassicConcentration_NES_swap,
+		getscene=function() return memory.read_u8(0x0012, "RAM") end,
+		getactive=function() return memory.read_u8(0x001F, "RAM") end,
+		getprize=function() return memory.read_u8(0x005B, "RAM") end,
+		getsolve=function() return memory.read_u8(0x00C0, "RAM") end,
 		CanHaveInfiniteLives=false
 	},
 	['Monopoly_NES']={ -- Monopoly (NES)
