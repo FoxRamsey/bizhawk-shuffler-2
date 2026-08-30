@@ -8021,12 +8021,8 @@ local gamedata = {
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
 		p1getlc=function() return memory.read_u8(0x0002BB, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getcc=function() return memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF") end,
 		maxhp=function() return 1 end,
-		other_swaps=function()
-			-- lives value remains at 0 when player loses their last life, need to catch player death 
-			local credits_changed, credits_curr, credits_prev = update_prev('credits', memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF"))
-			local lives_curr = memory.read_u8(0x0002BB, "m68000 : ram : 0x100000-0x10FFFF")
-			return credits_changed and lives_curr == 0 and credits_curr < credits_prev end,
 		gmode=function() return memory.read_u8(0x0001FC, "m68000 : ram : 0x100000-0x10FFFF")==9 end,
 		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters. coins cannot be pushed
 		p1livesaddr=function() return 0x0002BB end,
@@ -8038,22 +8034,8 @@ local gamedata = {
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
 		p1getlc=function() return memory.read_u8(0x000A89, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getcc=function() return from_bcd(memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF")) end,
 		maxhp=function() return 1 end,
-		other_swaps=function()
-			-- lives value remains at 0 when player loses their last life, need to catch player death 
-			
-			-- Need to convert binary-coded decimal hexadecimal value to just plain decimal
-			local creditsHex = memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF")
-			-- Get upper nybble, bit-shift right 4 bits
-			local tens = (creditsHex & 0xF0)>>4
-			-- Just the lower nybble
-			local ones = creditsHex & 0x0F
-			
-			-- used the merged value
-			local credits_changed, credits_curr, credits_prev = update_prev('credits', (tens * 10) + ones)
-			
-			local lives_curr = memory.read_u8(0x000A89, "m68000 : ram : 0x100000-0x10FFFF")
-			return credits_changed and lives_curr == 0 and credits_curr < credits_prev end,
 		gmode=function() return memory.read_u8(0x006402, "m68000 : ram : 0x100000-0x10FFFF")==1 end,
 		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters. coins cannot be pushed
 		p1livesaddr=function() return 0x000A89 end,
@@ -8065,22 +8047,8 @@ local gamedata = {
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
 		p1getlc=function() return memory.read_u8(0x000A41, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getcc=function() return from_bcd(memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF")) end,
 		maxhp=function() return 1 end,
-		other_swaps=function()
-			-- lives value remains at 0 when player loses their last life, need to catch player death 
-			
-			-- Need to convert binary-coded decimal hexadecimal value to just plain decimal
-			local creditsHex = memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF")
-			-- Get upper nybble, bit-shift right 4 bits
-			local tens = (creditsHex & 0xF0)>>4
-			-- Just the lower nybble
-			local ones = creditsHex & 0x0F
-			
-			-- used the merged value
-			local credits_changed, credits_curr, credits_prev = update_prev('credits', (tens * 10) + ones)
-			
-			local lives_curr = memory.read_u8(0x000A41, "m68000 : ram : 0x100000-0x10FFFF")
-			return credits_changed and lives_curr == 0 and credits_curr < credits_prev end,
 		gmode=function() return memory.read_u8(0x0008E6, "m68000 : ram : 0x100000-0x10FFFF")==201 end,
 		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters. coins cannot be pushed
 		p1livesaddr=function() return 0x000A41 end,
