@@ -108,6 +108,7 @@ plugin.description =
 	-Super C/Super Contra/Probotector II (NES), 1-2p
 	-Contra III: The Alien Wars/Super Probotector: Alien Rebels/Contra Spirits (SNES), 1-2p
 	-Contra: Hard Corps (Genesis/Mega Drive), 1-2p
+	-Contra 4 (DS), 1p
 
 	KONG BLOCK
 	-Donkey Kong (GB), 1p
@@ -4892,6 +4893,72 @@ local gamedata = {
 		ActiveP2=function() return memory.read_u8(0x1FCA, "WRAM") > 0 end,
 		maxhp=function() return 0 end,
 	},
+	['ContraHardCorps_GEN']={ -- Contra - Hard Corps, Genesis
+		func=twoplayers_withlives_swap,
+		p1gethp=function() return memory.read_u8(0xFA0D, "68K RAM") end,
+		p1getlc=function() return memory.read_u8(0xFA0C, "68K RAM") end,
+		p2gethp=function() return memory.read_u8(0xFA2D, "68K RAM") end,
+		p2getlc=function() return memory.read_u8(0xFA2C, "68K RAM") end,
+		maxhp=function() return 3 end,
+		CanHaveInfiniteLives=true,
+		LivesWhichRAM=function() return "68K RAM" end,
+		p1livesaddr=function() return 0xFA0C end,
+		p2livesaddr=function() return 0xFA2C end,
+		maxlives=function() return 70 end,
+		ActiveP1=function() return memory.read_u8(0xFA0C, "68K RAM") > 0 end,
+		ActiveP2=function() return memory.read_u8(0xFA2C, "68K RAM") > 0 end,
+		-- need to account for tag in
+		swap_exceptions=function()
+			local p1_lives_changed, p1_lives_curr, p1_lives_prev = update_prev("p1_lives", memory.read_u8(0xFA0C, "68K RAM"))
+			local p2_lives_changed, p2_lives_curr, p2_lives_prev = update_prev("p2_lives", memory.read_u8(0xFA2C, "68K RAM"))
+			if (p1_lives_changed and (p1_lives_curr == p1_lives_prev - 1) and p2_lives_prev == 0 and p2_lives_curr == 1) or
+			   (p2_lives_changed and (p2_lives_curr == p2_lives_prev - 1) and p1_lives_prev == 0 and p1_lives_curr == 1)
+			then
+				return true
+			end
+			return false
+		end,
+	},
+	['Contra4_DS']={ -- Contra 4 (DS)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 0 end,
+		p1getlc=function()
+			local contra4Level = memory.read_u8(0x1CD7FF, "Main RAM")
+			if contra4Level == 0x35 or contra4Level == 0x38 or contra4Level == 0x3A then
+				return memory.read_s8(0x1CD800, "Main RAM") -- HUD value is actual value
+			else
+				local gamestatePointer2 = memory.read_u32_le(0x1CD7E4, "Main RAM") & 0x3FFFFF
+				return memory.read_s8(gamestatePointer2 + 0x5B, "Main RAM") -- Note that the pointer gets set before the lives do in some stage transitions...
+			end
+		end,
+		gmode=function()
+			local gamestatePointer = memory.read_u32_le(0x1C6AE4, "Main RAM") & 0x3FFFFF
+			local gamestatePointer2 = memory.read_u32_le(0x1CD7E4, "Main RAM") & 0x3FFFFF
+			return gamestatePointer ~= 0 and gamestatePointer2 ~=0 -- I'd compare them against one another, too, but frustratingly they don't match on Level 5
+		end,
+		CanHaveInfiniteLives=true,--(memory.read_u32_le(0x1C6AE4, "Main RAM") ~= 0x00000000),
+		LivesWhichRAM=function() return "Main RAM" end,
+		p1livesaddr=function()
+			local contra4Level = memory.read_u8(0x1CD7FF, "Main RAM")
+			if contra4Level == 0x35 or contra4Level == 0x38 or contra4Level == 0x3A then
+				return 0x1CD800 -- the HUD lives display address IS the actual lives address in the 3D corridor stages
+			else
+				local gamestatePointer2 = memory.read_u32_le(0x1CD7E4, "Main RAM") & 0x3FFFFF
+				if gamestatePointer2 == 0 then
+					return nil -- No updating this frame
+				end
+				local lives = memory.read_s8(gamestatePointer2 + 0x5B, "Main RAM")
+				local hudLives = memory.read_s8(0x1CD800, "Main RAM")
+				if lives == hudLives then -- Be ABSOLUTELY SURE this value is correct before changing it
+					return gamestatePointer2 + 0x5B -- This is safe to update
+				end
+			end
+			return nil -- No updating this frame
+		end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end,
+		maxhp=function() return 0 end,
+	},
 	['BladesofSteel_NES']={ -- Blades of Steel NES
 		func=twoplayers_withlives_swap,
 		gmode=function() return memory.read_u8(0x0019, "RAM") ~= 1 end, -- 1 == in demo
@@ -6051,32 +6118,6 @@ local gamedata = {
 		other_swaps=function() return false end,
 		get_health=function() return memory.read_u16_be(0xA424, "68K RAM") end, -- note; health will not go above 999
 		grace=60,
-	},
-	['ContraHardCorps_GEN']={ -- Contra - Hard Corps, Genesis
-		func=twoplayers_withlives_swap,
-		p1gethp=function() return memory.read_u8(0xFA0D, "68K RAM") end,
-		p1getlc=function() return memory.read_u8(0xFA0C, "68K RAM") end,
-		p2gethp=function() return memory.read_u8(0xFA2D, "68K RAM") end,
-		p2getlc=function() return memory.read_u8(0xFA2C, "68K RAM") end,
-		maxhp=function() return 3 end,
-		CanHaveInfiniteLives=true,
-		LivesWhichRAM=function() return "68K RAM" end,
-		p1livesaddr=function() return 0xFA0C end,
-		p2livesaddr=function() return 0xFA2C end,
-		maxlives=function() return 70 end,
-		ActiveP1=function() return memory.read_u8(0xFA0C, "68K RAM") > 0 end,
-		ActiveP2=function() return memory.read_u8(0xFA2C, "68K RAM") > 0 end,
-		-- need to account for tag in
-		swap_exceptions=function()
-			local p1_lives_changed, p1_lives_curr, p1_lives_prev = update_prev("p1_lives", memory.read_u8(0xFA0C, "68K RAM"))
-			local p2_lives_changed, p2_lives_curr, p2_lives_prev = update_prev("p2_lives", memory.read_u8(0xFA2C, "68K RAM"))
-			if (p1_lives_changed and (p1_lives_curr == p1_lives_prev - 1) and p2_lives_prev == 0 and p2_lives_curr == 1) or
-			   (p2_lives_changed and (p2_lives_curr == p2_lives_prev - 1) and p1_lives_prev == 0 and p1_lives_curr == 1)
-			then
-				return true
-			end
-			return false
-		end,
 	},
 	['KurukuruKururin_GBA']={ -- KuruKuru Kururin, GBA
 		func=health_swap,
