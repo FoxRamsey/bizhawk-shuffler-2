@@ -209,6 +209,9 @@ D0E2A628A5DA9F72402559B2535C05D1         SonicCD_SCD                  -- Sonic t
 800C7C12BC1EAE7DDB61186875B29733         SonicSpinball_GEN            -- Sonic the Hedgehog Spinball (PAL)
 50ACBEA2461D179B2BF11460A1CC6409         Sonic3D_GEN                  -- Sonic 3D Blast: Flickies' Island Genesis (NTSC-U/PAL)
 CAF83E879EC362D01845A950E0DA7826         Sonic3D_SAT                  -- Sonic 3D Blast Saturn (NTSC-U)
+D842AFA7DD1E84DE08ADDB94A51506F1BCAFD551 SonicAdvance1_GBA            -- Sonic Advance (USA)
+7BCD6A07AF7C894746FA28073FE0C0E34408022D SonicAdvance2_GBA            -- Sonic Advance 2 (USA)
+30DB467EFFA5014806D42DB57E2299398A51355B SonicAdvance3_GBA            -- Sonic Advance 3 (USA)
 
 -- other supported games!
 FF66E33EFC818B516F7994F3027A72F4BC629B30 240P_NES                     -- 240p Test Suite, NES (for the stopwatch mode)

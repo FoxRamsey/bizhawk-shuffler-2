@@ -138,6 +138,9 @@ plugin.description =
 	-Sonic the Hedgehog CD (Sega [Mega] CD), 1p
 	-Sonic 3D Blast: Flickies' Island (Genesis/Mega Drive), 1p
 	-Sonic 3D Blast (Saturn), 1p
+	-Sonic Advance (GBA), 1p
+	-Sonic Advance 2 (GBA), 1p
+	-Sonic Advance 3 (GBA), 1p
 
 	ADDITIONAL SUPPORTED GAMES
 	-ActRaiser (SNES), 1p
@@ -7621,6 +7624,45 @@ local gamedata = {
 		LivesWhichRAM=function() return "68K RAM" end,
 		maxlives=function() return 9 end, -- Anything higher does not display
 		ActiveP1=function() return true end, -- TODO: this actually supports 4P turn-taking...
+	},
+	['SonicAdvance1_GBA']={ -- Sonic Advance (GBA)
+		func=sonic_swap,
+		gmode=function() return memory.read_u8(0x58c0, "IWRAM") ~= 0 end,
+		get_rings=function() return memory.read_u16_le(0x4fec, "IWRAM") end,
+		get_shield=function() return memory.read_u8(0x5a46, "IWRAM") & 9 end,
+		get_lives=function() return memory.read_u8(0x5024, "IWRAM") end,
+		get_iframes=function() return memory.read_u16_le(0x5a3c, "IWRAM") end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x5024 end,
+		LivesWhichRAM=function() return "IWRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['SonicAdvance2_GBA']={ -- Sonic Advance 2 (GBA)
+		func=sonic_swap,
+		gmode=function() return memory.read_u8(0x5848, "IWRAM") ~= 0 end,
+		get_rings=function() return memory.read_u16_le(0x53f0, "IWRAM") end,
+		get_shield=function() return memory.read_u8(0x5a17, "IWRAM") & 9 end,
+		get_lives=function() return memory.read_u8(0x5448, "IWRAM") end,
+		get_iframes=function() return memory.read_u16_le(0x5a0c, "IWRAM") end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x5448 end,
+		LivesWhichRAM=function() return "IWRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['SonicAdvance3_GBA']={ -- Sonic Advance 3 (GBA)
+		func=sonic_swap,
+		--gmode=function() return memory.read_u8(..., "IWRAM") ~= 0 end,
+		get_rings=function() return memory.read_u16_le(0x94c, "IWRAM") end,
+		get_shield=function() return memory.read_u8(0x16fc, "IWRAM") & 0x30 end,
+		get_lives=function() return memory.read_u8(0x954, "IWRAM") end,
+		get_iframes=function() return memory.read_u16_le(0x160a, "IWRAM") end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x954 end,
+		LivesWhichRAM=function() return "IWRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['IQ_PS1_NA']={ -- I.Q.: Intelligent Qube, PS1 (TODO: PAL? Japan?)
 		func=iq_swap,
