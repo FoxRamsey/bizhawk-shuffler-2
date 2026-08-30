@@ -12,6 +12,7 @@ plugin.settings =
 	{ name='DebugSingleGame', type='boolean', label='Debugging: Rearm the shuffler logic even if no new game was loaded' },
 	{ name='SMW2YI_MiniBonusSwaps', type='boolean', label="Yoshi's Island: Shuffle on Mini Battle damage/loss", default=true},
 	{ name='IceClimberBonusSwaps', type='boolean', label="Ice Climber (NES): Shuffle on failing the bonus game"},
+	{ name='AdamantiumRageEnhanceHealing', type='boolean', label="Wolverine Adamantium Rage SNES: Greatly increases regeneration rate" },
 	{ name='grace', type='number', label="Minimum grace period before swapping (won't go < 10 frames)", default=10 },
 }
 
@@ -7388,6 +7389,17 @@ local gamedata = {
 			local health_curr = memory.read_u8(0x001027, "WRAM")
 			local gameover_state_changed, gameover_state_cur, _ = update_prev('gameover_state', memory.read_u8(0x0000AF, "WRAM"))
 			return gameover_state_changed and health_curr > 0 and gameover_state_cur==255 end,
+		grace=30,
+		grace_on_hit=true,
+		cheats = {
+			AdamantiumRageEnhanceHealing = { -- Increate health regeneration speed. Healing from 10% to 100% originally took about 6 minutes and 20 seconds, now takes about 2 minutes
+				func = function()
+					if memory.read_u8(0x000045, "WRAM") == 85 then -- pick lower maximum value for regeneration counter
+						memory.write_u8(0x000045, 255, "WRAM") end -- sets the regeneration count to maximum, forcing a heal
+				end,
+				on_frame = true,
+			},
+		},
 	},
 	['MagicalQuestMickey1_SNES']={ -- The Magical Quest Starring Mickey Mouse (SNES)
 		func=health_swap,
