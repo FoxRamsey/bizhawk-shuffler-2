@@ -308,6 +308,7 @@ plugin.description =
 	-Teenage Mutant Ninja Turtles II: The Arcade Game (NES), 1-2p
 	-Teenage Mutant Ninja Turtles III: The Manhattan Project (NES), 1-2p
 	-Teenage Mutant Ninja Turtles IV: Turtles in Time (SNES), 1-2p
+	-The Cliffhanger - Edward Randy (Arcade), 1p
 	-The Magical Quest Starring Mickey Mouse (SNES), 1-2p
 	-The Magical Quest 2: The Great Circus Mystery Starring Mickey & Minnie (SNES), 1-2p
 	-The Magical Quest 3: Mickey to Donald - Magical Adventure 3 (SNES), 1-2p
@@ -7292,6 +7293,47 @@ local gamedata = {
 			end
 		return false
 		end,
+	},
+	['EdwardRandy_ARC']={ -- The Cliffhanger - Edward Randy (World ver 3)
+		func=function() return function(data)
+				local gmode = memory.read_u8(0x0000, "m68000 : ram : 0x194000-0x197FFF")==1
+		
+				-- score doubles as health, and is drained for several frames on damage, so we'll only shuffle when health stops falling to avoid constant shuffle
+				if data.isHealthFalling == nil then data.isHealthFalling = false end -- set a starting value of false, but do not overwrite a true value
+								
+				-- health (score) is stored as hex over three values each representing two digits, so need to be both converted and combined into a single value
+				local healthHexUnits = memory.read_u8(0x1533, "m68000 : ram : 0x194000-0x197FFF")
+				local healthHexHundreds = memory.read_u8(0x1532, "m68000 : ram : 0x194000-0x197FFF")
+				local healthHexTenThousands = memory.read_u8(0x1531, "m68000 : ram : 0x194000-0x197FFF")
+				
+				-- Get upper nybble, bit-shift right 4 bits
+				local tens = (healthHexUnits & 0xF0)>>4
+				local thousands = (healthHexHundreds & 0xF0)>>4
+				local hundredtens = (healthHexTenThousands & 0xF0)>>4
+				
+				-- Just the lower nybble
+				local ones = healthHexUnits & 0x0F
+				local hundreds = healthHexHundreds & 0x0F
+				local tenthousands = healthHexTenThousands & 0x0F
+				
+				-- Merge 'em
+				local _, health_curr, health_prev = update_prev('health',
+					ones + (10 * tens) + (100 * hundreds) + (1000 * thousands) + (10000 * tenthousands) + (100000 * hundredtens))
+								
+				-- when health is not falling, wait until it is. when health is failing, wait until it stops, then swap.
+				if gmode and health_prev ~= nil then
+					if not data.isHealthFalling then 
+						data.isHealthFalling = health_curr < health_prev
+					elseif health_curr >= health_prev then
+						return true end
+					end
+				return false end
+			end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x000C end, -- credits provided
+		LivesWhichRAM=function() return "m68000 : ram : 0x194000-0x197FFF" end,
+		maxlives=function() return 0x69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['TaleSpin_NES']={ -- TaleSpin, NES
 		func=singleplayer_withlives_swap,
