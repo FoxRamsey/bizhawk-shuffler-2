@@ -6083,8 +6083,7 @@ local gamedata = {
 		is_valid_gamestate=function() return true end,
 		other_swaps=function() return false end,
 		get_health=function() return memory.read_s8(0x4582, "IWRAM") end,
-		maxhp=function() return 3 end,
-		gmode=function() return memory.read_u8(0x1CE, "IWRAM") == 85 end, -- Not 100% sure about this, but seems good
+		get_max_health=function() return memory.read_s8(0x4583, "IWRAM") end,
 		grace=45,
 	},
 	['KururinParadise_GBA'] = { -- Kururin Paradise, GBA
