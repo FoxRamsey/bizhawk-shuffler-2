@@ -7080,16 +7080,9 @@ local gamedata = {
 			return math.min(memory.read_u8(0x080A, "CartRAM"), 1) end,
 		minhp=-1, -- small Wario is value 0, so shuffling needs to occur with health at 0
 		p1getlc=function()
-			--(binary-coded decimal conversation taken from Bubsy Jaguar implementation)
-			-- Need to convert binary-coded decimal hexadecimal value to just plain decimal
-			local livesHex = memory.read_u8(0x0809, "CartRAM")
-			-- Get upper nybble, bit-shift right 4 bits
-			local tens = (livesHex & 0xF0)>>4
-			-- Just the lower nybble
-			local ones = livesHex & 0x0F
-			-- Merge 'em
-			local lives = (tens * 10) + ones
-			return lives end,
+		-- Need to convert binary-coded decimal hexadecimal value to just plain decimal
+			return from_bcd(memory.read_u8(0x0809, "CartRAM"))
+		end,
 		maxhp=function() return 1 end,
 		other_swaps=function() return false end,
 		CanHaveInfiniteLives=true,
