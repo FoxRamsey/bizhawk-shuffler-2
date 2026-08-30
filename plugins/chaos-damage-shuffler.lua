@@ -4243,15 +4243,7 @@ local gamedata = {
 	['MonsterRancherExplorer_GBC']={ -- Monster Rancher Explorer (USA)
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x02C5, "WRAM") end,
-		p1getlc=function()
-			local livesHex = memory.read_u8(0x02C3, "WRAM")
-			-- Get upper nybble, bit-shift right 4 bits
-			local tens = (livesHex & 0xF0)>>4
-			-- Just the lower nybble
-			local ones = livesHex & 0x0F
-			-- Merge 'em
-			local lives = (tens * 10) + ones
-			return lives end,
+		p1getlc=function() return from_bcd(memory.read_u8(0x02C3, "WRAM")) end,
 		maxhp=function() return 3 end,
 		swap_exceptions=function()
 			--[[ After defeating a boss, the player's lives are reset to 1 on the same frame as the room number is updated.
