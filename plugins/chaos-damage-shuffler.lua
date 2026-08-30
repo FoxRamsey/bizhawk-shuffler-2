@@ -7295,11 +7295,11 @@ local gamedata = {
 		end,
 	},
 	['EdwardRandy_ARC']={ -- The Cliffhanger - Edward Randy (World ver 3)
-		func=function() return function()
+		func=function() return function(data)
 				local gmode = memory.read_u8(0x0000, "m68000 : ram : 0x194000-0x197FFF")==1
 		
 				-- score doubles as health, and is drained for several frames on damage, so we'll only shuffle when health stops falling to avoid constant shuffle
-				if prevdata["isHealthFalling"] == nil then prevdata["isHealthFalling"] = false end -- set a starting value of false, but do not overwrite a true value
+				if data.isHealthFalling == nil then data.isHealthFalling = false end -- set a starting value of false, but do not overwrite a true value
 								
 				-- health (score) is stored as hex over three values each representing two digits, so need to be both converted and combined into a single value
 				local healthHexUnits = memory.read_u8(0x1533, "m68000 : ram : 0x194000-0x197FFF")
@@ -7322,8 +7322,8 @@ local gamedata = {
 								
 				-- when health is not falling, wait until it is. when health is failing, wait until it stops, then swap.
 				if gmode and health_prev ~= nil then
-					if not prevdata["isHealthFalling"] then 
-						prevdata["isHealthFalling"] = health_curr < health_prev
+					if not data.isHealthFalling then 
+						data.isHealthFalling = health_curr < health_prev
 					elseif health_curr >= health_prev then
 						return true end
 					end
