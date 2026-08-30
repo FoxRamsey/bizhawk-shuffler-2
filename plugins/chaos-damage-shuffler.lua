@@ -302,6 +302,9 @@ plugin.description =
 	-Ultimate Mortal Kombat 3 (SNES), 1p (for now)
 	-Vice: Project Doom (NES), 1p
 	-Vs. Ice Climber, set IC4-4 B-1 (Arcade), 1p
+	-Wario Land - Super Mario Land 3 (GB), 1p
+	-Wario Land II (GBC), 1p
+	-Wario Land 3 (GBC), 1p
 	-Wario Land 4 (GBA), 1p
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
 	-WarioWare: Twisted! (GBA), 1p
@@ -7659,6 +7662,48 @@ local gamedata = {
 		end,
 		grace=80,
 		delay=7,
+	},
+	['WarioLand1_GB']={ -- Wario Land - Super Mario Land 3, GB
+		func=singleplayer_withlives_swap,
+		p1gethp=function()
+			-- powerup state. all damage returns Wario to small form, so for the purpose of damage we only need small and not small
+			return math.min(memory.read_u8(0x080A, "CartRAM"), 1) end,
+		minhp=-1, -- small Wario is value 0, so shuffling needs to occur with health at 0
+		p1getlc=function()
+		-- Need to convert binary-coded decimal hexadecimal value to just plain decimal
+			return from_bcd(memory.read_u8(0x0809, "CartRAM"))
+		end,
+		maxhp=function() return 1 end,
+		other_swaps=function() return false end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0809 end,
+		LivesWhichRAM=function() return "CartRAM" end,
+		maxlives=function() return 0x69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['WarioLand2_GBC']={ -- Wario Land II, GBC
+		func=function() 
+			return function()
+			-- gmode, no shuffling outside of gameplay
+			if memory.read_u8(0x0757, "WRAM")~=85 then return false end
+			
+			-- check iframes value for player being damaged. address starts at 0, goes to 1 when hit, then counts up to some value when the player regains control
+			local iframes = memory.read_u8(0x06DC, "WRAM")
+			
+			-- also check that player is stunned to affirm they were hit by a damaging attack. 
+			-- stun value changes slightly after the iframes value, so we check if the stun has changed in this frame but that the iframes were increased previously
+			local isstunned_changed, isstunned_curr, _ = update_prev('isstunned', memory.read_u8(0x0D60, "WRAM")) -- changes to 100 when stunned
+			return isstunned_changed and isstunned_curr == 100 and iframes > 0 end 
+		end,
+	},
+	['WarioLand3_GBC']={ -- Wario Land 3, GBC
+		func=function() 
+				return function()
+				-- check iframes value for player being damaged. address starts at 0, goes to 1 when hit, then counts up from 16 to some value when the player regains control
+				-- iframes directly go to 16 when iframes are gained from transformation, so by specifically checking change from 0 to 1 we reassure that iframes are from damage
+				local damage_changed, damage_curr, damage_prev = update_prev('damage', memory.read_u8(0x0A8C, "WRAM"))
+				return damage_changed and damage_curr == 1 and damage_prev == 0 end
+			end,
 	},
 	['WildGuns_SNES']={ -- Wild Guns, SNES
 		func=singleplayer_withlives_swap,
