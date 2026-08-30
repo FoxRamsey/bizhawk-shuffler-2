@@ -266,7 +266,11 @@ plugin.description =
 	-SD Gundam Sangokushi Rainbow Tairiku Senki (Japan) (Arcade), 1p
 	-Shaq-Fu (Genesis/Mega Drive), 1p
 	-Shatterhand (NES), 1p
+	-Shinobi (Arcade), 1p
+	-Revenge of Shinobi, The (Genesis/Mega Drive), 1p
 	-Shinobi III (Genesis/Mega Drive), 1p
+	-Shinobi Legions (Saturn), 1p
+	-Shinobi-X - Shin Shinobi Den (Saturn), 1p
 	-Simpsons: Bart vs. the World (NES), 1p
 	-Snake Rattle 'n Roll (NES), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
@@ -6620,6 +6624,27 @@ local gamedata = {
 		maxlives=function() return 9 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
+	['Shinobi_ARC']={ -- Shinobi (set 6, System 16A) (unprotected) (Arcade)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x1750, "m68000 : ram : 0xC70000-0xC73FFF") end,
+		maxhp=function() return 1 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x1750 end,
+		LivesWhichRAM=function() return "m68000 : ram : 0xC70000-0xC73FFF" end,
+		maxlives=function() return 6 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['ShinobiRevenge_GEN']={ -- Revenge of Shinobi, The (W) (REV01) [!]
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00E13B, "68K RAM") end,
+		p1getlc=function() return memory.read_u8(0x00E141, "68K RAM") end,
+		maxhp=function() return 8 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00E141 end,
+		LivesWhichRAM=function() return "68K RAM" end,
+		maxlives=function() return 10 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	['Scurge_GBA'] = { -- Scurge: Hive, GBA
 		func = iframe_health_swap,
 		get_iframes = function() return memory.read_u16_le(0x50E0, "IWRAM") end,
@@ -6666,6 +6691,28 @@ local gamedata = {
 		CanHaveInfiniteLives=true,
 		LivesWhichRAM=function() return "68K RAM" end,
 		p1livesaddr=function() return 0x37e0 end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['ShinobiLegions_SAT']={ -- Shinobi Legions (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0EA2CB, "Work Ram High") end,
+		p1getlc=function() return memory.read_u8(0x0252B9, "Work Ram High") end,
+		maxhp=function() return 6 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0252B9 end,
+		LivesWhichRAM=function() return "Work Ram High" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['ShinobiX_SAT']={ -- Shinobi Legions (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0EA41B, "Work Ram High") end,
+		p1getlc=function() return memory.read_u8(0x0252DD, "Work Ram High") end,
+		maxhp=function() return 6 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0252DD end,
+		LivesWhichRAM=function() return "Work Ram High" end,
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
