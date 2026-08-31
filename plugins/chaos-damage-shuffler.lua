@@ -182,6 +182,7 @@ plugin.description =
 	-Celeste 2 [Pico-8] (homebrew port) (GBA), 1p
 	-Chip and Dale Rescue Rangers 1 (NES), 1-2p
 	-Chip and Dale Rescue Rangers 2 (NES), 1-2p
+	-Clash At Demonhead (NES), 1p
 	-Crash Bandicoot 1-3 (PSX), 1p, US version
 	-Cyber-Lip (Arcade), 1p
 	-Crash Bandicoot 4 (bootleg) (GBA), 1p
@@ -272,6 +273,7 @@ plugin.description =
 	-Ninja Gaiden II - The Dark Sword of Chaos (NES), 1p
 	-Ninja Gaiden III - The Ancient Ship of Doom (NES), 1p
 	-Ninjawarriors (SNES), 1p
+	-Panic Restaurant (NES), 1p
 	-Panorama Cotton (English v1.0.1) (Mega Drive/Genesis), 1p
 	-PaRappa the Rapper (PSX), 1p - shuffles on dropping a rank
 	-Pebble Beach Golf Links (Sega Saturn), 1p - Tournament Mode, shuffles after stroke
@@ -356,6 +358,7 @@ plugin.description =
 	-Wario Land 3 (GBC), 1p
 	-Wario Land 4 (GBA), 1p
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
+	-Werewolf: The Last Warrior (NES), 1p
 	-WarioWare: Twisted! (GBA), 1p
 	-Wild Guns (SNES), 1p
 	-Wild West C.O.W.-Boys of Moo Mesa (Arcade), 1p
@@ -6081,6 +6084,18 @@ local gamedata = {
 		end,
 		grace=60, -- Professional/Action Mode (Nintendo Super System only???? Must verify) can combo you too rapidly to recover
 	},
+	['PanicRestaurant_NES']={ -- Panic Restaurant
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00D7, "RAM") end,
+		p1getlc=function() return memory.read_u8(0x00D6, "RAM") end,
+		maxhp=function() return 4 end,
+		gmode=function() return memory.read_u8(0x0019, "RAM")==6 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00D6 end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['PaRappa1_PS1']={ -- PaRappa the Rapper, PSX
 		func=singleplayer_withlives_swap,
 		gmode=function() return memory.read_u8(0x1C3670, "MainRAM") > 0 end, -- if no points yet, no shuffle, should help avoid shuffles between rounds and give leeway at the top of a round
@@ -8248,6 +8263,17 @@ local gamedata = {
 		grace=80,
 		delay=7,
 	},
+	['WerewolfLastWarrior_NES']={ -- Werewolf: The Last Warrior
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00BC, "RAM") end,
+		p1getlc=function() return memory.read_u8(0x0406, "RAM") end,
+		maxhp=function() return 20 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0406 end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['WarioLand1_GB']={ -- Wario Land - Super Mario Land 3, GB
 		func=singleplayer_withlives_swap,
 		p1gethp=function()
@@ -9155,6 +9181,13 @@ local gamedata = {
 		maxlives=function() return 3 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 		delay=5, -- good to give a slightly higher delay to make the damage more readable to the player
+	},
+	['ClashAtDemonhead_NES']={ -- Clash At Demonhead
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x002C, "RAM")==24 end,
+		get_health=function() return memory.read_s8(0x009F, "RAM") end,	
+		other_swaps=function() return false end,
+		grace=20,
 	},
 	['MarioKart_DS'] = { -- Mario Kart DS
 		func = function(gamemeta)
