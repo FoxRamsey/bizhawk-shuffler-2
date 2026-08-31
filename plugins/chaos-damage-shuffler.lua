@@ -13,6 +13,7 @@ plugin.settings =
 	{ name='DebugSingleGame', type='boolean', label='Debugging: Rearm the shuffler logic even if no new game was loaded' },
 	{ name='SMW2YI_MiniBonusSwaps', type='boolean', label="Yoshi's Island: Shuffle on Mini Battle damage/loss", default=true},
 	{ name='IceClimberBonusSwaps', type='boolean', label="Ice Climber (NES): Shuffle on failing the bonus game"},
+	{ name='LittleSamsonReviveFellas', type='boolean', label="Little Samson (NES): Revive allies on death"},
 	{ name='AdamantiumRageEnhanceHealing', type='boolean', label="Wolverine Adamantium Rage SNES: Greatly increases regeneration rate" },
 	{ name='GQ1NoRandomEncounters', type='boolean', label="Gargoyle's Quest 1: No random encounters" },
 	{ name='grace', type='number', label="Minimum grace period before swapping (won't go < 10 frames)", default=10 },
@@ -5790,6 +5791,27 @@ local gamedata = {
 		LivesWhichRAM=function() return "RAM" end,
 		maxlives=function() return 69 end,
 		ActiveP1=function() return true end, -- p1 is always active!
+		cheats = {
+			LittleSamsonReviveFellas = { 
+			-- goal: if you lose an ally, detect that and resurrect them on swapping in
+				func = function()
+					-- check if level is high enough to have all the teammates (not 0 through 3) and if "all teammates selectable" is set
+					if memory.read_u8(0x003F, "RAM") > 3 and memory.read_u8(0x0090, "RAM") % 16 == 0xF
+					then
+					-- if ally has 0 health, they died; set ally's hp to their own max hp to revive them
+						if memory.read_u8(0x0098, "RAM") == 0 -- Kikira (dragon)
+							then memory.write_u8(0x0098, memory.read_u8(0x0094, "RAM"), "RAM")
+						end 
+						if memory.read_u8(0x0099, "RAM") == 0 -- Gamm (golem)
+							then memory.write_u8(0x0099, memory.read_u8(0x0095, "RAM"), "RAM")
+						end 
+						if memory.read_u8(0x009A, "RAM") == 0 -- K.O. (mouse)
+							then memory.write_u8(0x009A, memory.read_u8(0x0096, "RAM"), "RAM")
+						end 
+					end
+				end
+			},
+		},
 	},
 	['WarioWare_GBA']={ -- WarioWare, Inc. / Made in Wario, GBA
 		func=singleplayer_withlives_swap,
@@ -9799,28 +9821,6 @@ function plugin.on_game_load(data, settings)
 			and memory.read_u8(0x00002A, "WRAM") > 0 and memory.read_u8(0x00002A, "WRAM") < 255 -- have we started playing?
 		then
 			memory.write_u8(0x00002A, 69, "WRAM") -- if so, set lives to 69. Nice.
-		end
-	end
-	
-	-- Little Samson (NES)
-	-- goal: if you lose an ally, detect that and resurrect them on swapping in
-	if tag == "LittleSamson_NES" then
-		local LittleSamson_NES_ReviveAllies = true -- turn this to false if you don't want this upgrade to Infinite Lives
-		if settings.InfiniteLives == true -- is Infinite Lives enabled?
-			and LittleSamson_NES_ReviveAllies == true
-		-- check if level is high enough to have all the teammates (not 0 through 3) and if "all teammates selectable" is set
-			and memory.read_u8(0x003F, "RAM") > 3 and memory.read_u8(0x0090, "RAM") % 16 == 0xF
-		then
-		-- if ally has 0 health, they died; set ally's hp to their own max hp to revive them
-			if memory.read_u8(0x0098, "RAM") == 0 -- D
-			then memory.write_u8(0x0098, memory.read_u8(0x0094, "RAM"), "RAM")
-			end 
-			if memory.read_u8(0x0099, "RAM") == 0 -- G
-			then memory.write_u8(0x0099, memory.read_u8(0x0095, "RAM"), "RAM")
-			end 
-			if memory.read_u8(0x009A, "RAM") == 0 -- M
-			then memory.write_u8(0x009A, memory.read_u8(0x0096, "RAM"), "RAM")
-			end 
 		end
 	end
 	
