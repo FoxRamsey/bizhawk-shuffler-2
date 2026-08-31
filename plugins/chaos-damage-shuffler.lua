@@ -617,21 +617,6 @@ local function FamilyFeud_SNES_swap(gamemeta)
 		end
 	end
 
-local function DoubleDare_NES_swap(gamemeta)
-	return function()
-		local score_changed, score, prev_score = update_prev('score', gamemeta.getscore())
-		local player_changed, player, prev_player = update_prev('player', gamemeta.getplayer())
-		local text_changed, text, prev_text = update_prev('text', gamemeta.gettext())
-		local round_changed, round, prev_round = update_prev('round', gamemeta.getround())
-		local parse_changed, parse, prev_parse = update_prev('parse', gamemeta.getparse())
-		return
-			--(score_changed and score > prev_score) or -- covers all instances of opponent getting money, including losing challenges and base value questions
-			(score_changed and score > prev_score and round == 0 and parse ~= 774910244) or -- Use these instead to not shuffle on base value questions in Round 1
-			(score_changed and score > prev_score and round == 1 and parse ~= 774910500) or -- Round 2
-			(text == 12 and player == 0), 50 -- covers getting a question wrong without a dare
-		end
-	end
-
 local function singleplayer_withlives_swap(gamemeta)
 	return function(data)
 		-- if a method is provided and we are not in normal gameplay, don't ever swap
@@ -4324,13 +4309,19 @@ local gamedata = {
 		CanHaveInfiniteLives=false
 	},
 	['DoubleDare_NES']={ -- Double Dare (NES)
-		func=DoubleDare_NES_swap,
-		getscore=function() return memory.read_u8(0x0607, "RAM") end,
-		getplayer=function() return memory.read_u8(0x0570, "RAM") end,
-		gettext=function() return memory.read_u8(0x05F0, "RAM") end,
-		getround=function() return memory.read_u8(0x05F8, "RAM") end,
-		getparse=function() return memory.read_u32_le(0x05C8, "RAM") end,
-		CanHaveInfiniteLives=false
+		func=function() return function()
+			local score_changed, score, prev_score = update_prev('score', memory.read_u8(0x0607, "RAM"))
+			local player_changed, player, prev_player = update_prev('player', memory.read_u8(0x0570, "RAM"))
+			local text_changed, text, prev_text = update_prev('text', memory.read_u8(0x05F0, "RAM"))
+			local round_changed, round, prev_round = update_prev('round', memory.read_u8(0x05F8, "RAM"))
+			local parse_changed, parse, prev_parse = update_prev('parse', memory.read_u32_le(0x05C8, "RAM"))
+			return
+				--(score_changed and score > prev_score) or -- covers all instances of opponent getting money, including losing challenges and base value questions
+				(score_changed and score > prev_score and round == 0 and parse ~= 774910244) or -- Use these instead to not shuffle on base value questions in Round 1
+				(score_changed and score > prev_score and round == 1 and parse ~= 774910500) or -- Round 2
+				(text == 12 and player == 0), 50 -- covers getting a question wrong without a dare
+			end
+		end,
 	},
 	['Monopoly_NES']={ -- Monopoly (NES)
 		func=Monopoly_NES_swap,
