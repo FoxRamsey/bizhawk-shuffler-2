@@ -211,6 +211,7 @@ plugin.description =
 	-Goldeneye: 007 (N64), 1p
 	-Goof Troop (SNES), 1-2p
 	-Gremlins 2: The New Batch (NES), 1p
+	-Gun.Smoke (NES), 1p
 	-Gunstar Heroes (Genesis/Mega Drive), 1p
 	-Gunstar Super Heroes (GBA), 1p
 	-Gyruss (NES), 1p
@@ -252,6 +253,7 @@ plugin.description =
 	-Math Blaster - Episode 1 (SNES), 1p
 	-Mega Q*Bert (Genesis/Mega Drive), 1p
 	-Mendel Palace (NES), 1p
+	-Mercs (Genesis/Mega Drive), 1p
 	-Metal Slug - Super Vehicle-001 (Arcade), 1p
 	-Metal Slug X - Super Vehicle-001 (Arcade), 1p
 	-Metal Slug 3 (Arcade), 1p
@@ -8934,7 +8936,30 @@ local gamedata = {
 			-- Shuffle when a balloon is used to save from a pit even though there's no actual damage
 			local balloon_changed, balloon_curr, balloon_prev = update_prev('balloon', memory.read_u8(0x050C, "RAM"))
 			return balloon_changed and balloon_curr < balloon_prev end,
-    },
+	},
+	['GunSmoke_NES']={ -- Gun.Smoke (NES)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0077, "RAM") end, -- horse health
+		p1getlc=function() return memory.read_u8(0x007A, "RAM") end,
+		maxhp=function() return 3 end,
+		minhp=-1, -- horse dying does not result in player death
+		swap_exceptions=function()
+			-- the player loses their horse between levels, so horse health drops to zero, causing a swap whenever the player clears a level with a horse.
+			-- suppress shuffling on frame when stage changes
+			local stage_changed, stage_curr, stage_prev = update_prev('stage', memory.read_u8(0x0041, "RAM"))
+			if stage_changed then return true end
+			
+			-- horse health is reduced to zero at the start of the new horse animation, potentially leading to shuffling if the player already has a horse.
+			-- attempt to suppress shuffling during the new horse animation by identifying appropriate flag
+			if memory.read_u8(0x0420, "RAM")==12 then return true end
+			
+			return false end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x007A end,
+		LivesWhichRAM=function() return "RAM" end,
+		maxlives=function() return 10 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['GargoylesQuest1_GB']={ -- Gargoyle's Quest - Ghosts'n Goblins, GB
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x020A, "WRAM") end,
@@ -9456,6 +9481,17 @@ local gamedata = {
 		p1livesaddr=function() return 0x000653 end,
 		LivesWhichRAM=function() return "m68000 : ram : 0x108000-0x11FFFF" end,
 		maxlives=function() return 2 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['Mercs_GEN']={ -- Mercs (W) [!] (Genesis)
+		func=health_swap,
+		is_valid_gamestate=function() return memory.read_u8(0x00C5BE, "68K RAM") ~= 255 end, -- confirms that character is not being switched
+		get_health=function() return memory.read_u8(0x00C349, "68K RAM") end,
+		other_swaps=function() return false end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00C343 end,
+		LivesWhichRAM=function() return "68K RAM" end,
+		maxlives=function() return 36 end, -- values are stored as multiples of 4; max of 9 continues is 9*4=36
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['MetalSlug1_ARC']={ -- Metal Slug - Super Vehicle-001, arcade
