@@ -363,6 +363,9 @@ plugin.description =
 	-WarioWare, Inc.: Mega Microgame$! (GBA), 1p - bonus games including 2p are pending
 	-Werewolf: The Last Warrior (NES), 1p
 	-WarioWare: Twisted! (GBA), 1p
+	-Wheel of Fortune (NES)
+	-Wheel of Fortune Family Edition (NES)
+	-Wheel of Fortune Junior Edition (NES)
 	-Wild Guns (SNES), 1p
 	-Wild West C.O.W.-Boys of Moo Mesa (Arcade), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
@@ -675,6 +678,29 @@ local function FamilyFeud_SNES_swap(gamemeta)
 			(player < 2), 30 -- It's player 1 or 2, not the CPU; give 30 frames of buzzer before and after (roughly) swaps
 		end
 	end
+
+local function WheelOfFortune_NES_swap(gamemeta)
+	return function()
+		local p2total_changed, p2total, prev_p2total = update_prev('p2total', gamemeta.getp2total())
+		local p3total_changed, p3total, prev_p3total = update_prev('p3total', gamemeta.getp3total())
+		local player_changed, player, prev_player = update_prev('player', gamemeta.getplayer())
+		local text_changed, text, prev_text = update_prev('text', gamemeta.gettext())
+		local name_changed, name, prev_name = update_prev('name', gamemeta.getname())
+		
+		return	
+			(text ~= name) and -- In the unlikely scenario that a player name matches the text checks, this prevents those shuffles entirely.
+			(p2total_changed and p2total > prev_p2total) or -- Player 2 solves
+			(p3total_changed and p3total > prev_p3total) or	-- Player 3 solves
+			((text_changed and player == 1) and -- Checking text rather than active player so it also works in 1-player without CPU opponents
+			(text == 3570914557 or -- Wrong Letter
+			text == 3891917012 or -- Miss Turn
+			text == 3925530105 or -- Bankrupt
+			text == 4057266675 or -- Must Buy Vowels
+			text == 4093049812 or -- Wrong Solve
+			text == 4177062384 or -- Bought a non-vowel
+			text == 4193506304)), 50 -- Out of Time
+		end
+	end	
 
 local function singleplayer_withlives_swap(gamemeta)
 	return function(data)
@@ -4428,6 +4454,30 @@ local gamedata = {
 		getstrike=function() return memory.read_u8(0x020E, "WRAM") end,
 		getwhichplayer=function() return memory.read_u8(0x08DF, "WRAM") end,
 		CanHaveInfiniteLives=false
+	},
+	['WheelOfFortune_NES']={ -- Wheel of Fortune (NES)
+		func=WheelOfFortune_NES_swap,
+		getplayer=function() return memory.read_u8(0x0006, "RAM") end,
+		getp2total=function() return memory.read_u8(0x03AD, "RAM") end,
+		getp3total=function() return memory.read_u8(0x03B0, "RAM") end,
+		getname=function() return memory.read_u32_le(0x0382, "RAM") end,
+		gettext=function() return memory.read_u32_le(0x047C, "RAM") end,
+	},
+	['WheelOfFortune_Family_NES']={ -- Wheel of Fortune Family Edition (NES)
+		func=WheelOfFortune_NES_swap,
+		getplayer=function() return memory.read_u8(0x0006, "RAM") end,
+		getp2total=function() return memory.read_u8(0x043D, "RAM") end,
+		getp3total=function() return memory.read_u8(0x0440, "RAM") end,
+		getname=function() return memory.read_u32_le(0x0412, "RAM") end,
+		gettext=function() return memory.read_u32_le(0x050C, "RAM") end,
+	},
+	['WheelOfFortune_Junior_NES']={ -- Wheel of Fortune Junior Edition (NES)
+		func=WheelOfFortune_NES_swap,
+		getplayer=function() return memory.read_u8(0x0006, "RAM") end,
+		getp2total=function() return memory.read_u8(0x03AD, "RAM") end,
+		getp3total=function() return memory.read_u8(0x03B0, "RAM") end,
+		getname=function() return memory.read_u32_le(0x0382, "RAM") end,
+		gettext=function() return memory.read_u32_le(0x047C, "RAM") end,
 	},
 	['DoubleDare_NES']={ -- Double Dare (NES)
 		func=function() return function()
