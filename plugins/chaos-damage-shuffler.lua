@@ -617,20 +617,6 @@ local function FamilyFeud_SNES_swap(gamemeta)
 		end
 	end
 
-local function ClassicConcentration_NES_swap(gamemeta)
-	return function()
-		local prize_changed, prize, prev_prize = update_prev('prize', gamemeta.getprize())
-		local solve_changed, solve, prev_solve = update_prev('solve', gamemeta.getsolve())
-		local scene_changed, scene, prev_scene = update_prev('scene', gamemeta.getscene())
-		local active_changed, active, prev_active = update_prev('active', gamemeta.getactive())
-
-		return
-			--(prize_changed and prize > prev_prize) or -- Activate to swaps on any opponent matches.
-			(scene ~= 127 and active_changed and active == 1) or -- Swaps when P1 misses a match in main rounds. Does not trigger in bonus rounds.
-			(solve_changed and solve > prev_solve), 30  -- Swaps on P2 solving
-		end
-	end
-
 local function singleplayer_withlives_swap(gamemeta)
 	return function(data)
 		-- if a method is provided and we are not in normal gameplay, don't ever swap
@@ -4323,12 +4309,17 @@ local gamedata = {
 		CanHaveInfiniteLives=false
 	},
 	['ClassicConcentration_NES']={ -- Classic Concentration (NES)
-		func=ClassicConcentration_NES_swap,
-		getscene=function() return memory.read_u8(0x0012, "RAM") end,
-		getactive=function() return memory.read_u8(0x001F, "RAM") end,
-		getprize=function() return memory.read_u8(0x005B, "RAM") end,
-		getsolve=function() return memory.read_u8(0x00C0, "RAM") end,
-		CanHaveInfiniteLives=false
+		func=function() return function()
+		local prize_changed, prize, prev_prize = update_prev('prize', memory.read_u8(0x005B, "RAM"))
+		local solve_changed, solve, prev_solve = update_prev('solve', memory.read_u8(0x00C0, "RAM"))
+		local scene_changed, scene, prev_scene = update_prev('scene', memory.read_u8(0x0012, "RAM"))
+		local active_changed, active, prev_active = update_prev('active', memory.read_u8(0x001F, "RAM"))
+		return
+			--(prize_changed and prize > prev_prize) or -- Activate to swaps on any opponent matches.
+			(scene ~= 127 and active_changed and active == 1) or -- Swaps when P1 misses a match in main rounds. Does not trigger in bonus rounds.
+			(solve_changed and solve > prev_solve), 30  -- Swaps on P2 solving
+		end
+	end,
 	},
 	['Monopoly_NES']={ -- Monopoly (NES)
 		func=Monopoly_NES_swap,
