@@ -31,9 +31,9 @@ plugin.settings = {
 	{ name='remember_volume', type='boolean', label='Remember audio volume', default=true },
 	{ name='default_volume', type='number', datatype='UNSIGNED', label='Default Volume (0-100)', default=MAX_VOLUME },
 	{ name='remember_nds_screen', type='boolean', label='Remember NDS screen settings', default=true },
-	{ name='default_nds_layout', type='select', options=nds_layouts, label='Default layout', default=nds_layouts[1] },
+	{ name='default_nds_layout', type='select', options=nds_layouts, ordered=true, label='Default layout', default=nds_layouts[1] },
 	{ name='default_nds_gap', type='number', datatype='UNSIGNED', label='Default gap (0-128)', default=0 },
-	{ name='default_nds_rotation', type='select', options=nds_rotation_labels, label='Default rotation', default=nds_rotation_labels[1] },
+	{ name='default_nds_rotation', type='select', options=nds_rotation_labels, ordered=true, label='Default rotation', default=nds_rotation_labels[1] },
 	{ name='default_nds_invert', type='boolean', label='Default top/bottom inversion', default=false },
 }
 plugin.description =
