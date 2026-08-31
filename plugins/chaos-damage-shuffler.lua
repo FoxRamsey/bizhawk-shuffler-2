@@ -175,6 +175,7 @@ plugin.description =
 	-Cyber-Lip (Arcade), 1p
 	-Crash Bandicoot 4 (bootleg) (GBA), 1p
 	-Darkwing Duck (NES), 1p
+	-Demon Front / Moyu Zhanxian (Arcade), 1p
 	-Demon's Crest (SNES), 1p
 	-Dick Tracy (NES), 1p
 	-Do-Re-Mi Fantasy - Milon no Dokidoki Daibouken (SNES), 1p
@@ -240,6 +241,10 @@ plugin.description =
 	-Mega Q*Bert (Genesis/Mega Drive), 1p
 	-Mendel Palace (NES), 1p
 	-Metal Slug - Super Vehicle-001 (Arcade), 1p
+	-Metal Slug X - Super Vehicle-001 (Arcade), 1p
+	-Metal Slug 3 (Arcade), 1p
+	-Metal Slug 4 (Arcade), 1p
+	-Metal Slug 5 (Arcade), 1p
 	-Metal Storm (NES), 1p
 	-Mighty Morphin Power Rangers - The Movie (SNES), 1p
 	-Minnesota Fats - Pool Legend (Saturn), 1p story mode
@@ -4370,6 +4375,17 @@ local gamedata = {
 		LivesWhichRAM=function() return "RAM" end,
 		p1livesaddr=function() return 0x0599 end,
 		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['DemonFront_ARC']={ -- Demon Front / Moyu Zhanxian, (Arcade)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end,
+		p1getlc=function() return memory.read_u8(0x01C90F, "m68000 : ram : 0x800000-0x81FFFF") end,
+		maxhp=function() return 1 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x010A3C end, -- credits provided instead of lives to allow for character swapping
+		LivesWhichRAM=function() return "m68000 : ram : 0x800000-0x81FFFF" end,
+		maxlives=function() return 70 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['DemonsCrest']={ -- Demon's Crest (SNES)
@@ -9067,7 +9083,7 @@ local gamedata = {
 		maxlives=function() return 2 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
-	['MetalSlug1_ARC']={ -- Metal Slug - Super Vehicle-001, arcade (US)
+	['MetalSlug1_ARC']={ -- Metal Slug - Super Vehicle-001, arcade
 		func=singleplayer_withlives_swap,
 		-- 0xfdb6 and 0xfdb7 are P2 and P1 states: 0x00=Inactive, 0x01=Playing, 0x02=Continue, 0x03=Game Over
 		gmode=function() 
@@ -9090,6 +9106,62 @@ local gamedata = {
 		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
 		maxlives=function() return 71 end,
 		ActiveP1=function() return true end, -- p1 is always active (until p2 support added!)
+	},
+	['MetalSlugX_ARC']={ -- Metal Slug X - Super Vehicle-001, arcade
+		func=singleplayer_withlives_swap,
+		p1gethp=function()
+			-- 0x00C621: slug health
+			local swap_on_slug_damage = false -- if you want to swap when the slug (tank) is damaged, set this to true
+			if swap_on_slug_damage ~= true then return 0 end
+			return memory.read_s8(0x00C621, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getlc=function() return memory.read_u8(0x001288, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 48 end,
+		minhp=-1;
+		gmode=function() return memory.read_u8(0x006F38, "m68000 : ram : 0x100000-0x10FFFF")==8 end,
+		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters
+		p1livesaddr=function() return 0x001288 end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['MetalSlug3_ARC']={ -- Metal Slug 3, arcade
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
+		p1getlc=function() return memory.read_u8(0x0002BB, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getcc=function() return memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF") end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x0001FC, "m68000 : ram : 0x100000-0x10FFFF")==9 end,
+		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters. coins cannot be pushed
+		p1livesaddr=function() return 0x0002BB end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!		
+	},	
+	['MetalSlug4_ARC']={ -- Metal Slug 4, arcade
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
+		p1getlc=function() return memory.read_u8(0x000A89, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getcc=function() return from_bcd(memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF")) end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x006402, "m68000 : ram : 0x100000-0x10FFFF")==1 end,
+		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters. coins cannot be pushed
+		p1livesaddr=function() return 0x000A89 end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!		
+	},
+	['MetalSlug5_ARC']={ -- Metal Slug 5, arcade
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return 1 end, -- currently not swapping on vehicle damage
+		p1getlc=function() return memory.read_u8(0x000A41, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getcc=function() return from_bcd(memory.read_u8(0x000034, "m68000 : ram : 0xD00000-0xD0FFFF")) end,
+		maxhp=function() return 1 end,
+		gmode=function() return memory.read_u8(0x0008E6, "m68000 : ram : 0x100000-0x10FFFF")==201 end,
+		CanHaveInfiniteLives=false, -- not giving infinite lives so that the player can change characters. coins cannot be pushed
+		p1livesaddr=function() return 0x000A41 end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!		
 	},
 	['TripWorld_GB']={ -- Trip World, GB, and Trip World DX, GBC
 		func=singleplayer_withlives_swap,
