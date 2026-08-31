@@ -9960,13 +9960,6 @@ if type(tonumber(which_level)) == "number" then
 			-- give the player some Gnat Attack instructions!
 			gui.drawText(0,0,"GNAT ATTACK! Dpad moves, face buttons click, hold one/both of L/R to go fast", "green")
 		end
-		if tag == "WolverineAdamantium_SNES" then
-			-- increate health regeneration speed
-			-- regeneration counter counts up to 255 then rolls over to 0. When the counter hits 255, health recovers by 1
-			if settings.InfiniteLives
-			and memory.read_u8(0x000045, "WRAM") == 85 then -- pick lower maximum value for regeneration counter
-				memory.write_u8(0x000045, 255, "WRAM") end -- sets the regeneration count to maximum, forcing a heal
-		end		
 	end
 end
 
