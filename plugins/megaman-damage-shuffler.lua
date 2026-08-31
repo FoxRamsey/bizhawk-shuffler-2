@@ -56,7 +56,7 @@ plugin.description =
 
 local NO_MATCH = 'NONE'
 
-local tags = {}
+local tags
 local prevdata
 local swap_scheduled
 local shouldSwap
@@ -701,6 +701,10 @@ local function get_game_tag()
 	end
 
 	return nil
+end
+
+function plugin.on_setup(data, settings)
+	tags = {}
 end
 
 function plugin.on_game_load(data, settings)
