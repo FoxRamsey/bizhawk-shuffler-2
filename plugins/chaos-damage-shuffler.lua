@@ -325,6 +325,8 @@ plugin.description =
 	-Super Monkey Ball: Touch & Roll (DS), 1p
 	-Super Smash Bros. (N64), 1p - also supports Smash Remix mod
 	-Super Smash TV (SNES), 1p
+	-Super Turrican (SNES), 1p
+	-Super Turrican 2 (SNES), 1p
 	-TaleSpin (NES), 1p
 	-Tarzan: Lord of the Jungle (unreleased) (SNES), 1p
 	-Tecmo Super Bowl (NES), 1p (on opponent scores, giveaways, giving up first down, failing to get a first down)
@@ -9604,6 +9606,30 @@ local gamedata = {
 		p1livesaddr=function() return 0x00D7F4 end,
 		LivesWhichRAM=function() return "WRAM" end,
 		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['Superturrican_SNES']={ -- Super Turrican, SNES 
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x04FD, "WRAM") end,
+		p1getlc=function() return memory.read_u8(0x04FB, "WRAM") end,
+		p1getcc=function() return memory.read_u8(0x0578, "WRAM") end,
+		maxhp=function() return 12 end,
+		CanHaveInfiniteLives=true,
+		LivesWhichRAM=function() return "WRAM" end,
+		p1livesaddr=function() return 0x04FB end,
+		maxlives=function() return 99 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['Superturrican2_SNES']={ -- Super Turrican 2, SNES
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0AEE, "WRAM") end, -- ((0x0AF0, "WRAM") for Alt Address for Health)
+		p1getlc=function() return memory.read_u8(0x0AF2, "WRAM") end,
+		p1getcc=function() return memory.read_u8(0x1014, "WRAM") end,
+		maxhp=function() return 12 end,
+		CanHaveInfiniteLives=true,
+		LivesWhichRAM=function() return "WRAM" end,
+		p1livesaddr=function() return 0x0AF2 end,
+		maxlives=function() return 99 end,
 		ActiveP1=function() return true end, -- p1 is always active!
 	},
 }
