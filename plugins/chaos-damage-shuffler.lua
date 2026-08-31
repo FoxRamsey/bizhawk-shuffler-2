@@ -13,6 +13,7 @@ plugin.settings =
 	{ name='DebugSingleGame', type='boolean', label='Debugging: Rearm the shuffler logic even if no new game was loaded' },
 	{ name='SMW2YI_MiniBonusSwaps', type='boolean', label="Yoshi's Island: Shuffle on Mini Battle damage/loss", default=true},
 	{ name='IceClimberBonusSwaps', type='boolean', label="Ice Climber (NES): Shuffle on failing the bonus game"},
+	{ name='AdamantiumRageEnhanceHealing', type='boolean', label="Wolverine Adamantium Rage SNES: Greatly increases regeneration rate" },
 	{ name='GQ1NoRandomEncounters', type='boolean', label="Gargoyle's Quest 1: No random encounters" },
 	{ name='grace', type='number', label="Minimum grace period before swapping (won't go < 10 frames)", default=10 },
 	{ name='GraceOnHit', type='boolean', label="Apply grace period from last hit instead of last swap" },
@@ -297,6 +298,8 @@ plugin.description =
 	-Solomon no Kagi (Arcade), 1p
 	-Sonic Jam 6 (bootleg) (Genesis/Mega Drive), 1p
 	-Sparkster (SNES), 1p
+	-Spider-Man & Venom - Maximum Carnage (SNES), 1p
+	-Spider-Man X-Men - Arcade's Revenge (SNES), 1p
 	-StarTropics (NES), 1p
 	-Street Fighter 2010: The Final Fight (NES), 1p
 	-Streets of Rage II (Genesis/Mega Drive), 1-2p (includes duel mode)
@@ -346,6 +349,7 @@ plugin.description =
 	-Wild West C.O.W.-Boys of Moo Mesa (Arcade), 1p
 	-Windjammers / Flying Power Disc (Arcade), 1p
 	-Wit's (NES), 1p
+	-Wolverine - Adamantium Rage (SNES), 1p
 
 	NICHE ZONE
 	- NES 240p Suite: shuffles on every second that passes in Stopwatch Mode. Can be useful for testing a single game.
@@ -6923,6 +6927,76 @@ local gamedata = {
 		ActiveP1=function() return true end, -- p1 is always active!
 		delay=10, -- helps with health-draining situations, like the wringers in stage 2
 	},
+	['MaximumCarnage_SNES']={ -- Spider-Man-Venom - Maximum Carnage, SNES (USA)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x000B7C, "WRAM") end,
+		p1getlc=function() return memory.read_u8(0x000990, "WRAM") end,
+		maxhp=function() return 48 end,
+		gmode=function() return memory.read_u8(0x000BE3, "WRAM") == 8 end,
+		swap_exceptions=function() return memory.read_u8(0x0002F4, "WRAM") == 32 end, -- check for letterboxed cutscenes, which may otherwise cause shuffles
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x000994 end, -- infinite continues (0x000994) instead of infinite lives (0x000990) for greater penalty for failure
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		grace=25,
+	},
+	['ArcadesRevenge_SNES']={ -- Spider-Man-X-Men - Arcade's Revenge, SNES (USA)
+		func=function() return function()
+				local playercharacter = memory.read_u8(0x000143, "WRAM")
+				local is_cyclops = 1
+				local is_wolverine = 2
+				local is_spiderman = 3
+				local is_gambit = 4
+				local is_storm = 5
+				
+				local lives_changed, lives_curr, lives_prev = update_prev('lives', memory.read_u8(0x000100, "WRAM"))
+				
+				local spiderman_health_changed, spiderman_health_curr, spiderman_health_prev = update_prev('spiderman_health', memory.read_u8(0x0010F8, "WRAM"))
+				local spiderman_health_max = 128
+				
+				local gambit_health_changed, gambit_health_curr, gambit_health_prev = update_prev('gambit_health', memory.read_u8(0x00119E, "WRAM"))
+				local gambit_health_max = 104
+				
+				-- cyclops, wolverine, and storm (air meter) use a common health address and maximum
+				local cycwolsto_health_changed, cycwolsto_health_curr, cycwolsto_health_prev = update_prev('cycwolsto_health', memory.read_u8(0x000B29, "WRAM"))
+				local cycwolsto_health_max = 127
+				
+				local oxygen_timer_changed, oxygen_timer_curr, oxygen_timer_prev = update_prev('oxygen_timer', memory.read_u8(0x000B28, "WRAM"))
+				
+				local gmode = memory.read_u8(0x0001FC, "WRAM")==129
+				
+				-- healing items can raise health above max, after which it snaps down to max. conditions need to avoid shuffling when dealing with health higher than max
+				if (gmode) then
+					if (playercharacter == is_cyclops or playercharacter == is_wolverine) and cycwolsto_health_curr <= cycwolsto_health_max and cycwolsto_health_curr > 0 then
+						if cycwolsto_health_changed and cycwolsto_health_prev <= cycwolsto_health_max and cycwolsto_health_curr < cycwolsto_health_prev then
+							return true end
+					elseif playercharacter == is_spiderman and spiderman_health_curr <= spiderman_health_max and spiderman_health_curr > 0 then
+						if spiderman_health_changed and spiderman_health_prev <= spiderman_health_max and spiderman_health_curr < spiderman_health_prev then
+							return true end
+					elseif playercharacter == is_gambit and gambit_health_curr <= gambit_health_max and gambit_health_curr > 0 then
+						if gambit_health_changed and gambit_health_prev <= gambit_health_max and gambit_health_curr < gambit_health_prev then
+							return true end
+					elseif playercharacter == is_storm and cycwolsto_health_curr <= cycwolsto_health_max and cycwolsto_health_curr > 0 then
+						if cycwolsto_health_changed and cycwolsto_health_prev <= cycwolsto_health_max and cycwolsto_health_curr < cycwolsto_health_prev then
+							-- storm's air meter constantly drains when she isn't on the surface so we need to avoid swapping on regular life loss
+							if oxygen_timer_curr < oxygen_timer_prev or cycwolsto_health_curr < (cycwolsto_health_prev - 1) then return true end
+						end
+					end
+					
+					-- lives are common to all characters and can be handled identically
+					if lives_changed and lives_curr == lives_prev - 1 then return true end
+				end
+				
+				return false end
+			end,
+		grace=10,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x000100 end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 9 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
 	['StarTropics_NES']={ -- StarTropics, NES
 		func=singleplayer_withlives_swap,
 		p1gethp=function() return memory.read_u8(0x0112, "RAM") end,
@@ -8198,6 +8272,27 @@ local gamedata = {
 			end
 			return false
 		end,
+	},
+	['WolverineAdamantium_SNES']={ -- Wolverine - Adamantium Rage, SNES (USA)
+		func=health_swap,
+		is_valid_gamestate=function() return true end,
+		get_health=function() return memory.read_u8(0x001027, "WRAM") end,
+		other_swaps=function() 
+			-- there are no lives, so attempt to catch instant game overs like elsie-dee by detecting when the game over screen has appeared while the player still has health
+			local health_curr = memory.read_u8(0x001027, "WRAM")
+			local gameover_state_changed, gameover_state_cur, _ = update_prev('gameover_state', memory.read_u8(0x0000AF, "WRAM"))
+			return gameover_state_changed and health_curr > 0 and gameover_state_cur==255 end,
+		grace=30,
+		grace_on_hit=true,
+		cheats = {
+			AdamantiumRageEnhanceHealing = { -- Increase health regeneration speed. Healing from 10% to 100% originally took about 6 minutes and 20 seconds, now takes about 2 minutes
+				func = function()
+					if memory.read_u8(0x000045, "WRAM") == 85 then -- pick lower maximum value for regeneration counter
+						memory.write_u8(0x000045, 255, "WRAM") end -- sets the regeneration count to maximum, forcing a heal
+				end,
+				on_frame = true,
+			},
+		},
 	},
 	['MagicalQuestMickey1_SNES']={ -- The Magical Quest Starring Mickey Mouse (SNES)
 		func=health_swap,
