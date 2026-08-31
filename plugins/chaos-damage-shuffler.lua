@@ -160,6 +160,12 @@ plugin.description =
 	-Batman (NES), 1p
 	-Blades of Steel (NES - NA/Europe), 1-2p
 	-Bonk's Adventure (TG-16), 1p
+	-Bonk's Revenge (TG-16), 1p
+	-Bonk III - Bonk's Big Adventure (TG-16), 1p
+	-B.C. Kid / Bonk's Adventure / Kyukyoku!! PC Genjin (Arcade), 1p
+	-Super Bonk (SNES), 1p
+	-Super Genjin 2 (Super Bonk 2) (SNES), 1p
+	-Super Air Zonk: Rockabilly-Paradise (TG-CD), 1p
 	-Bubble Bobble (NES), 1p
 	-Bubsy in Claws Encounters of the Furred Kind (aka Bubsy 1) (SNES), 1p
 	-Bubsy in Fractured Furry Tales (Jaguar), 1p
@@ -8843,6 +8849,123 @@ local gamedata = {
 			local _, _, meatseconds_prev = update_prev('meatseconds', memory.read_u8(0x0DC2, "Main Memory"))
 			local _, _, meatmillis_prev = update_prev('meatmillis', memory.read_u8(0x0DC1, "Main Memory"))
 			return meatlevel_changed and meatlevel_cur < meatlevel_prev and (meatseconds_prev ~= 0 or meatmillis_prev ~= 1) end,
+	},
+	['BonksRevenge_TG16']={ -- Bonk's Revenge (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0E87, "Main Memory") end,
+		p1getlc=function() return memory.read_u8(0x0A1A, "Main Memory") end,
+		maxhp=function() return 40 end,
+		gmode=function() return memory.read_u8(0x00C9, "Main Memory") == 1 end,
+		other_swaps=function()			
+			-- Swap if you lose your meat power up through damage, but not from the timer.
+			-- Levels are roughly at intervals of hex 40, but seems to occasionally have a stray 1 added, so 
+			local meatlevel_changed, meatlevel_cur, meatlevel_prev = update_prev('meatlevel', memory.read_u8(0x1F0E6D, "System Bus (21 bit)"))
+			local _, _, meatseconds_prev = update_prev('meatseconds', memory.read_u8(0x0EBE, "Main Memory"))
+			local _, _, meatmillis_prev = update_prev('meatmillis', memory.read_u8(0x0EBD, "Main Memory"))
+			return meatlevel_changed and meatlevel_cur < (meatlevel_prev - 0x3F) and (meatseconds_prev ~= 0 or meatmillis_prev ~= 1) end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x0A1B end, -- continues used instead of lives since lives revive you on the spot
+		LivesWhichRAM=function() return "Main Memory" end,
+		maxlives=function() return 7 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['BonksBigAdventure_TG16']={ -- Bonk III - Bonk's Big Adventure (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x0B8F, "Main Memory") end,
+		p1getlc=function() return memory.read_u8(0x0B8D, "Main Memory") end,
+		maxhp=function() return 25 end, -- not known, assumed from previous games
+		gmode=function() return memory.read_u8(0x0060, "Main Memory") == 1 end,
+		CanHaveInfiniteLives=false, -- disabled since continues are infinite
+		p1livesaddr=function() return 0x0B8D end,
+		LivesWhichRAM=function() return "Main Memory" end,
+		maxlives=function() return 70 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		other_swaps=function()
+			-- Swap if you lose your meat power up through damage, but not from the timer.
+			local meatlevel_changed, meatlevel_cur, meatlevel_prev = update_prev('meatlevel', memory.read_u8(0x0B85, "Main Memory"))
+			local _, _, meatseconds_prev = update_prev('meatseconds', memory.read_u8(0x0B95, "Main Memory"))
+			local _, _, meatmillis_prev = update_prev('meatmillis', memory.read_u8(0x0B93, "Main Memory"))
+			if (meatlevel_changed and meatlevel_cur < meatlevel_prev and (meatseconds_prev ~= 0 or meatmillis_prev ~= 1)) then return true end
+			
+			-- Swap if you are returned to normal size via damage
+			-- when restoring to normal size because you picked up shrinking candy, iframes be set at the start of the shrinking animation
+			local size_changed, size_cur, size_prev = update_prev('size', memory.read_u8(0x0B87, "Main Memory")) -- 0 = normal, 1 = small, 2 = big
+			local iframes_changed, iframes_cur, iframes_prev = update_prev('iframes', memory.read_u8(0x09B6, "Main Memory"))
+			return size_changed and size_cur == 0 and iframes_changed and iframes_cur == 79
+			end,
+	},
+	['BonksAdventure_ARC']={ -- B.C. Kid / Bonk's Adventure / Kyukyoku!! PC Genjin
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x005997, "m68000 : ram : 0x100000-0x10FFFF") end,
+		p1getlc=function() return memory.read_u8(0x005974, "m68000 : ram : 0x100000-0x10FFFF") end,
+		maxhp=function() return 3 end,
+		gmode=function() return memory.read_u8(0x000122, "m68000 : ram : 0x100000-0x10FFFF") == 3 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x005974 end,
+		LivesWhichRAM=function() return "m68000 : ram : 0x100000-0x10FFFF" end,
+		maxlives=function() return 10 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		other_swaps=function()
+			--[[ As with other Bonk games, we need to swap if you lose your meat power up through damage, but not from the timer. Uniquely to the arcade Bonk is that the timer
+			for your powerup is extremely small but can be extended by damaging enemies, and that your powered up state toggles during the last approximately 60 frames of your
+			powerup timer. Due to the latter, we can't rely on the timer running out to tell us the moment when you run out of a powerup normally, as you'll appear to lose your
+			powerup several times before the timer runs out. So once the timer enters into the last 59 frames, we need to start looking at iframes instead.]]
+			local meatlevel_changed, meatlevel_curr, meatlevel_prev = update_prev('meatlevel', memory.read_u8(0x003396, "m68000 : ram : 0x100000-0x10FFFF"))
+			local _, meattimer_curr, _ = update_prev('meattimer', memory.read_u8(0x005989, "m68000 : ram : 0x100000-0x10FFFF"))
+			local _, iframes_curr, _ = update_prev('iframes', memory.read_u8(0x005993, "m68000 : ram : 0x100000-0x10FFFF"))
+			return meatlevel_changed and meatlevel_curr < meatlevel_prev and (meattimer_curr > 60 or iframes_curr > 0) end,
+	},
+	['SuperBonk_SNES']={ -- Super Bonk (USA)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x00101C, "WRAM") end,
+		p1getlc=function() return memory.read_u8(0x00101E, "WRAM") end,
+		maxhp=function() return 30 end,
+		swap_exceptions=function()
+			-- bonk is returned to normal form for bonus stages, need to suppress swap when entering
+			local isOnBonusStage = memory.read_u8(0x00100D, "WRAM")
+			return isOnBonusStage == 1 or isOnBonusStage == 17 end,
+		CanHaveInfiniteLives=false, -- disabled since continues are infinite and lives revive you on the spot anyway
+		p1livesaddr=function() return 0x00101E end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+		other_swaps=function()
+			-- Swap if you lose your meat power up through damage, but not from the timer. goes from 0 to -1 when losing power
+			local meatlevel_changed, meatlevel_cur, meatlevel_prev = update_prev('meatlevel', memory.read_u8(0x001009, "WRAM"))
+			local _, _, meatseconds_prev = update_prev('meatseconds', memory.read_s8(0x001010, "WRAM"))
+			local _, _, meatmillis_prev = update_prev('meatmillis', memory.read_s8(0x00100F, "WRAM"))
+			return meatlevel_changed and meatlevel_cur < meatlevel_prev and (meatseconds_prev ~= 0 or meatmillis_prev ~= 0) end,
+	},
+	['SuperBonk2_SNES']={ -- Super Genjin 2 (Japan)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x001109, "WRAM") end,
+		p1getlc=function() return memory.read_u8(0x00110D, "WRAM") end,
+		maxhp=function() return 30 end,
+		other_swaps=function()
+			-- shuffle on powerup loss but only by damage
+			local powerup_changed, powerup_curr, powerup_prev = update_prev('powerup', memory.read_u8(0x0010F6, "WRAM"))
+			return powerup_changed
+				and powerup_curr == 0 -- returned to base bonk
+				and memory.read_u8(0x001101, "WRAM") == 1 -- identifies that player is in a damaged state
+ 				end,
+		swap_exceptions=function() return memory.read_u8(0x00007A, "WRAM") ~= 4 end,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x00110D end,
+		LivesWhichRAM=function() return "WRAM" end,
+		maxlives=function() return 69 end,
+		ActiveP1=function() return true end, -- p1 is always active!
+	},
+	['SuperAirZonk_TG16']={ -- Super Air Zonk (U)
+		func=singleplayer_withlives_swap,
+		p1gethp=function() return memory.read_u8(0x065B, "Main Memory") end, -- powerup form (when uncombined)
+		p1getlc=function() return memory.read_u8(0x065A, "Main Memory") end,
+		maxhp=function() return 4 end, -- max increases as game progresses
+		minhp=-1,
+		CanHaveInfiniteLives=true,
+		p1livesaddr=function() return 0x065A end,
+		LivesWhichRAM=function() return "Main Memory" end,
+		maxlives=function() return 10 end,
+		ActiveP1=function() return true end, -- p1 is always active!
 	},
 	['Pepsiman_PSX']={ -- Pepsiman (Japan)
 		func=singleplayer_withlives_swap,
