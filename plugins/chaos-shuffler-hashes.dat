@@ -144,13 +144,11 @@ A12D74C73A0481599A5D832361D168F4737BBCF6 Zelda_1                      -- The Leg
 4671517D72D09799403F6C672CD2B395933E926E Zelda_1                      -- The Legend of Zelda NES (US 1.1) (No Intro Headered)
 BE2F5DC8C5BA8EC1A344A71F9FB204750AF24FE7 Zelda_1                      -- The Legend of Zelda NES (US 1.1) (No Intro Headerless)
 84A8149F5A71BA00FCE846F85D166EB866DE3E7C Zelda_1                      -- The Legend of Zelda Redux quality of life patch (Headered)
--- The Legend of Zelda Redux comes with many optional patches, too many to include here by default, add your favorite's hash as needed
 353489A57F24A429572E76BD455BC51D821F7036 Zelda_2                      -- Zelda II The Adventure of Link NES (US)
 08FA60F23E477752FDD850B1FD4171C6CA025127 Zelda_2                      -- Zelda II The Adventure of Link NES (US) (No Intro Headered)
 11333ADB723A5975E0ECCA3AEE8F4747AA8D2D26 Zelda_2                      -- Zelda II The Adventure of Link NES (US) (No Intro Headerless)
 19C6C1CDFC1EED5C280995C433B3A35F45C6C0AB Zelda_2                      -- Zelda 2 Redux quality of life patch
 4F2657269FA17C3E4A670A0A8B227208085E3555 Zelda_2                      -- Zelda 2 Redux quality of life patch (Headered)
--- Zelda 2 Redux comes with many optional patches, too many to include here by default, add your favorite's hash as needed
 602167F897B4F56FE8CEE837933DA3BED5882BBD Zelda_LA                     -- The Legend of Zelda Link's Awakening GB (EN 1.0)
 5259E68522225A7A830E29EA17DFDDC33263CED5 Zelda_LA                     -- The Legend of Zelda Link's Awakening GB (EN 1.1)
 5AB63DEF958728933571C3B4F6AF54DB14F3F8B2 Zelda_LA                     -- The Legend of Zelda Link's Awakening GB (EN 1.2)
@@ -159,8 +157,6 @@ D90AC17E9BF17B6C61624AD9F05447BDB5EFC01A Zelda_LA                     -- The Leg
 1C091225688D966928CC74336DBEF2E07D12A47C Zelda_LA                     -- The Legend of Zelda Link's Awakening DX GBC (EN 1.2)
 8BF965E21B79C74E605B11CC69D25BF64D4AF326 Zelda_LA                     -- Link's Awakening DX Redux quality of life patch (Variable Width Font version)
 4A413F3AD189BCAE954564CC716E947C1CE7E265 Zelda_LA                     -- Link's Awakening DX Redux quality of life patch (Font Improvement version)
--- Link's Awakening Redux comes with many optional patches, too many to include here by default, add your favorite's hash as needed
--- Reminder to enable the Expansion Slot if playing an N64 game or the shuffler won't work!
 AD69C91157F6705E8AB06C79FE08AAD47BB57BA7 Zelda_Ocarina_10             -- The Legend of Zelda Ocarina of Time N64 (US 1.0)
 D3ECB253776CD847A5AA63D859D8C89A2F37B364 Zelda_Ocarina_11             -- The Legend of Zelda Ocarina of Time N64 (US 1.1)
 41B3BDC48D98C48529219919015A1AF22F5057C2 Zelda_Ocarina_12             -- The Legend of Zelda Ocarina of Time N64 (US 1.2)
@@ -168,10 +164,8 @@ B82710BA2BD3B4C6EE8AA1A7E9ACF787DFC72E9B Zelda_Ocarina_GC             -- The Leg
 8B5D13AAC69BFBF989861CFDC50B1D840945FC1D Zelda_Ocarina_MQ             -- The Legend of Zelda Ocarina of Time Master Quest N64 (US GameCube)
 BE88A72E623A8C9D16A561D8880469392229424A Zelda_Ocarina_10             -- Ocarina of Time Redux quality of life patch
 076BA198F988EFAA32D03B254832E3762D8B3AA6 Zelda_Ocarina_10             -- Master Quest Redux quality of life patch
--- Ocarina of Time Redux comes with many optional patches, too many to include here by default, add your favorite's hash as needed
 D6133ACE5AFAA0882CF214CF88DABA39E266C078 Zelda_Majora                 -- The Legend of Zelda Majora's Mask N64 (US)
 E3415F908B1CE47111E67C2535C8087A359B17F6 Zelda_Majora                 -- Majora's Mask Redux quality of life patch
--- Majora's Mask Redux comes with many optional patches, too many to include here by default, add your favorite's hash as needed
 BA1268290FB2B1B70505D2D7B5825FC8A4816A4B Zelda_Seasons                -- The Legend of Zelda Oracle of Seasons GBC (US)
 880374FB978B18AF4AA529E2E32F7FFB4D7DD2F4 Zelda_Ages                   -- The Legend of Zelda Oracle of Ages GBC (US)
 0D0FB2355D02E195677130BA8F89DA7413D81AED Zelda_Ages                   -- Oracle of Ages GBC with good swimming patch
@@ -181,10 +175,6 @@ B4BD50E4131B027C334547B4524E2DBBD4227130 Zelda_Minish                 -- The Leg
 DA957F0D63D14CB441D215462904C4FA8519C613 MetroidSuper                 -- Super Metroid SNES (US/JP 1.0)
 E7E852F0159CE612E3911164878A9B08B3CB9060 Zelda_LTTP                   -- Link to the Past SNES (JP 1.0)
 6D4F10A8B10E10DBE624CB23CF03B88BB8252973 Zelda_LTTP                   -- Link to the Past SNES (US)
---"PASTE YOUR HASH HERE AND REMOVE THE -- AT THE FRONT OF THIS LINE" Zelda_LTTP                   -- YOUR SEED/REVISION FOR LTTP
---"PASTE YOUR HASH HERE AND REMOVE THE -- AT THE FRONT OF THIS LINE" MetroidSuper                 -- YOUR SEED/REVISION FOR SUPER METROID
---"PASTE YOUR HASH HERE AND REMOVE THE -- AT THE FRONT OF THIS LINE" SMZ3                         -- YOUR SMZ3 ROM
--- MAKE MULTIPLE LINES WITH EACH HASH IF YOU ARE SHUFFLING MULTIPLE ROMS OF THESE RANDOMIZERS
 
 -- Sonic Block
 1BC674BE034E43C96B86487AC69D9293         Sonic1_GEN                   -- Sonic The Hedgehog 1 (Genesis/Mega Drive) (International/Rev. 00)
@@ -204,7 +194,6 @@ C82B0B73AF1FC91CC8EE9D997C9B2B29D6105B2D Sonic2_GEN                   -- Bubsy i
 D724EA4DD417FE330C9DCFD955C596B2         Sonic3K_GEN                  -- Sonic the Hedgehog 3 (Genesis/Mega Drive) (NTSC-U)
 4EA493EA4E9F6C9EBFCCBDB15110367E         Sonic3K_GEN                  -- Sonic & Knuckles (Genesis/Mega Drive) (World)
 C5B1C655C19F462ADE0AC4E17A844D10         Sonic3K_GEN                  -- Sonic the Hedgehog 3 & Knuckles (Genesis/Mega Drive) (World)
---"PASTE YOUR HASH HERE AND REMOVE THE -- AT THE FRONT OF THIS LINE"         Sonic3K_GEN                  -- Sonic 3 Complete (ROM is customizable, so checksum could be anything)
 8C7237C503276E5DDE93FE4FA5300CBE996DFBEF Sonic3K_GEN                  -- Sonic 3 Complete (Arcade Pit config)
 BBA401CFF383AD7946978A600E756561         SonicCD_SCD                  -- Sonic the Hedgehog CD (Sega CD) (NTSC-U)
 FA354D70DEE21CE70F425CC918150922         SonicCD_SCD                  -- Sonic the Hedgehog CD (Sega CD) (Beta 920 - essentially the NTSC-U version but just before the soundtrack changed)
