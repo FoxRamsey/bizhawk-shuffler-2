@@ -1,3 +1,4 @@
+# You can add your own hashes for romhacks etc. by creating a file called "megaman-hashes.user.dat" with the same format as this one
 0FE255649359ECE8CB64B6F24ACAF09F17AF746C mm1nes -- Mega Man (E) [!].nes
 17730D3A6E4A618CF1AA106024C8FB4EE2E18907 mm1nes -- Mega Man (E) [T+Dut1.0_Ok Impala!].nes
 6F6C21598A417CC3AD6D06D32CAB7372F12C1C7C mm1nes -- Mega Man (E) [T+Ita][b1].nes
@@ -431,3 +432,4 @@ E063416D9A327E618FDC2D0A0C452E6AE5D86DAB mmx3gen -- Rockman X3 (Unl) [f1] [Heart
 0212DC4B34DA1DA42311BF7D47FC1383DAF88033 mmx3gen -- Rockman X3 (Unl) [b2] [Heart Crash Fix]
 256CF8372391BB5CE68459E2F57230AAE1E03F33 sequel-wars-red -- Mega Man The Sequel Wars Episode Red
 55056DD411539AA76A3C1E2371542E5BDDA5D174 sequel-wars-red -- Mega Man The Sequel Wars Episode Red v1.1
+# You can add your own hashes for romhacks etc. by creating a file called "megaman-hashes.user.dat" with the same format as this one
